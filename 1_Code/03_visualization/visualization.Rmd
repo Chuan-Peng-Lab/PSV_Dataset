@@ -1,0 +1,513 @@
+---
+title: "BF"
+author: "SunXinRu"
+date: "2026-02-03"
+output: html_document
+---
+# 加载包
+```{r}
+library(tidyverse)
+library(effectsize)
+library(BayesFactor)
+library(patchwork)
+```
+
+
+# 可视化
+```{r}
+
+plot_data <- data.frame(
+  domain = factor(c("competence", "morality"),
+                  levels = c("competence", "morality")),
+  mean = c(mean(IAT_data_D2$moral_IAT, na.rm = TRUE),
+           mean(IAT_data_D2$ability_IAT, na.rm = TRUE)),
+  sd = c(sd(IAT_data_D2$moral_IAT, na.rm = TRUE),
+         sd(IAT_data_D2$ability_IAT, na.rm = TRUE)),
+  n = c(sum(!is.na(IAT_data_D2$moral_IAT)),
+        sum(!is.na(IAT_data_D2$ability_IAT)))
+)
+
+# 标准误
+plot_data$se <- plot_data$sd / sqrt(plot_data$n)
+
+# 95% CI
+plot_data$ci <- qt(.975, df = plot_data$n - 1) * plot_data$se
+library(ggplot2)
+
+# 计算 95% CI
+plot_data$ci <- qt(.975, df = plot_data$n - 1) * plot_data$se
+
+
+
+p <- ggplot(plot_data, aes(x = domain, y = mean)) +
+  
+  # 柱子（低饱和学术色，无重边框）
+  geom_col(width = 0.3,
+           fill = c("grey70", "grey70"),
+           color = NA) +
+  
+  # 95% CI 误差线（更细）
+  geom_errorbar(aes(ymin = mean - ci,
+                    ymax = mean + ci),
+                width = 0.1,
+                linewidth = 0.5) +
+  
+  # 零基线
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             linewidth = 0.4) +
+  
+  
+  # 纵轴范围（给顶部留空间）
+  scale_y_continuous(
+    limits = c(0, 0.62),
+    expand = c(0, 0)
+  ) +
+  
+  labs(
+    x = NULL,
+    y = "D Score"
+  ) +
+  
+  theme_classic(base_size = 11, base_family = "Arial") +
+  
+  theme(
+    axis.line = element_line(linewidth = 0.5),
+    axis.text = element_text(size = 10),
+    axis.title = element_text(size = 11),
+    legend.position = "none"
+  )
+
+p
+
+
+ggsave(
+  filename = "IAT_Positive_Self_Bias.png",
+  plot = p,
+  width = 4.5,
+  height = 2.25,
+  units = "in",
+  dpi = 600,
+  bg = "white"
+)
+```
+
+
+# SMT
+
+```{r}
+library(dplyr)
+
+ALT_plot_data <- ALT_diff %>%
+  group_by(domain, valence) %>%
+  summarise(
+    mean_diff = mean(diff, na.rm = TRUE),
+    se = sd(diff, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+ALT_plot_data <- ALT_plot_data %>%
+  mutate(
+    domain = recode(domain,
+                    "ability" = "competence",
+                    "moral"   = "morality")
+  )
+dodge <- position_dodge(width = 0.6)
+p5 <- ggplot(ALT_plot_data,
+       aes(x = domain,
+           y = mean_diff,
+           fill = valence)) +
+
+  geom_col(position = dodge,
+           width = 0.5) +
+
+  geom_errorbar(aes(ymin = mean_diff - se,
+                    ymax = mean_diff + se,
+                    group = valence),   # 关键
+                position = dodge,
+                width = 0.2,
+                linewidth = 0.5) +
+
+ 
+
+  scale_fill_manual(values = c(
+    "negative"   = "grey70",
+    "positive" = "grey20"
+  )) +
+
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             linewidth = 0.4) +
+
+  coord_cartesian(ylim = c(-0.75, 0.75)) +   # ⭐ 关键
+
+  labs(
+    x = "",
+    y = "d'"
+  ) +
+
+  theme_classic(base_size = 14) +
+  theme(
+    legend.position = "none",
+    strip.text = element_text(size = 14)
+  )
+```
+
+# SMT rt
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+plot_data_rt <- ALT_rt_diff %>%
+  group_by(domain, valence) %>%
+  summarise(
+    mean = mean(diff, na.rm = TRUE),
+    sd   = sd(diff, na.rm = TRUE),
+    n    = sum(!is.na(diff)),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    se = sd / sqrt(n),
+    ci = qt(.975, df = n - 1) * se
+  )
+plot_data_rt$domain <- recode(plot_data_rt$domain,
+                              "ability" = "competence",
+                              "moral"   = "morality")
+
+plot_data_rt$domain <- factor(plot_data_rt$domain,
+                              levels = c("competence", "morality"))
+
+plot_data_rt$valence <- factor(plot_data_rt$valence,
+                               levels = c("negative", "positive"))
+dodge <- position_dodge(width = 0.6)
+p6 <- ggplot(plot_data_rt,
+               aes(x = domain,
+                   y = mean,
+                   fill = valence)) +
+  
+  geom_col(position = dodge,
+    width = 0.5) +
+  
+  geom_errorbar(aes(ymin = mean - ci,
+                    ymax = mean + ci,
+                    group = valence),
+                position = dodge,
+                width = 0.2,
+                linewidth = 0.5) +
+  
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             linewidth = 0.4) +
+  
+  scale_fill_manual(values = c(
+    "negative"   = "grey70",
+    "positive" = "grey20"
+  )) +
+  
+  coord_cartesian(ylim = c(-50, 50)) +
+  
+  labs(
+    x = "",
+    y = "RT (ms)",
+    fill = "Valence"
+  ) +
+  
+  theme_classic(base_size = 14) 
+```
+
+```{r}
+combined_plot2 <- (p5 + p6) +
+  plot_annotation(tag_levels = "A")
+
+combined_plot2
+```
+```{r}
+ggsave(
+  "SMT_results.jpg",
+  combined_plot2,
+  width = 9,
+  height = 4.5,
+  dpi = 300
+)
+```
+
+
+# SRET
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+plot_data <- SRET_EW_df %>%
+  group_by(domain, valence, person) %>%
+  summarise(
+    mean = mean(pro_yes, na.rm = TRUE),
+    se = sd(pro_yes, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+diff_data <- SRET_EW_df %>%
+  group_by(ID, domain, valence, person) %>%
+  summarise(
+    pro_yes = mean(pro_yes, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_wider(names_from = person,
+              values_from = pro_yes) %>%
+  drop_na(self, friend) %>%
+  mutate(diff = self - friend) %>%
+  group_by(domain, valence) %>%
+  summarise(
+    mean_diff = mean(diff, na.rm = TRUE),
+    se = sd(diff, na.rm = TRUE)/sqrt(n()),
+    .groups = "drop"
+  )
+# 更改名称
+diff_data <- diff_data %>%
+  mutate(
+    domain = recode(domain,
+                    "ability"  = "competence",
+                    "morality" = "morality")
+  )
+# 绘图
+dodge <- position_dodge(width = 0.6)
+p1 <- ggplot(diff_data, aes(x = domain, y = mean_diff, fill = valence)) +
+  geom_col(position = dodge,
+           width = 0.5) +
+  geom_errorbar(aes(ymin = mean_diff - se,
+                    ymax = mean_diff + se,
+                    group = valence),   # 关键
+                position = dodge,
+                width = 0.2,
+                linewidth = 0.5) +
+  
+geom_hline(yintercept = 0,
+             linetype = "dashed",
+             linewidth = 0.4) +
+
+  scale_fill_manual(values = c(
+    "Negative" = "grey70",
+    "Positive" = "grey20"
+  )) +
+
+  coord_cartesian(ylim = c(-1, 1)) +
+
+  labs(
+    x = "",
+    y = "yes self − yes friend",
+    fill = "Valence"
+  ) +
+
+  theme_classic(base_size = 14) +
+  theme(legend.position = "none")
+```
+
+# rt
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+diff_rt_data <- SRET_EW_df %>%
+  group_by(ID, domain, valence, person) %>%
+  summarise(
+    avg_rt = mean(avg_rt, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_wider(
+    names_from = person,
+    values_from = avg_rt
+  ) %>%
+  drop_na(self, friend) %>%
+  mutate(
+    diff = self - friend   
+  ) %>%
+  group_by(domain, valence) %>%
+  summarise(
+    mean_diff = mean(diff, na.rm = TRUE),
+    se = sd(diff, na.rm = TRUE)/sqrt(n()),
+    .groups = "drop"
+  )
+```
+
+```{r}
+# 更改名称
+diff_rt_data <- diff_rt_data %>%
+  mutate(
+    domain = recode(domain,
+                    "ability"  = "competence",
+                    "morality" = "morality")
+  )
+dodge <- position_dodge(width = 0.6)
+p2 <- ggplot(diff_rt_data, aes(x = domain, y = mean_diff, fill = valence)) +
+ geom_col(position = dodge,
+           width = 0.5) +
+  geom_errorbar(aes(ymin = mean_diff - se,
+                    ymax = mean_diff + se,
+                    group = valence),   # 关键
+                position = dodge,
+                width = 0.2,
+                linewidth = 0.5) +
+  
+geom_hline(yintercept = 0,
+             linetype = "dashed",
+             linewidth = 0.4) +                
+  
+ scale_fill_manual(values = c(
+    "Negative" = "grey70",
+    "Positive" = "grey20"
+  )) +
+
+  coord_cartesian(ylim = c(-50, 50)) +
+
+  labs(
+    x = "",
+    y = "RT (ms)",
+    fill = "Valence"
+  ) +
+
+  theme_classic(base_size = 14)+
+  theme(legend.position = "none")
+```
+
+```{r}
+library(patchwork)
+combined_plot <- p1 + p2 +
+  plot_layout(widths = c(1,1))
+  plot_annotation(tag_levels = "A")
+
+combined_plot
+```
+```{r}
+ggsave(
+  "EW_self_advantage.jpg",
+  combined_plot,
+  width = 9,
+  height = 6,
+  dpi = 300
+)
+```
+
+
+# rec
+
+```{r}
+diff_rec_plot <- rec_diff_df %>%
+  group_by(domain, valence) %>%
+  summarise(
+    mean_diff = mean(diff, na.rm = TRUE),
+    se = sd(diff, na.rm = TRUE)/sqrt(n()),
+    .groups = "drop"
+  )
+diff_rec_plot <- diff_rec_plot %>%
+  mutate(
+    domain = recode(domain,
+                    "ability"  = "competence",
+                    "morality" = "morality")
+  )
+dodge <- position_dodge(width = 0.6)
+p3 <- ggplot(diff_rec_plot, aes(x = domain, y = mean_diff, fill = valence)) +
+  geom_col(position = dodge,
+           width = 0.5) +
+  geom_errorbar(aes(ymin = mean_diff - se,
+                    ymax = mean_diff + se,
+                    group = valence),   # 关键
+                position = dodge,
+                width = 0.2,
+                linewidth = 0.5) +
+  
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             linewidth = 0.4) +
+  scale_fill_manual(values = c(
+    "Negative"   = "grey70",
+    "Positive" = "grey20"
+  )) +
+  
+  coord_cartesian(ylim = c(-0.15, 0.15)) + 
+  labs(
+    x = "",
+    y = "d'(Recognition)"
+  ) +
+  theme_classic(base_size = 14) +
+  theme(legend.position = "none")
+```
+
+```{r}
+diff_source_plot <- source_df %>%
+  group_by(domain, valence) %>%
+  summarise(
+    mean_dprime = mean(dprime, na.rm = TRUE),
+    se = sd(dprime, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+# 统一领域名称（和 recognition 一样）
+diff_source_plot <- diff_source_plot %>%
+  mutate(
+    domain = recode(domain,
+                    "ability"  = "competence",
+                    "morality" = "morality")
+  )
+
+# ===============================
+# 绘图
+# ===============================
+dodge <- position_dodge(width = 0.6)
+p4 <- ggplot(diff_source_plot,
+       aes(x = domain,
+           y = mean_dprime,
+           fill = valence)) +
+  geom_col(position = dodge,
+           width = 0.5) +
+  geom_errorbar(aes(ymin = mean_dprime - se,
+                    ymax = mean_dprime + se,
+                    group = valence),   # 关键
+                position = dodge,
+                width = 0.2,
+                linewidth = 0.5) +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             linewidth = 0.4) +
+  scale_fill_manual(values = c(
+    "Negative"   = "grey70",
+    "Positive" = "grey20"
+  )) +
+  
+  coord_cartesian(ylim = c(-1, 1)) + #根据结果范围调整
+  labs(
+    x = "",
+    y = "d'(Source memory)"
+  ) +
+  theme_classic(base_size = 14) 
+  
+```
+
+```{r}
+p1 <- p1 + ggtitle("Encoding phase")
+p2 <- p2 + ggtitle("Encoding phase")
+p3 <- p3 + ggtitle("Recognition phase")
+p4 <- p4 + ggtitle("Source memory phase")
+final_plot <- (p1 + p2) / (p3 + p4) +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    tag_levels = "A",
+    theme = theme(
+      legend.position = "right",
+      legend.title = element_text(size = 12),
+      legend.text = element_text(size = 11)
+    )
+  )
+
+final_plot
+```
+```{r}
+ggsave(
+  "SRET_all_results.jpg",
+  final_plot,
+  width = 12,
+  height = 9,
+  dpi = 300
+)
+```
+
