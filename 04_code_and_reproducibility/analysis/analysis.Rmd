@@ -1,0 +1,2556 @@
+---
+title: "PSV_Dataset: Integrated analysis pipeline for the positive self-view dataset"
+author: "Xinru Sun, Yi Ding, Shuting Sun, Hu Chuan-Peng"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+---
+
+# Overview
+
+This document integrates, in manuscript order, all analysis code used to produce the released dataset and the results reported in the manuscript *"An integrated dataset of self-report and behavioral measures of positive self-view"*.
+
+Each section corresponds to a manuscript section and contains the original code copied verbatim from the archived project scripts (source noted in each header). Code is not rewritten; chunk headers from the original scripts are preserved.
+
+**Manuscript → code map**
+
+| Section | Manuscript part | Original scripts |
+|---|---|---|
+| 2 | Data merging (Data Collection / Data Preprocessing) | `Analysis_data_Sunst/clean/combine_day0–3_code.R`, `select_code.R` |
+| 3 | Quality control (Participants and Data Quality Control) | `descrip/preprocess/SEE_day0–3_clean.Rmd` |
+| 4 | IAT indices (IAT / Behavioral Task Processing) | `descrip/IAT.Rmd`, `analysis_code/analysis_st.Rmd` |
+| 5 | SMT indices (SMT / Behavioral Task Processing) | `descrip/ALT.Rmd`, `analysis_code/analysis_st.Rmd` |
+| 6 | SRET indices (SRET / Behavioral Task Processing) | `descrip/SRET.Rmd`, `analysis_code/analysis_st.Rmd` |
+| 7 | Merging and standardization (Standardization of Derived Measures) | `analysis_code/analysis_st.Rmd`, `analysis_code/merge_data.Rmd` |
+| 8 | Questionnaire scores and test–retest reliability (Self-report Questionnaires; Reliability) | `descrip/preprocess/SEE_day3_clean.Rmd`, `analysis_code/analysis_st.Rmd` |
+| 9 | Descriptive statistics (Technical Validation) | `descrip/` tables code |
+| 10 | Split-half reliability of behavioral indices (Reliability) | `local_additions/extract_26_behavioral_indices_split_half.R` |
+
+Note: the original scripts were run on the `Measuring_posit_self` project with its own working directories (e.g., `../../../Data/...`); paths are preserved verbatim below and should be adapted to the released folder layout when re-running.
+
+# Section 1. Data merging across collection waves
+
+## 1.1 Combine Day-0 (screening session) files
+**Source: `Analysis_data_Sunst/clean/clean_day0/combine_day0_code.R`**
+
+```{r combine_day0, eval=FALSE}
+# 加载所需的包
+library(readr)
+library(dplyr)
+library(purrr)
+
+# 设置工作目录到包含phase_001至phase_020文件夹的路径
+# 初始化一个空的data frame用于存储合并后的数据
+merged_data <- data.frame()
+
+# 遍历文件夹phase_003至phase_020
+for(i in 3:20) {
+  folder_name <- paste0("phase_", sprintf("%03d", i))
+  file_name <- paste0("day0_all_", folder_name, ".csv")
+  file_path <- paste0(folder_name, "/", file_name)
+  
+  # 检查文件是否存在
+  if(file.exists(file_path)) {
+    # 读取CSV文件，指定文件编码为UTF-8
+    data <- read.csv(file_path, header = TRUE, fileEncoding = "UTF-8")
+    # 将数据追加到merged_data中
+    merged_data <- rbind(merged_data, data)
+  } else {
+    cat("文件不存在：", file_path, "\n")
+  }
+}
+
+# 合并后的数据写入新的CSV文件
+write.csv(merged_data, file = "merged_data.csv", row.names = FALSE)
+
+```
+
+## 1.2 Combine Day-1 files
+**Source: `Analysis_data_Sunst/clean/clean_day1/combine_day1_code.R`**
+
+```{r combine_day1, eval=FALSE}
+# 加载所需的包
+library(readr)
+library(dplyr)
+library(purrr)
+
+library(rio)
+library(plyr)
+
+# 创建一个空的数据框来保存合并后的数据
+merged_data <- data.frame()
+##一定要设置在clean_day1下的工作路径和清空环境
+# 遍历文件夹phase_003至phase_020
+for (i in 3:20) {
+  # 构建文件夹名称
+  folder <- paste0("phase_", sprintf("%03d", i))
+  # 构建文件路径
+  file <- paste0("day1_q_", folder, ".csv")
+  # 构建完整的文件路径
+  path <- file.path(folder, file)
+  
+  # 检查文件是否存在
+  if (file.exists(path)) {
+    # 读取CSV文件
+    data <- import(path)
+    # 将数据追加到merged_data中
+    merged_data <- rbind.fill(merged_data, data)
+  } else {
+    message(paste("File", path, "does not exist."))
+  }
+}
+
+# 查看合并后的数据
+head(merged_data)
+
+# 合并后的数据写入新的CSV文件
+write.csv(merged_data, file = "merged_data1.csv", row.names = FALSE)
+
+```
+
+## 1.3 Combine Day-2 files
+**Source: `Analysis_data_Sunst/clean/clean_day2/combine_day2_code.R`**
+
+```{r combine_day2, eval=FALSE}
+# 加载所需的包
+library(readr)
+library(dplyr)
+library(purrr)
+
+library(rio)
+library(plyr)
+
+# 创建一个空的数据框来保存合并后的数据
+merged_data <- data.frame()
+##一定要设置在clean_day1下的工作路径和清空环境
+# 遍历文件夹phase_003至phase_020
+for (i in 3:20) {
+  # 构建文件夹名称
+  folder <- paste0("phase_", sprintf("%03d", i))
+  # 构建文件路径
+  file <- paste0("day2_q_", folder, ".csv")
+  # 构建完整的文件路径
+  path <- file.path(folder, file)
+  
+  # 检查文件是否存在
+  if (file.exists(path)) {
+    # 读取CSV文件
+    data <- import(path)
+    # 将数据追加到merged_data中
+    merged_data <- rbind.fill(merged_data, data)
+  } else {
+    message(paste("File", path, "does not exist."))
+  }
+}
+
+# 查看合并后的数据
+head(merged_data)
+
+# 合并后的数据写入新的CSV文件
+write.csv(merged_data, file = "merged_data2.csv", row.names = FALSE)
+
+```
+
+## 1.4 Combine Day-3 (retest) files
+**Source: `Analysis_data_Sunst/clean/clean_day3/combine_day3_code.R`**
+
+```{r combine_day3, eval=FALSE}
+# 加载所需的包
+library(readr)
+library(dplyr)
+library(purrr)
+
+library(rio)
+library(plyr)
+
+# 创建一个空的数据框来保存合并后的数据
+merged_data <- data.frame()
+##一定要设置在clean_day1下的工作路径和清空环境
+# 遍历文件夹phase_003至phase_020
+for (i in 3:20) {
+  # 构建文件夹名称
+  folder <- paste0("phase_", sprintf("%03d", i))
+  # 构建文件路径
+  file <- paste0("day3_q_", folder, ".csv")
+  # 构建完整的文件路径
+  path <- file.path(folder, file)
+  
+  # 检查文件是否存在
+  if (file.exists(path)) {
+    # 读取CSV文件
+    data <- import(path)
+    # 将数据追加到merged_data中
+    merged_data <- rbind.fill(merged_data, data)
+  } else {
+    message(paste("File", path, "does not exist."))
+  }
+}
+
+# 查看合并后的数据
+head(merged_data)
+
+# 合并后的数据写入新的CSV文件
+write.csv(merged_data, file = "merged_data3.csv", row.names = FALSE)
+
+```
+
+## 1.5 Select questionnaire variables per session
+**Source: `Analysis_data_Sunst/clean/select_code.R`**
+
+```{r select_code, eval=FALSE}
+library(dplyr)
+##读取数据之前一定要设置工作路径
+day0 <- read_csv("clean_day0/merged_data0.csv")
+day1 <- read_csv("clean_day1/merged_data1.csv")
+day2 <- read_csv("clean_day2/merged_data2.csv")
+day3 <- read_csv("clean_day3/merged_data3.csv")
+
+#选取day0 中的问卷数据,1select_code 主要放置的是选取的问卷数据的代码
+# 生成列名
+selfclarity_columns <- paste0("selfclarity_", seq(1, 12))
+phq_columns <- paste0("phq_", seq(1, 9))
+gad_columns <- paste0("gad_", seq(1, 7))
+
+# 选择列
+select_day0 <- day0 %>%
+  select(one_of(c(selfclarity_columns , phq_columns, gad_columns, "ID")))
+
+write.csv(select_day0, file = "select_day0.csv", row.names = FALSE)
+
+
+ses_columns <- paste0("ses_", seq(1, 10))
+coreself_columns <- paste0("coreself_", seq(1, 10))
+SGPS_columns <- paste0("SGPS_", seq(1, 9))
+NPI_columns <- paste0("NPI", seq(1, 15))
+hsns_columns <- paste0("hsns_", seq(1, 10))
+
+select_day1 <- day1%>%
+  select(one_of(c(ses_columns , coreself_columns, SGPS_columns,NPI_columns,hsns_columns, "ID")))
+
+write.csv(select_day1, file = "select_day1.csv", row.names = FALSE)
+
+swb_columns <- paste0("swb_", seq(1, 5))
+LOT_columns <- paste0("LOT_", seq(1, 6))
+IPC_columns <- paste0("IPC_", seq(1, 8))
+MorIden_columns <- paste0("MorIden_", seq(1, 10))
+moralSeImag_columns <- paste0("moralSeImag_", seq(1, 9))
+sde_columns <- paste0("sde_", seq(1, 20))
+IM_columns <- paste0("IM_", seq(1, 20))
+
+select_day2 <- day2%>%
+  select(one_of(c(swb_columns , LOT_columns, IPC_columns ,MorIden_columns,moralSeImag_columns,sde_columns,IM_columns,"ID")))
+
+write.csv(select_day2, file = "select_day2.csv", row.names = FALSE)
+
+domain_rating_columns <- paste0("domain_rating_", seq(1, 5))
+
+select_day3 <- day3%>%
+  select(one_of(c(selfclarity_columns , phq_columns, gad_columns,
+                  ses_columns , coreself_columns, SGPS_columns,NPI_columns,hsns_columns,
+                  swb_columns , LOT_columns, IPC_columns ,MorIden_columns,moralSeImag_columns,sde_columns,IM_columns,
+                  domain_rating_columns,
+                  "ID")))
+write.csv(select_day3, file = "select_day3.csv", row.names = FALSE)
+
+```
+
+# Section 2. Quality control (participant screening)
+
+## 2.1 Day-0 (screening): age criterion and questionnaire processing
+**Source: `descrip/preprocess/SEE_day0_clean.Rmd`**
+
+```{r}
+
+subj_phase_day0 <- function(phase,Eligible,Moneny,Paid_date) {
+
+# 导入文件，修改文件地址“/phase_00x/day0_all_phase_00x.csv”中的批次号“phase_00x”
+day0_all<-read.csv(paste0("../../../Data/clean/clean_day0/",phase,"/day0_all_",phase,".csv"), header = TRUE, sep = ",", stringsAsFactors = FALSE, fileEncoding = "UTF-8") %>%mutate(No=X)#重命名列
+print(day0_all)
+
+# 导入文件，修改文件地址"../../../Data/raw/day0/phase_00x/"中的批次号“phase_00x”
+subj_day0<-read.csv(list.files(paste0("../../../Data/raw/day0/",phase,"/"),pattern = "^SEE.*\\.csv$", full.names = TRUE), header = TRUE, sep = ",", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+print(subj_day0)
+subj_day0<-subj_day0%>%
+    slice(-1)%>%
+  select(-c("Subject.IDs","NodeId"))%>%#去除这些列
+  rename(
+    USERID=UserId,#脑岛ID
+    Time_day0=Time,#实验时间
+    religion=Info_Q1,#宗教
+    e_mail = Info_Q2,#邮箱
+    wechat = Info_Q3,#微信
+    region = Info_Q4,#地区
+    major = Info_Q5,#专业
+    left_hand = Info_Q6,#是否左撇子
+    refresh_rate = Info_Q7,#刷新率
+    resolution_ratio = Info_Q8#电脑分辨率
+  ) %>%
+  mutate(Eligible=Eligible,#是否符合要求
+         Moneny=Moneny,#报酬金额
+         Paid_date=Paid_date)%>%#付偿日期
+  arrange( USERID)%>%#将脑岛ID从低到高排序
+  mutate(No= row_number())%>%#按行依次编号
+merge(.,day0_all[, c("No", "ID","ParticipantID","subj_idx")], by = "No", all.x = TRUE)#将ID合并进文件
+print(subj_day0)
+# 导出文件，输出的文件地址"../../../Data/raw/day0/phase_00x/subj_day0_phase_00x.xlsx",修改批次号“phase_00x”
+write.xlsx(subj_day0, file=paste0("../../../Data/raw/day0/",phase,"/subj_day0_",phase,".xlsx"))
+
+#subj_day0_phase_003<-read.xlsx("../../../Data/raw/day0/phase_003/subj_day0_phase_003.xlsx")
+subj_email<-subj_day0%>%
+  select(c("ID","e_mail","wechat","Subject.Name","region"))%>%
+  rename(姓名=ID,
+   邮件地址=e_mail,
+         移动电话=wechat,
+         联系地址=region
+         )
+  
+write.csv(subj_email, paste0("../../../Data/raw/day0/",phase,"/subj_email_",phase,".csv"))
+
+#去掉该数据中的被试脑岛编号和被试姓名
+day0_all<-day0_all%>%
+select(-c("subj_name","subj_idx"))
+write.csv(day0_all,paste0("../../../Data/clean/clean_day0/",phase,"/day0_all_",phase,".csv"))
+
+}
+
+subj_phase_day0("phase_020","yes","1","3.12 ")
+```
+```{r day0 数据总分计算，分类}
+plot_descript_day0<-function(phase){
+  
+  day0_subj<-read.xlsx(paste0("../../../Data/raw/day0/",phase,"/subj_day0_",phase,".xlsx"))  # 参加day0实验的所有被试
+  
+day0_all<-read.csv(paste0("../../../Data/clean/clean_day0/",phase,"/day0_all_",phase,".csv"), fileEncoding = "UTF-8")  # day0问卷数据
+
+invalid_day0<-day0_all%>%
+  filter(age>59|age<18)%>%
+print()  ## day0中年龄小于18或大于59岁
+
+write.xlsx(invalid_day0, file = paste0("../../../Data/raw/day0/", phase, "/invalid_day0_", phase, ".xlsx"))  ##输出无效被试
+
+day0_subj<-day0_subj%>%
+  filter(!ID %in% invalid_day0$ID)
+
+write.xlsx(day0_subj, file=paste0("../../../Data/raw/day0/",phase,"/subj_day0_",phase,".xlsx"))  ## 输出参加day0符合条件的被试
+
+day0_all <- day0_all %>%
+   filter(age<=59&age>=18)%>%
+  select(-birthday,-ID,No,ParticipantID)%>%
+  mutate(
+    age=case_when(
+          between(age, 18, 28) ~ "18~28",
+          between(age, 28, 38) ~ "28~38",
+           between(age, 38, 48) ~ "38~48",
+          between(age, 48, 59) ~ "48~59",
+          age>59~ ">59",
+          TRUE ~ as.character(age) 
+        ),
+         obj_ses1=as.character(obj_ses1),
+         fri_ses2=as.character(fri_ses2),
+        sex=case_when(
+          sex==0~"male",
+          sex==1~"female",
+          TRUE ~ as.character(sex) 
+        ) ) %>%
+ mutate(fatherEdu = case_when(
+    fatherEdu == 0 ~ "zero",
+    fatherEdu == 1 ~ "elementary",
+    fatherEdu == 2 ~ "junior",
+    fatherEdu == 3 ~ "senior",
+    fatherEdu == 4 ~ "college",
+    fatherEdu == 5 ~ "graduate",
+    TRUE ~ as.character(fatherEdu)  # 如果没有匹配到上述条件，保持不变
+  ))%>%
+  mutate(motherEdu = case_when(
+    motherEdu == 0 ~ "zero",#没上学
+    motherEdu == 1 ~ "elementary",#小学
+    motherEdu == 2 ~ "junior",#初中
+    motherEdu == 3 ~ "senior",#高中，中专
+    motherEdu == 4 ~ "college",#大学（专科或本科）
+    motherEdu == 5 ~ "graduate",#研究生
+    TRUE ~ as.character(motherEdu)  # 如果没有匹配到上述条件，保持不变
+  ))%>%
+  mutate(FatherOccupation = case_when(
+    FatherOccupation == 0 ~ "临时工",
+    FatherOccupation == 1 ~ "个体经营",
+    FatherOccupation == 2 ~ "一般管理",
+    FatherOccupation == 3 ~ "中层管理",
+    FatherOccupation == 4 ~ "高级管理",
+    TRUE ~ as.character(FatherOccupation)  # 如果没有匹配到上述条件，保持不变
+  ))%>%
+  mutate(MotherOccupation = case_when(
+    MotherOccupation == 0 ~ "临时工",
+    MotherOccupation == 1 ~ "个体经营",
+    MotherOccupation == 2 ~ "一般管理",
+    MotherOccupation == 3 ~ "中层管理",
+    MotherOccupation == 4 ~ "高级管理",
+    TRUE ~ as.character(MotherOccupation)  # 如果没有匹配到上述条件，保持不变
+  ))%>%
+  mutate(income = case_when(
+    income == 0 ~ "zero",
+    income < 2000 ~ "<2000",
+    between(income, 2000, 5000) ~ "2000~5000",
+    between(income, 5000, 10000) ~ "5000~10000",
+    between(income, 10000, 30000) ~ "10000~30000",
+    between(income, 30000, 50000) ~ "30000~50000",
+    between(income, 50000, 100000) ~ "50000~100000",
+    between(income, 100000, 150000) ~ "100000~150000",
+    between(income, 150000, 200000) ~ "150000~200000",
+    income >= 200000 ~ "≥200000",
+    TRUE ~ as.character(income)  # 如果没有匹配的条件，保持不变
+  ))%>%
+  mutate(phq_al = rowSums(select(., starts_with("phq_")))) %>%
+  mutate(phq = case_when(
+    phq_al >= 0 & phq_al <= 4 ~ "none",
+    phq_al >= 5 & phq_al <= 9 ~ "mild",
+    phq_al >= 10 & phq_al <= 14 ~ "moderate",
+    phq_al >= 15 & phq_al <= 19 ~ "mod to severe",
+     phq_al >= 20  ~ "severe",
+    TRUE ~ NA_character_
+  ))%>%
+mutate(selfclarity_al = rowSums(select(., starts_with("selfclarity_")))) %>%
+mutate(gad_al = rowSums(select(., starts_with("gad_")))) %>%
+  mutate(gad = case_when(
+    gad_al >= 0 & gad_al <= 4 ~ "none",
+    gad_al >= 5 & gad_al <= 9 ~ "mild",
+    gad_al >= 10 & gad_al <= 14 ~ "moderate",
+    gad_al >= 15 ~ "severe",
+    TRUE ~ NA_character_
+  ))
+day0_1<-day0_all%>%
+  select(age,obj_ses1,fri_ses2,sex,fatherEdu, motherEdu,FatherOccupation,MotherOccupation,income,phq,gad)
+  
+#绘制离散变量的棒图
+plot_bar(day0_all)
+
+#绘制连续变量的直方图
+plot_histogram(day0_all)
+
+}
+plot_descript_day0("phase_017")
+
+```
+
+
+## 2.2 Day-1 (Day 2 session) behavioral criteria
+**Source: `descrip/preprocess/SEE_day1_clean.Rmd` (chunk "day1 被试筛选")**
+
+```{r day1 被试筛选}
+select_day1<-function(phase){
+# ALT部分的筛选
+  #读取ALT1文件
+  
+ALT1<-read.csv(paste0("../../../Data/clean/clean_day1/",phase,"/ALT1_",phase,".csv"))
+
+ ## 筛选标准1：ALT1单个条件的正确率不低于60%
+ALT1_select<-ALT1 %>%
+  mutate(ID = as.character(ID)) %>%
+   mutate(ParticipantID = as.character(ParticipantID)) %>%
+  mutate(rt=as.numeric(rt))%>% #分别转变被试编号和反应时类型为字符型与数值型
+  mutate(correct = ifelse(correct == "true", 1, ifelse(correct == "false", 0, NA)))%>% ##重编码correct，1对0错
+  filter(screen_id%in%c("formal_ALT1_1","formal_ALT1_2") )%>% #选择正式实验的数据
+  group_by(ID, con,conditionType) %>%  #按被试与条件分组，con为“图形_匹配/不匹配”，conditionType为“匹配/不匹配”
+  summarise(
+    avg_rt = mean(rt, na.rm = TRUE),#分组后计算平均反应时
+    max_rt = max(rt, na.rm = TRUE),#分组后计算最大反应时
+    min_rt = min(rt, na.rm = TRUE),#分组后计算最小反应时
+    sd_rt=sd(rt, na.rm = TRUE), #计算平均反应时的标准差
+    all_count=n(),#每个条件的总trial数量
+    row_count = sum(rt>=200 & rt <=1200, na.rm = TRUE),  #每个条件反应时符合条件的总数,舍弃按键太快<200和按键太慢>1200的
+    correct_count = sum(correct == 1 & rt>=200 & rt <=1200, na.rm = TRUE),#按键速度符合要求，正确反应的
+    acc = correct_count /all_count #计算正确率= 正确/总数
+  )%>%
+    mutate(note = "") %>%
+  mutate(note = ifelse(acc < 0.6, "invalid", note))%>%#正确率小于0.6，为无效
+  ungroup()
+
+print(ALT1_select)#查看筛选后的ALT1数据
+  
+## 筛选标准2：IAT异常反应时的比例小于0.1
+#IAT部分的数据的筛选
+ #读取IAT数据
+IAT<-read.csv(paste0("../../../Data/clean/clean_day1/",phase,"/IAT_",phase,".csv"))
+
+IAT_select <- IAT %>%
+  # filter(.,ID != "phase_003_subj_14")%>%#不需要每次有这行代码，本次去除是因为被试重复作答
+   mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>%
+  mutate(ParticipantID = as.character(ParticipantID)) %>%
+  filter(screen_id %in% c(3, 4, 6, 7)) %>%  # 选出将来用于分析的block
+  group_by(ID,task_id) %>%# task_id是领域，按被试和领域分组
+  summarise(rt_over10000=sum(rt>10000),rt_les300 = sum(rt <= 300), row_count = sum(rt<=10000)) %>% #计算反应时过长的trial数，反应时过短的trial数
+  mutate(proportion = rt_les300 / row_count) %>% #排除反应时过长的trial以后，计算反应时过短的trial所占的比例
+    mutate(note = "") %>%
+  mutate(note = ifelse(proportion > 0.1, "invalid", note))#比例大于0.1，则无效
+
+#查看IAT筛选结果
+print(IAT_select)
+
+
+#合并IAT和ALT的无效数据
+ex_subj <- bind_rows(
+  ALT1_select %>% filter(note == "invalid"),
+  IAT_select %>% filter(note == "invalid")
+)
+
+# 查看两个组合后的无效数据
+print(ex_subj)
+
+# 读取 subj_day1 数据
+subj_day1 <- read.xlsx(paste0("../../../Data/raw/day1/", phase, "/subj_day1_", phase, ".xlsx"))
+
+
+# 根据 ex_subj 的 ID 列填充 Eligible 列，如果在无效数据中，则填入no,否则为yes，上传到飞书subj_info的所有参加day1的被试信息
+subj_day1 <- subj_day1 %>%
+  mutate(Eligible = ifelse(ID %in% ex_subj$ID, "no", "yes"))
+
+# 将结果写入 Excel 文件，导出day1所有被试数据
+write.xlsx(subj_day1, file = paste0("../../../Data/raw/day1/", phase, "/subj_day1_", phase, ".xlsx"))
+
+# 从 subj_day1 中筛选 Eligible 列的值为 "yes" 的行，导出符合要求的被试数据
+select_day1 <- subj_day1 %>%
+  filter(Eligible == "yes")
+
+# 将筛选后的结果写入 CSV 文件，这个是导入脑岛的被试信息
+write.xlsx(select_day1, file = paste0("../../../Data/raw/day1/", phase, "/select_day1_", phase, ".xlsx"))
+
+invalid_day1 <- ex_subj %>%
+write.xlsx(., file = paste0("../../../Data/raw/day1/", phase, "/invalid_day1_", phase, ".xlsx"))
+
+
+
+}
+
+##仅需修改此代码；分别为“批次号”
+
+select_day1("phase_020")
+```
+
+
+## 2.3 Day-2 (Day 3 session) behavioral criteria
+**Source: `descrip/preprocess/SEE_day2_clean.Rmd` (chunk "day2 被试筛选")**
+
+```{r day2 被试筛选}
+select_day2<-function(phase){
+  
+  ALT2<-read.csv(paste0("../../../Data/clean/clean_day2/",phase,"/ALT2_",phase,".csv"))
+ SRET<-read.csv(paste0("../../../Data/clean/clean_day2/",phase,"/SRET_",phase,".csv"))
+
+# ALT部分的筛选
+ ## 筛选标准1：ALT2单个条件的正确率不低于20%
+ALT2_select<-ALT2%>%
+   filter(screen_id%in%c("ability","moral") )%>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  mutate(correct= as.numeric(correct))%>% ##重编码correct
+  mutate(con=paste(con,valence,sep = "_"))%>%#选择正式实验的数据
+  group_by(ID,con) %>%  #按被试与条件分组
+  summarise(
+    avg_rt = mean(rt, na.rm = TRUE),
+    max_rt = max(rt, na.rm = TRUE),
+    min_rt = min(rt, na.rm = TRUE),
+    sd_rt=sd(rt, na.rm = TRUE), #计算平均反应时
+    all_count=n(),#每个条件的总trial数量
+    row_count = sum(rt>=200 & rt <=1200, na.rm = TRUE),  #每个条件反应时符合条件的总数,舍弃按键太快和按键太慢的
+    correct_count = sum(correct == 1 & rt>=200 & rt <=1200, na.rm = TRUE),
+    acc = correct_count /  all_count #计算正确率= 正确/总数
+  )%>%
+    mutate(note = "") %>%
+  mutate(note = ifelse(acc < 0.2, "invalid", note))%>%#**各个图形的正确率不低于20%（ability_friend_match_negative）**
+  ungroup()
+print(ALT2_select)
+
+
+  
+ ## 筛选标准2：ALT2单个领域的正确率不低于60%  
+  ALT2_select2<-ALT2%>%
+   filter(screen_id%in%c("ability","moral") )%>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  mutate(correct= as.numeric(correct))%>%
+    mutate(note = "")%>%
+  group_by(ID,screen_id) %>%
+  summarise(
+     avg_rt2 = mean(rt, na.rm = TRUE),
+    max_rt2 = max(rt, na.rm = TRUE),
+    min_rt2 = min(rt, na.rm = TRUE),
+    sd_rt2=sd(rt, na.rm = TRUE),
+    all_count2 = n(),
+    correct_count2 = sum(correct == 1 & rt >= 200 & rt <= 1200, na.rm = TRUE),
+    acc2 = correct_count2 / all_count2,
+    note = ifelse(acc2 < 0.6, "invalid", note)#**道德、能力领域的总正确率不低于60%**
+  )
+print(ALT2_select2)
+
+
+  # EW阶段的yes比例和rt汇总
+SRET_EW<-SRET %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  mutate(correct= as.numeric(correct))%>% ##重编码correct
+  filter(screen_id%in%c("EW_formal") )%>% #选择正式实验的数据
+   filter(!word %in% c("务实", "迷糊", "坚贞", "说谎", "主见", "缓慢", "素养", "低俗")) %>%                                                               group_by(ID,person,valence,domain)%>%
+     summarize(
+             avg_rt_mean= mean(rt, na.rm = TRUE),
+            avg_sd_rt=sd(rt, na.rm = TRUE),
+            max_rt = max(rt, na.rm = TRUE),
+            min_rt = min(rt, na.rm = TRUE),
+            N_Yes = sum(responses == "yes"),
+            N_No = sum(responses == "no"),
+            N=n(),
+            pro_yes=N_Yes/N,)                                                                                                         
+  print(SRET_EW) ###查看评估阶段每个被试的反应时    
+  
+
+
+###########计算每个被试的总新旧再认正确率；
+  #####筛选标准3：SRET的再认正确率低于0.55
+ SRET_RJ <- SRET  %>%
+    mutate(ID = as.character(ID),
+           rt = as.numeric(rt),
+           correct = as.numeric(correct)) %>%
+    filter(screen_id %in% c("RJ_formal1")) %>%
+    filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙")) %>%
+    mutate(sdt = case_when((identity == "old" & (responses %in% c("familiar", "old"))) ~ "hit",
+                          (identity == "old" & (responses == "new" )) ~ "miss",
+                          (identity == "new" & (responses %in% c("familiar", "old"))) ~ "fa",
+                          (identity == "new" & (responses == "new")) ~ "cr"),) %>%
+   # group_by(ID,domain, valence ) %>%#, valence
+   group_by(ID) %>%
+    summarize( 
+      H = sum(sdt == "hit"),
+      M = sum(sdt == "miss"),
+      FA = sum(sdt == "fa"),
+      CR = sum(sdt == "cr"),
+      new= sum(responses %in% c("new")),#按键为新词
+      old=sum(responses %in% c("old")),
+      familiar=sum(responses %in% c("familiar")),
+     self_H = sum(sdt == "hit"& person=="self")/40,
+     friend_H = sum(sdt == "hit"& person=="friend")/40,
+      recognition = (H + CR) / (H + CR + M + FA),### valence * domain,4个条件 *（20 new+ 20 old）, 20 old = 10 self +10 friend
+      avg_rt = mean(rt, na.rm = TRUE),
+      sd_rt = sd(rt, na.rm = TRUE),
+      max_rt = max(rt, na.rm = TRUE),
+    min_rt = min(rt, na.rm = TRUE),
+    ) %>%
+  mutate(note = "") %>%
+    mutate(
+      P_H = (H+0.5)/(H+M+1), # if hit rate is 1, standardize it    P_H = ifelse(P_H == 1, 1 - 1 / (2 * (H + M)), P_H),
+    P_FA = (FA+0.5)/(FA+CR+1),# if FA rate is 0, standardize it    P_FA = ifelse(P_FA == 0, 1 / (2 * (H + M)), P_FA), 
+    Correct_recognition = P_H - P_FA,
+      d_prime = qnorm(P_H) -qnorm(P_FA),
+      note = ifelse(recognition<0.55, "invalid", note)) #**正确率低于0.53**
+ 
+   print(SRET_RJ)
+   
+
+##**筛选标准4：查看SRET的来源判断超过20%试次反应时低于200ms，**
+ ###########计算每个被试的再认正确率#####
+ SRET_RJ2 <- SRET  %>%
+    mutate(ID = as.character(ID),
+           rt = as.numeric(rt),
+           correct = as.numeric(correct)) %>%
+    filter(screen_id %in% c("RJ_formal1")) %>%
+    filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙")) %>%
+    mutate(sdt = case_when((identity == "old" & (responses %in% c("familiar", "old"))) ~ "hit",
+                          (identity == "old" & (responses == "new" )) ~ "miss",
+                          (identity == "new" & (responses %in% c("familiar", "old"))) ~ "fa",
+                          (identity == "new" & (responses == "new")) ~ "cr"),) %>%
+    group_by(ID, valence,domain) %>%#, 道德/能力*积极/消极
+    summarize(
+      H = sum(sdt == "hit"),
+      M = sum(sdt == "miss"),
+      FA = sum(sdt == "fa"),
+      CR = sum(sdt == "cr"),
+      new= sum(responses %in% c("new")),#按键为新词
+      old=sum(responses %in% c("old")),
+      familiar=sum(responses %in% c("familiar")),
+     self_H = sum(sdt == "hit"& person=="self")/10,
+     friend_H = sum(sdt == "hit"& person=="friend")/10,
+     P_H = H/(H+M),
+     P_FA = FA/(FA+CR),
+      recognition = (H + CR) / (H + CR + M + FA),#  40个
+      avg_rt = mean(rt, na.rm = TRUE),
+      sd_rt = sd(rt, na.rm = TRUE),
+      max_rt = max(rt, na.rm = TRUE),
+    min_rt = min(rt, na.rm = TRUE),
+    ) %>%
+  mutate(note = "") %>%
+    mutate(
+      P_H = (H+0.5)/(H+M+1), # if hit rate is 1, standardize it P_H = ifelse(P_H == 1, 1 - 1 / (2 * (H + M)), P_H),
+       P_FA = (FA+0.5)/(FA+CR+1), # if FA rate is 0, standardize it P_FA = ifelse(P_FA == 0, 1 / (2 * (H + M)), P_FA),
+      Correct_recognition = P_H - P_FA,
+      Z_P_H = qnorm(P_H),
+      Z_P_FA = qnorm(P_FA),
+      d_prime = Z_P_H - Z_P_FA,
+      )
+ 
+   print(SRET_RJ2)
+
+SRET_RJ_2 <- SRET %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt = as.numeric(rt)) %>%
+ mutate(correct = as.numeric(coalesce(correct,-1))) %>% #对新词按键判断的试次的correct记为-1
+  filter(screen_id %in% c("RJ_formal_2")) %>%
+  filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙")) %>%
+   mutate(sdt = case_when((identity == "self" & (correct=="1") )~ "self_hit",
+                          #自我条件下的击中，信号是“self”，反应是“self”
+                          (identity == "self" & (correct=="0") )~ "self_miss",
+                          #自我条件下的漏报，信号是“self”，反应是“friend”
+                          (identity == "friend" & (correct=="1" )) ~ "friend_hit",
+                          #朋友条件下的击中，信号是“friend”，反应是“friend”
+                           (identity == "friend" & (correct=="0" )) ~ "friend_miss",
+                          #朋友条件下的漏报，信号是“friend”，反应是“self”
+                          (is.na(identity) & (!is.na(response))) ~ "fa",
+                          #新词（无信号），反应为self或者friend
+                        ) )
+
+
+SRET_RJ_2<-SRET_RJ_2%>%
+  group_by(ID) %>%#,valence,domain
+  summarize(n=n(), #所有按键反应了的试次
+     row_count = sum(rt<200, na.rm = TRUE),
+    less_200=row_count/n,
+   count_self = sum(responses == "self"),#所有反应是“self”的试次
+   count_friend = sum(responses == "friend"),#所有反应是“friend”的试次
+   self_H = sum(sdt == "self_hit"),#自我条件下的击中，信号是“self”，反应是“self”
+   friend_H = sum(sdt == "friend_hit"),#朋友条件下的击中，信号是“friend”，反应是“friend”
+      FA = sum(sdt == "fa"),#新词（无信号），反应为self或者friend
+      self_recognition = self_H /count_self,
+   # number of correct source attributions for self/ number of hits for self
+   friend_recognition = friend_H/ count_friend,
+      avg_rt = mean(rt, na.rm = TRUE),
+      sd_rt = sd(rt, na.rm = TRUE),
+   max_rt = max(rt, na.rm = TRUE),
+    min_rt = min(rt, na.rm = TRUE),
+  )%>%
+ mutate(note= ifelse(less_200>0.3, "invalid"," "))
+print(SRET_RJ_2)
+
+
+########################################
+# 使用group_by和summarize检查每个ID的行数
+id_counts <- SRET %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt = as.numeric(rt)) %>%
+ mutate(correct = as.numeric(coalesce(correct,-1))) %>% #对新词按键判断的试次的correct记为-1
+  filter(screen_id %in% c("RJ_formal_2")) %>%
+  filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙")) %>%
+   mutate(sdt = case_when((identity == "self" & (correct=="1") )~ "self_hit",
+                          #自我条件下的击中，信号是“self”，反应是“self”
+                          (identity == "self" & (correct=="0") )~ "self_miss",
+                          #自我条件下的漏报，信号是“self”，反应是“friend”
+                          (identity == "friend" & (correct=="1" )) ~ "friend_hit",
+                          #朋友条件下的击中，信号是“friend”，反应是“friend”
+                           (identity == "friend" & (correct=="0" )) ~ "friend_miss",
+                          #朋友条件下的漏报，信号是“friend”，反应是“self”
+                          (is.na(identity) & (!is.na(response))) ~ "fa",
+                          #新词（无信号），反应为self或者friend
+                        ) ) %>%
+   group_by(ID,valence,domain) %>%#
+  summarize(
+   count_self = sum(responses == "self"),#所有反应是“self”的试次
+   count_friend = sum(responses == "friend"),#所有反应是“friend”的试次
+   self_H = sum(sdt == "self_hit"),#自我条件下的击中，信号是“self”，反应是“self”
+   friend_H = sum(sdt == "friend_hit"),#朋友条件下的击中，信号是“friend”，反应是“friend”
+      FA = sum(sdt == "fa"),#新词（无信号），反应为self或者friend
+      self_recognition = self_H /count_self,
+   # number of correct source attributions for self/ number of hits for self
+   friend_recognition = friend_H/ count_friend,
+      avg_rt = mean(rt, na.rm = TRUE),
+      sd_rt = sd(rt, na.rm = TRUE),
+   max_rt = max(rt, na.rm = TRUE),
+    min_rt = min(rt, na.rm = TRUE),
+  )%>%
+ungroup()%>%
+  group_by(ID) %>%
+  summarize(row_count = n())
+
+# 检查是否每个ID都有4行数据
+print(id_counts)
+
+#**合并ALT2两种筛选标准下排除的无效数据**
+ex_subj <- bind_rows(
+  ALT2_select %>% filter(note == "invalid"),
+  ALT2_select2 %>% filter(note == "invalid"),
+  SRET_RJ%>% filter(note == "invalid"),
+  SRET_RJ_2%>%filter(note=="invalid")
+  )
+   
+#查看两个组合后的无效数据
+print(ex_subj)
+############################
+
+###############################
+# 读取 subj_day1 数据
+subj_day2 <- read.xlsx(paste0("../../../Data/raw/day2/", phase, "/subj_day2_", phase, ".xlsx"))
+
+# 根据 ex_subj 的 ID 列填充 Eligible 列，如果在无效数据中，则填入no,否则为yes，上传到飞书subj_info的所有参加day1的被试信息
+subj_day2 <- subj_day2 %>%
+  mutate(Eligible = ifelse(ID %in% ex_subj$ID, "no", "yes"))
+
+# 将结果写入 Excel 文件，导出day1所有被试数据
+write.xlsx(subj_day2, file = paste0("../../../Data/raw/day2/", phase, "/subj_day2_", phase, ".xlsx"))
+
+# 从 subj_day2 中筛选 Eligible 列的值为 "yes" 的行，导出符合要求的被试数据
+select_day2 <- subj_day2 %>%
+  filter(Eligible == "yes")
+
+invalid_day2 <- ex_subj
+write.xlsx(invalid_day2, file = paste0("../../../Data/raw/day2/", phase, "/invalid_day2_", phase, ".xlsx"))
+
+# 将筛选后的结果写入 CSV 文件，这个是导入脑岛的被试信息
+write.xlsx(select_day2, file = paste0("../../../Data/raw/day2/", phase, "/select_day2_", phase, ".xlsx"))
+}
+
+
+##仅需修改此代码；分别为“批次号”，“发放金额”，“发放报酬的日期”
+
+select_day2("phase_019")
+```
+
+
+# Section 3. Implicit Association Test (IAT)
+
+## 3.1 IAT data processing (block classification)
+**Source: `descrip/IAT.Rmd`**
+
+```{r IAT数据处理}
+
+##数据预处理，区分相容与不相容的block，
+IAT_data <- IAT_all%>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(ParticipantID = as.character(ParticipantID)) %>%
+  mutate(rt=as.numeric(rt))%>%
+  group_by(ID) %>%
+  mutate(
+    version_attrib = case_when(
+      task_id == "ability"~ (version_attrib[response == "0"& !is.na(version_attrib)]),
+      TRUE ~ version_attrib),
+    version_target = case_when(
+      task_id == "ability"~ (version_target[response == "0"& !is.na(version_target)]),
+      TRUE ~ version_target),
+    version_attrib2 = case_when(
+      task_id == "moral"~ (version_attrib2[response == "0"& !is.na(version_attrib2)]),
+      TRUE ~ version_attrib2),
+    version_target2 = case_when(
+      task_id == "moral"~ (version_target2[response == "0"& !is.na(version_target2)]),
+      TRUE ~ version_target2))%>%
+  mutate(version = NA)%>%
+  mutate(
+    version = case_when(
+    version_attrib == version_target & task_id == "ability" & screen_id == 3 ~ "A1",#相容为A，不相容为B，练习阶段为1，正式为2
+    version_attrib == version_target & task_id == "ability" & screen_id == 4 ~ "A2",
+    version_attrib == version_target & task_id == "ability" & screen_id == 6 ~ "B1",
+    version_attrib == version_target & task_id == "ability" & screen_id == 7 ~ "B2",
+    
+    version_attrib != version_target & task_id == "ability" & screen_id == 3 ~ "B1",
+    version_attrib != version_target & task_id == "ability" & screen_id == 4 ~ "B2",
+    version_attrib != version_target & task_id == "ability" & screen_id == 6 ~ "A1",
+    version_attrib != version_target & task_id == "ability" & screen_id == 7 ~ "A2",
+    
+    version_attrib2 == version_target2 & task_id == "moral" & screen_id == 3 ~ "A1",
+    version_attrib2 == version_target2 & task_id == "moral" & screen_id == 4 ~ "A2",
+    version_attrib2 == version_target2 & task_id == "moral" & screen_id == 6 ~ "B1",
+    version_attrib2 == version_target2 & task_id == "moral" & screen_id == 7 ~ "B2",
+    
+    version_attrib2 != version_target2 & task_id == "moral" & screen_id == 3 ~ "B1",
+    version_attrib2 != version_target2 & task_id == "moral" & screen_id == 4 ~ "B2",
+    version_attrib2 != version_target2 & task_id == "moral" & screen_id == 6 ~ "A1",
+    version_attrib2 != version_target2 & task_id == "moral" & screen_id == 7 ~ "A2",
+      TRUE ~ version  # 如果没有满足条件的情况，保持原值
+    )) %>%
+    filter(screen_id %in% c(3, 4, 6, 7)) %>%
+  filter(rt<=10000)%>%
+   mutate(
+    block_type = case_when(
+      version %in% c("A1", "A2") ~ "compatible",
+      version %in% c("B1", "B2") ~ "incompatible",))%>%
+  mutate(con = case_when(
+    block_type == "compatible" & condition %in% c("other", "negative") ~ "消极_朋友",
+    block_type == "compatible" & condition %in% c("self", "positive") ~ "积极_自我",
+    block_type == "incompatible" & condition %in% c("other", "positive") ~ "积极_朋友",
+    block_type == "incompatible" & condition %in% c("self", "negative") ~ "消极_自我"
+  ))
+
+####计算出原始数据的均值，标准差
+  IAT_data1<-IAT_data%>%
+    group_by(ID,task_id,block_type,version) %>%  ##condition是4类标签的，task_id是moral和ability，version是A1,A2,B1,B2
+  summarize(
+    mean_rt = mean(rt),
+    sd_rt = sd(rt),
+    row_n = n(),
+    se_rt = sd(rt) / sqrt(row_n))
+print(IAT_data1)
+
+##将错误的试次的反应时替换为平均反应时+600 ms
+IAT_data<-IAT_data%>%
+  left_join(IAT_data1%>%select(ID,task_id,block_type,version,mean_rt),by=c("ID","task_id","block_type","version"))%>%
+  mutate(rt=ifelse(correct=="false",mean_rt+600,rt))
+
+###计算取代完错误试次后的数据的均值，标准差
+ IAT_data1<-IAT_data%>%
+    group_by(ID,task_id,block_type,version) %>%  ##condition是4类标签的，task_id是moral和ability，version是A1,A2,B1,B2
+  summarize(
+    mean_rt = mean(rt),
+    sd_rt = sd(rt),
+    row_n = n(),
+    se_rt = sd(rt) / sqrt(row_n))
+
+```
+```{r IAT的D值计算}
+IAT_data_D2<-IAT_data1%>%
+  ungroup()%>%
+  select(-c("block_type","se_rt"))%>%
+  pivot_wider(names_from = version, values_from = c(mean_rt, sd_rt,row_n)) %>%
+  group_by(ID,task_id) %>% #task_id是领域(moral,ability)   #ID,version
+  reframe(
+    diff_B1A1 = round((mean_rt_B1 - mean_rt_A1), digits = 3),
+    diff_B2A2 =round(( mean_rt_B2 - mean_rt_A2), digits = 3),
+    SD_B1A1 = round((sqrt((((row_n_A1-1)*(sd_rt_A1^2)+(row_n_B1-1)*(sd_rt_B1^2))+((row_n_A1+row_n_B1)*((mean_rt_A1-mean_rt_B1)^2)/4))/(row_n_A1+row_n_B1-1))), digits = 3),
+    SD_B2A2 = round((sqrt((((row_n_A2-1)*(sd_rt_A2^2)+(row_n_B2-1)*(sd_rt_B2^2))+((row_n_A2+row_n_B2)*((mean_rt_A2-mean_rt_B2)^2)/4))/(row_n_A2+row_n_B2-1))), digits = 3),
+     D= round(((diff_B1A1/SD_B1A1) + (diff_B2A2/SD_B2A2))/2, digits = 3)
+    )%>%
+mutate(
+    effect = case_when(
+      abs(D) <= 0.2 ~ "small",
+      abs(D) <= 0.5 ~ "mid",
+      TRUE ~ "big")) #分为moral，ability两个领域的IAT_D
+print(IAT_data_D)
+IAT_data_D<-IAT_data_D%>%
+  rename(domain=task_id,IAT_SE=D)
+```
+
+
+## 3.2 IAT D-score computation
+**Source: `analysis_code/analysis_st.Rmd` (IAT D值计算)**
+
+```{r IAT}
+##数据预处理，区分相容与不相容的block
+#IAT_all.csv,生成IAT_data, IAT_data1,  IAT_data1用于计算d值，IAT_data包括原始的相容（积极-自我，消极-朋友）与不相容（积极-朋友，消极-自我）
+IAT_data <- IAT_all%>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(ParticipantID = as.character(ParticipantID)) %>%
+  mutate(rt=as.numeric(rt))%>%
+  group_by(ID) %>%
+  mutate(###将block进行领域分类，分成“道德”和“能力”
+    version_attrib = case_when(
+      task_id == "ability"~ (version_attrib[response == "0"& !is.na(version_attrib)]),
+      TRUE ~ version_attrib),
+    version_target = case_when(
+      task_id == "ability"~ (version_target[response == "0"& !is.na(version_target)]),
+      TRUE ~ version_target),
+    version_attrib2 = case_when(
+      task_id == "moral"~ (version_attrib2[response == "0"& !is.na(version_attrib2)]),
+      TRUE ~ version_attrib2),
+    version_target2 = case_when(
+      task_id == "moral"~ (version_target2[response == "0"& !is.na(version_target2)]),
+      TRUE ~ version_target2))%>%
+  mutate(version = NA)%>%
+  mutate(### 相容为A，不相容为B，练习阶段为1，正式为2
+    version = case_when(
+    version_attrib == version_target & task_id == "ability" & screen_id == 3 ~ "A1",
+    version_attrib == version_target & task_id == "ability" & screen_id == 4 ~ "A2",
+    version_attrib == version_target & task_id == "ability" & screen_id == 6 ~ "B1",
+    version_attrib == version_target & task_id == "ability" & screen_id == 7 ~ "B2",
+    
+    version_attrib != version_target & task_id == "ability" & screen_id == 3 ~ "B1",
+    version_attrib != version_target & task_id == "ability" & screen_id == 4 ~ "B2",
+    version_attrib != version_target & task_id == "ability" & screen_id == 6 ~ "A1",
+    version_attrib != version_target & task_id == "ability" & screen_id == 7 ~ "A2",
+    
+    version_attrib2 == version_target2 & task_id == "moral" & screen_id == 3 ~ "A1",
+    version_attrib2 == version_target2 & task_id == "moral" & screen_id == 4 ~ "A2",
+    version_attrib2 == version_target2 & task_id == "moral" & screen_id == 6 ~ "B1",
+    version_attrib2 == version_target2 & task_id == "moral" & screen_id == 7 ~ "B2",
+    
+    version_attrib2 != version_target2 & task_id == "moral" & screen_id == 3 ~ "B1",
+    version_attrib2 != version_target2 & task_id == "moral" & screen_id == 4 ~ "B2",
+    version_attrib2 != version_target2 & task_id == "moral" & screen_id == 6 ~ "A1",
+    version_attrib2 != version_target2 & task_id == "moral" & screen_id == 7 ~ "A2",
+      TRUE ~ version  # 如果没有满足条件的情况，保持原值
+    )) %>%
+    filter(screen_id %in% c(3, 4, 6, 7)) %>%
+  filter(rt<=10000)%>%
+   mutate(
+    block_type = case_when(
+      version %in% c("A1", "A2") ~ "compatible",
+      version %in% c("B1", "B2") ~ "incompatible",))%>%
+  mutate(con = case_when(
+    block_type == "compatible" & condition %in% c("other", "negative") ~ "消极_朋友",
+    block_type == "compatible" & condition %in% c("self", "positive") ~ "积极_自我",
+    block_type == "incompatible" & condition %in% c("other", "positive") ~ "积极_朋友",
+    block_type == "incompatible" & condition %in% c("self", "negative") ~ "消极_自我"
+  ))
+
+####计算出原始数据的均值，标准差
+  IAT_data1<-IAT_data%>%
+    group_by(ID,task_id,block_type,version) %>%  ##condition是4类标签的，task_id是moral和ability，version是A1,A2,B1,B2
+  summarize(
+    mean_rt = mean(rt),
+    sd_rt = sd(rt),
+    row_n = n(),
+    se_rt = sd(rt) / sqrt(row_n))
+print(IAT_data1)
+
+##将错误的试次的反应时替换为平均反应时+600 ms
+IAT_data<-IAT_data%>%
+  left_join(IAT_data1%>%select(ID,task_id,block_type,version,mean_rt),by=c("ID","task_id","block_type","version"))%>%
+  mutate(rt=ifelse(correct=="false",mean_rt+600,rt))
+
+###计算取代完错误试次后的数据的均值，标准差
+ IAT_data1<-IAT_data%>%
+    group_by(ID,task_id,block_type,version) %>%  ##condition是4类标签的，task_id是moral和ability，version是A1,A2,B1,B2
+  summarize(
+    mean_rt = mean(rt),
+    sd_rt = sd(rt),
+    row_n = n(),
+    se_rt = sd(rt) / sqrt(row_n))
+```
+
+
+####IAT指标提取
+```{r IAT的D值计算_2}
+#根据IAT_data1生成数据IAT_data_D2
+IAT_data_D<-IAT_data1%>%
+  ungroup()%>%
+  select(-c("block_type","se_rt"))%>%
+  pivot_wider(names_from = version, values_from = c(mean_rt, sd_rt,row_n)) %>%
+  group_by(ID,task_id) %>% #task_id是领域(moral,ability)   #ID,version
+  reframe(
+    diff_B1A1 = round((mean_rt_B1 - mean_rt_A1), digits = 3),
+    diff_B2A2 =round(( mean_rt_B2 - mean_rt_A2), digits = 3),
+    SD_B1A1 = round((sqrt((((row_n_A1-1)*(sd_rt_A1^2)+(row_n_B1-1)*(sd_rt_B1^2))+((row_n_A1+row_n_B1)*((mean_rt_A1-mean_rt_B1)^2)/4))/(row_n_A1+row_n_B1-1))), digits = 3),
+    SD_B2A2 = round((sqrt((((row_n_A2-1)*(sd_rt_A2^2)+(row_n_B2-1)*(sd_rt_B2^2))+((row_n_A2+row_n_B2)*((mean_rt_A2-mean_rt_B2)^2)/4))/(row_n_A2+row_n_B2-1))), digits = 3),
+     D= round(((diff_B1A1/SD_B1A1) + (diff_B2A2/SD_B2A2))/2, digits = 3)
+    )%>%
+mutate(
+    effect = case_when(
+      abs(D) <= 0.2 ~ "small",
+      abs(D) <= 0.5 ~ "mid",
+      TRUE ~ "big")) #分为moral，ability两个领域的IAT_D
+print(IAT_data_D)
+IAT_data_D<-IAT_data_D%>%
+  rename(domain=task_id,IAT_SE=D)
+
+IAT_data_D<-IAT_data_D%>%
+  select(ID,domain,IAT_SE)%>%
+  pivot_wider(names_from = domain,values_from = IAT_SE)%>%
+  rename(moral_IAT=moral,
+         ability_IAT=ability)
+
+##因"phase_017_subj_13"的SRET数据部分遗失，去除他的数据
+##修改：将计算完成的IAT_data_D中的"phase_017_subj_13"去除并保存为IAT_data_D2
+IAT_data_D2<-IAT_data_D%>%
+  filter(ID!="phase_017_subj_13")
+write.csv(IAT_data_D2,"IAT_data_D2.csv")
+```
+
+
+# Section 4. Self-Matching Task (SMT; historical label ALT)
+
+## 4.1 SMT data selection and cleaning
+**Source: `analysis_code/analysis_st.Rmd` (ALT2数据选择/预处理)**
+
+```{r ALT2数据选择}
+#ALT2_all.csv
+ALT2_all <- ALT2_all%>%mutate(ID = as.character(ID)) %>%
+   mutate(ParticipantID = as.character(ParticipantID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  filter(screen_id%in%c("ability","moral"))%>%#选择正式实验的数据
+  mutate(correct = ifelse(is.na(correct), 0, correct))%>%
+  filter(rt>=200 & rt <=1200)#筛出反应时在200~1200
+```
+
+
+
+```{r}
+#根据ALT2_all.csv生成ALT2_rt
+ALT2_rt <-ALT2_all%>% 
+     filter(identity=="match")%>%
+  select(ID,domain,valence,person,Image,rt,correct) %>%  #按被试与条件分组
+  group_by(ID,domain,valence,person) %>%  #按被试与条件分组
+  summarise(
+    avg_rt = mean(rt, na.rm = TRUE))%>%
+  filter(valence=="positive")%>% # only in positive
+pivot_wider(names_from = person,values_from = avg_rt)%>%
+  mutate(ALT_SE_rt=friend-self)%>%
+ungroup()%>%
+  select(ID,domain,ALT_SE_rt)%>%
+  pivot_wider(names_from = domain,values_from = ALT_SE_rt)%>%
+  rename(moral_ALT_rt=moral,
+         ability_ALT_rt=ability)
+
+head(ALT2_rt)
+##因"phase_017_subj_13"的SRET数据部分遗失，去除他的数据
+ALT2_rt<-ALT2_rt%>%
+  filter(ID!="phase_017_subj_13")
+write.csv(ALT2_rt,"ALT2_rt.csv")
+```
+
+```{r}
+#根据ALT2_all.csv生成ALT2_dprime
+ALT2_dprime<-ALT2_all%>%
+   group_by(ID,domain,valence,person) %>%  #按被试与条件分组
+  filter(valence=="positive")%>%# only in positive
+      dplyr::mutate(
+                sdt = dplyr::case_when(
+                        (correct== 1 & identity == 'match') ~ "hit",# "match"condition,correct response
+                        (correct == 1 & identity == 'nonmatch') ~ "CR",
+                        (correct == 0 & identity == 'match') ~ "miss",
+                        (correct == 0 & identity == 'nonmatch') ~ "FA"))%>%
+   summarize( 
+      hit = sum(sdt == "hit"),#count
+     miss = sum(sdt == "miss"),
+      FA = sum(sdt == "FA"),
+      CR = sum(sdt == "CR"), ) %>%
+    dplyr::mutate(hitR = hit/(hit + miss),                                     # hit rate
+                      FAR  = FA/(FA+CR)) %>%                                       # fa rate
+        dplyr::mutate(hitR = ifelse(hitR == 1, 1 - 1/(2*(hit + miss)), hitR),      # if hit rate is 1, standardize it
+                      FAR  = ifelse(FAR == 0, 1/(2*(hit + miss)), FAR)) %>%        # if FA rate is 0, standardize it
+        dplyr::mutate(dprime = qnorm(hitR) - qnorm(FAR))%>%
+  select(ID,domain,valence,person,dprime)%>%
+  pivot_wider(names_from = person,values_from = dprime)%>%
+  mutate(ALT_SE_d=self-friend)%>%
+  ungroup()%>%
+   select(ID,domain,ALT_SE_d)%>%
+  pivot_wider(names_from = domain,values_from = ALT_SE_d)%>%
+  rename(moral_ALT_d=moral,
+         ability_ALT_d=ability)
+head(ALT2_dprime)
+##因"phase_017_subj_13"的SRET数据部分遗失，去除他的数据
+ALT2_dprime<-ALT2_dprime%>%
+  filter(ID!="phase_017_subj_13")
+write.csv(ALT2_dprime,"ALT2_dprime.csv")
+```
+
+
+## 4.2 SMT accuracy and d-prime indices
+**Source: `descrip/ALT.Rmd` (ALT2 正确率和dprime / RT match trials)**
+
+```{r ALT2数据选择_2}
+
+ALT2_all <- ALT2_all%>%mutate(ID = as.character(ID)) %>%
+   mutate(ParticipantID = as.character(ParticipantID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  filter(screen_id%in%c("ability","moral"))%>%
+  mutate(correct = ifelse(is.na(correct), 0, correct))%>%
+  filter(rt>=200 & rt <=1200)#筛出反应时在200~1200
+```
+```{r 正确率和dprime}
+ALT2_analysis<-function(data){
+  
+  #**总体匹配配雨云图*
+   ALT2.0 <-data%>% #选择正式实验的数据
+      group_by(ID,domain,valence,person) %>%  #按被试与条件分组
+      dplyr::mutate(
+                sdt = dplyr::case_when(
+                        (correct== 1 & identity == 'match') ~ "hit",
+                        (correct == 1 & identity == 'nonmatch') ~ "CR",
+                        (correct == 0 & identity == 'match') ~ "miss",
+                        (correct == 0 & identity == 'nonmatch') ~ "FA"))%>%
+   summarize( 
+      hit = sum(sdt == "hit"),
+     miss = sum(sdt == "miss"),
+      FA = sum(sdt == "FA"),
+      CR = sum(sdt == "CR"),
+  
+    ) %>%
+    dplyr::mutate(hitR = hit/(hit + miss),                                     # hit rate
+                      FAR  = FA/(FA+CR)) %>%                                       # fa rate
+        dplyr::mutate(hitR = ifelse(hitR == 1, 1 - 1/(2*(hit + miss)), hitR),      # if hit rate is 1, standardize it
+                      FAR  = ifelse(FAR == 0, 1/(2*(hit + miss)), FAR)) %>%        # if FA rate is 0, standardize it
+        dplyr::mutate(dprime = qnorm(hitR) - qnorm(FAR))
+   
+   assign("ALT2_dprime", ALT2.0, envir = .GlobalEnv)
+   d_plot1 <- ALT2.0%>%
+    filter(domain=="moral")%>%
+    ggplot(., aes(x = valence, y = dprime, fill = person, colour = person)) +
+    geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = 2, trim = FALSE, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5) +
+    geom_boxplot(aes(x = valence, y = dprime), outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+    ylab('dprime') +  coord_flip() +
+    theme_cowplot() + guides(fill = FALSE, colour = FALSE) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2") +
+    ggtitle("Figure 2a: ACC of ALT2_moral")+
+  guides(fill = guide_legend(title = "参照条件"), colour = guide_legend(title = "参照条件"))
+# ACC_ability
+  d_plot2 <- ALT2.0%>%
+    filter(domain=="ability")%>%
+    ggplot(., aes(x = valence, y = dprime, fill = person, colour = person)) +
+    geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = 2, trim = FALSE, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5) +
+    geom_boxplot(aes(x = valence, y = dprime), outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+    ylab('dprime') +  coord_flip() +
+    theme_cowplot() + guides(fill = FALSE, colour = FALSE) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2") +
+    ggtitle("Figure 2b: ACC of ALT2_ability")+
+  guides(fill = guide_legend(title = "参照条件"), colour = guide_legend(title = "参照条件"))
+ 
+
+  # Combine plots vertically
+  final_plot1 <- d_plot1 | d_plot2
+   #ggsave(output_file, final_plot, width = 10, height = 15) #输出保存到文件夹
+  print(final_plot1)
+  ggsave("fig1_ALT2.png", final_plot1, width = 10, height = 8, dpi = 300) 
+  
+ ALT2.0<-ALT2.0 %>%
+    mutate(person= case_when(
+    person == "self" ~ "自我",
+    person == "friend"~ "朋友",
+  ))%>%
+     mutate(valence= case_when(
+    valence == "positive" ~ "积极",
+    valence == "negative" ~ "消极",
+  ))%>%
+     mutate(domain= case_when(
+    domain == "ability" ~ "能力",
+    domain == "moral"~ "道德",
+  ))
+  
+  #**正确率的方差分析**
+    ALT2_d <-ALT2.0%>% 
+  MANOVA(., dv = "dprime", subID="ID",
+       within=c("domain", "valence","person"),
+       sph.correction="GG",
+        file = "ALT2_d.doc") %>%
+    EMMEANS(c("valence","person"), by = "domain") %>%
+    EMMEANS(c("valence","person","domain")) 
+    
+   
+   
+   #####################################
+   
+  ALT2 <-data%>% #选择正式实验的数据
+      group_by(ID,domain,valence,person) %>%  #按被试与条件分组  
+  summarise(
+    all_count=n(), row_count = sum(rt>=200 & rt <=1200, na.rm = TRUE), 
+    correct_count = sum(correct == 1 & rt>=200 & rt <=1200, na.rm = TRUE),
+    acc = correct_count /all_count )
+print(ALT2)
+ assign("ALT2_ACC", ALT2, envir = .GlobalEnv)
+  # ACC_moral
+  acc_plot1 <- ALT2%>%
+    filter(domain=="moral")%>%
+    ggplot(., aes(x = valence, y = acc, fill = person, colour = person)) +
+    geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = 2, trim = FALSE, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5) +
+    geom_boxplot(aes(x = valence, y = acc), outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+    ylab('正确率') +  coord_flip() +
+    theme_cowplot() + guides(fill = FALSE, colour = FALSE) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2") +
+    ggtitle("Figure 2a: ACC of ALT2_moral")+
+  guides(fill = guide_legend(title = "参照条件"), colour = guide_legend(title = "参照条件"))
+# ACC_ability
+  acc_plot2 <- ALT2%>%
+    filter(domain=="ability")%>%
+    ggplot(., aes(x = valence, y = acc, fill = person, colour = person)) +
+    geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = 2, trim = FALSE, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5) +
+    geom_boxplot(aes(x = valence, y = acc), outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+    ylab('正确率') +  coord_flip() +
+    theme_cowplot() + guides(fill = FALSE, colour = FALSE) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2") +
+    ggtitle("Figure 2b: ACC of ALT2_ability")+
+  guides(fill = guide_legend(title = "参照条件"), colour = guide_legend(title = "参照条件"))
+ 
+
+  # Combine plots vertically
+  final_plot1 <- acc_plot1 | acc_plot2
+   #ggsave(output_file, final_plot, width = 10, height = 15) #输出保存到文件夹
+  print(final_plot1)
+  
+  ggsave("fig2_ALT2.png", final_plot1, width = 10, height = 8, dpi = 300) 
+  
+  
+  ALT2<-ALT2%>%
+    mutate(person= case_when(
+    person == "self" ~ "自我",
+    person == "friend"~ "朋友",
+  ))%>%
+     mutate(valence= case_when(
+    valence == "positive" ~ "积极",
+    valence == "negative" ~ "消极",
+  ))%>%
+     mutate(domain= case_when(
+    domain == "ability" ~ "能力",
+    domain == "moral"~ "道德",
+  ))
+  #**正确率的方差分析**
+    ALT2_ACC <-ALT2%>% 
+  MANOVA(., dv = "acc", subID="ID",
+       within=c("domain", "valence","person"),
+       sph.correction="GG",
+        file = "ALT2_acc.doc") %>%
+    EMMEANS(c("valence","person"), by = "domain")
+    
+ 
+ 
+  
+}
+ALT2_all<-ALT2_all%>%
+  filter(ID!="phase_017_subj_13")
+ALT2_analysis(ALT2_all)
+```
+```{r 反应时只选择match试次做分析}
+ALT2_analysis<-function(data){
+  
+  #**总体匹配配雨云图*
+   ALT2 <-data%>% #选择正式实验的数据
+     filter(identity=="match")%>%
+  group_by(ID,domain,valence,person) %>%  #按被试与条件分组
+  summarise(
+    avg_rt = mean(rt, na.rm = TRUE),sd_rt=sd(rt, na.rm = TRUE),
+    max_rt = max(rt, na.rm = TRUE), min_rt = min(rt, na.rm = TRUE),)
+print(ALT2)
+  #assign("ALT2_RT", ALT2, envir = .GlobalEnv)
+
+
+  # rt_moral
+  rt_plot1 <- ALT2%>%
+    filter(domain=="moral")%>%
+    ggplot(., aes(x = valence, y = avg_rt, fill = person, colour = person)) +
+    geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = 2, trim = FALSE, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5) +
+    geom_boxplot(aes(x = valence, y = avg_rt), outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+    ylab('RT') +  coord_flip() +
+    theme_cowplot() + guides(fill = FALSE, colour = FALSE) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2") +
+    ggtitle("Figure 2a: RT of ALT2_moral")+
+  guides(fill = guide_legend(title = "reference"), colour = guide_legend(title = "reference"))
+# rt_ability
+  rt_plot2 <- ALT2%>%
+    filter(domain=="ability")%>%
+    ggplot(., aes(x = valence, y = avg_rt, fill = person, colour = person)) +
+    geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = 2, trim = FALSE, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5) +
+    geom_boxplot(aes(x = valence, y = avg_rt), outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+    ylab('RT') +  coord_flip() +
+    theme_cowplot() + guides(fill = FALSE, colour = FALSE) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2") +
+    ggtitle("Figure 2b: RT of ALT2_ability")+
+  guides(fill = guide_legend(title = "reference"), colour = guide_legend(title = "reference"))
+
+
+    final_plot2 <- rt_plot1 | rt_plot2
+   #ggsave(output_file, final_plot, width = 10, height = 15) #输出保存到文件夹
+  print(final_plot2)
+    ALT2<-ALT2%>%
+    mutate(person= case_when(
+    person == "self" ~ "自我",
+    person == "friend"~ "朋友",
+  ))%>%
+     mutate(valence= case_when(
+    valence == "positive" ~ "积极",
+    valence == "negative" ~ "消极",
+  ))%>%
+     mutate(domain= case_when(
+    domain == "ability" ~ "能力",
+    domain == "moral"~ "道德",
+  ))
+    ALT2_RT <-ALT2%>% 
+  MANOVA(., dv = "avg_rt", subID="ID",
+       within=c("domain", "valence","person"),
+       sph.correction="GG",
+       file = "ALT2_RT.doc") %>%
+    EMMEANS(c("valence","person"), by = "domain")%>%
+    EMMEANS(c("valence","person","domain")) 
+  #*
+ 
+  
+}
+ALT2_analysis(ALT2_all)
+```
+
+
+# Section 5. Self-Referent Encoding Task (SRET)
+
+## 5.1 SRET data correction and EW (encoding/word-evaluation) indices
+**Source: `analysis_code/analysis_st.Rmd` (修正数据 / SRET EW / rt / RJ1 / RJ2)**
+
+```{r 修正数据}
+# 选择ID为phase_016_subj_84和phase_016_subj_85的数据，以下步骤均在修正他们的RJ_formal1，将修正后的数据保存为SRET_all.csv
+selected_SRET <- SRET %>%
+  filter(ID %in% c("phase_016_subj_84", "phase_016_subj_85")) %>%
+  filter(screen_id == "EW_formal")%>%
+filter(!word %in% c("务实", "迷糊", "坚贞", "说谎", "主见", "缓慢", "素养", "低俗"))  %>%
+  mutate(person = ifelse(person == "自己", "self",
+                          ifelse(person == "朋友", "friend", person)))%>%
+  select(ID,person,word)
+# 选择screen_id为"RJ_formal1"的行
+SRET_update <- SRET %>%
+  filter(screen_id == "RJ_formal1") %>%
+   filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙"))%>% 
+  mutate(person = ifelse(ID %in% c("phase_016_subj_84", "phase_016_subj_85"),
+                          selected_SRET$person, person))
+selected2_SRET <- SRET %>%
+  filter(screen_id == "RJ_formal_2") %>%
+  select(c("ID", "word",  "identity")) %>%
+  rename(person2 = identity)%>%
+  filter(!is.na(person2))
+
+ SRET_update <- SRET_update %>%
+  filter(screen_id %in% c("RJ_formal1")) %>%
+  left_join(., selected2_SRET, by = c("ID", "word")) %>%
+  mutate(person = ifelse(is.na(person), selected2_SRET$person2, person))
+SRET_update <-SRET_update%>%
+  select(-person2)
+
+
+SRET.0<-SRET %>%
+  filter(screen_id != "RJ_formal1" )#%>%
+#unique(SRET.0$screen_id)%>%
+
+  SRET.0<-rbind(SRET.0,SRET_update)
+  
+   SRET.0<-SRET.0%>%
+   filter(screen_id%in%c("EW_formal","RJ_formal1","RJ_formal_2"))
+ write.csv(SRET.0,"SRET_all.csv")
+ 
+ ###修正后的数据仅包括"EW_formal","RJ_formal1","RJ_formal_2"；其中"RJ_formal1"已扣除练习试次
+ 
+
+```
+
+####SRET指标提取
+```{r}
+#提取不同领域的指标
+SRET_EW<-SRET.0 %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  mutate(correct= as.numeric(correct))%>% ##重编码correct
+  filter(screen_id%in%c("EW_formal") )%>% #选择正式实验的数据
+   filter(!word %in% c("务实", "迷糊", "坚贞", "说谎", "主见", "缓慢", "素养", "低俗"))%>% #筛除首尾的干扰词
+#每个被试在 person(self,friend) * valence(positive,negative) * domain(ability,moral)的词汇评估的按'yes'比例 
+  mutate(con = paste(valence, person, sep = "_"))%>%
+  group_by(ID,con,domain)%>%
+  summarize(N_Yes = sum(responses == "yes"),
+            N_No = sum(responses == "no"))%>%
+  ungroup()%>%
+ select(ID,domain,N_Yes,con)%>%
+  pivot_wider(
+    names_from = con,  # con列的值将成为新列的名称
+    values_from = N_Yes,  # N_Yes列的值将填充到新列中
+    values_fill = list(N_Yes = 0)  # 如果没有值，则填充为0
+  )%>%
+ group_by(ID,domain)%>%
+  mutate(SRET_SE=Positive_self-Negative_self)%>%
+  select(ID,domain,SRET_SE)%>%
+  pivot_wider(names_from = domain,values_from = SRET_SE)%>%
+  rename(moral_SRET_EW=morality,
+         ability_SRET_EW=ability)
+
+##因"phase_017_subj_13"的SRET数据部分遗失，去除他的数据
+SRET_EW<-SRET_EW%>%
+  filter(ID!="phase_017_subj_13")
+write.csv(SRET_EW,"SRET_EW.csv")
+####如果无法将rt转换为数值型请在终端运行以下代码
+# # 尝试将rt列转换为数值型
+#   SRET.0$rt <- as.numeric(SRET.0$rt)
+# # 检查转换后的类型
+#   class(SRET.0$rt)
+```
+
+
+```{r}
+#提取SRET反应时指标
+SRET_rt<-SRET.0 %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  mutate(correct= as.numeric(correct))%>% ##重编码correct
+  filter(screen_id%in%c("EW_formal") )%>% #选择正式实验的数据
+   filter(!word %in% c("务实", "迷糊", "坚贞", "说谎", "主见", "缓慢", "素养", "低俗"))%>% #筛除首尾的干扰词
+ 
+ #每个被试在 person(self,friend) * valence(positive,negative) * domain(ability,moral)的词汇评估的按'yes'比例 
+
+  mutate(con = paste(valence, person, sep = "_"))%>%
+  group_by(ID,con,domain)%>%
+  summarize( avg_rt = mean(rt, na.rm = TRUE),)%>%
+  ungroup()%>%
+ select(ID,domain,avg_rt,con)%>%
+  pivot_wider(
+    names_from = con,  # con列的值将成为新列的名称
+    values_from = avg_rt,  # N_Yes列的值将填充到新列中
+    values_fill = list(avg_rt = 0)  # 如果没有值，则填充为0
+  )%>%
+ group_by(ID,domain)%>%
+  mutate(SRET_SE=Negative_self-Positive_self)%>%
+  select(ID,domain,SRET_SE)%>%
+  pivot_wider(names_from = domain,values_from = SRET_SE)%>%
+  rename(moral_SRET_rt=morality,
+         ability_SRET_rt=ability)
+
+##因"phase_017_subj_13"的SRET数据部分遗失，去除他的数据
+SRET_rt<-SRET_rt%>%
+  filter(ID!="phase_017_subj_13")
+write.csv(SRET_rt,"SRET_rt.csv")
+```
+
+```{r}
+#新旧词判断
+SRET_RJ <- SRET.0 %>%
+     filter(screen_id %in% c("RJ_formal1")) %>%
+      filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙"))%>% 
+     mutate(correct = ifelse(correct != 1, 0, correct))%>%
+    mutate(ID = as.character(ID),
+           rt = as.numeric(rt),
+           correct = as.numeric(correct))  %>%
+    mutate(sdt = case_when((identity == "old" & (responses %in% c("familiar", "old"))) ~ "hit",
+                          (identity == "old" & (responses == "new" )) ~ "miss",
+                          (identity == "new" & (responses %in% c("familiar", "old"))) ~ "fa",
+                          (identity == "new" & (responses == "new")) ~ "cr"),) %>%
+   group_by(ID,domain, valence,person) %>%
+    filter(!is.na(person))%>%
+    summarize( 
+      H = sum(sdt == "hit"),
+      M = sum(sdt == "miss"),
+      FA = sum(sdt == "fa"),#根据RJ_formal2判断，本身是new，但是被判断为self/friend
+      CR = 10-FA,
+      new= sum(responses %in% c("new")),#按键为新词
+      old=sum(responses %in% c("old")),
+      familiar=sum(responses %in% c("familiar")),
+    ) %>%
+    mutate(
+      P_H = (H+0.5)/(H+M+1), # if hit rate is 1, standardize it    P_H = ifelse(P_H == 1, 1 - 1 / (2 * (H + M)), P_H),
+    P_FA = (FA+0.5)/(FA+CR+1),# if FA rate is 0, standardize it    P_FA = ifelse(P_FA == 0, 1 / (2 * (H + M)), P_FA),  
+    dprime = qnorm(P_H) -qnorm(P_FA),
+    
+  )%>%
+  mutate(dprime = ifelse(is.na(dprime), 0, dprime))%>%
+  filter(valence=="Positive")%>%
+  ungroup()%>%
+  select(c("ID","domain","person","dprime"))%>%
+  pivot_wider(names_from = person,values_from = dprime,values_fill = list(dprime = 0))%>%
+ group_by(ID,domain)%>%
+  mutate(SRET_RJ1_d=self-friend)%>%
+  ungroup()%>%
+   select(ID,domain,SRET_RJ1_d)%>%
+  pivot_wider(names_from = domain,values_from = SRET_RJ1_d)%>%
+  rename(moral_SRET_RJ1_d=morality,
+         ability_SRET_RJ1_d=ability)
+head(SRET_RJ)
+print(setdiff(unique(SRET$ID),unique(SRET_RJ$ID)))
+
+```
+
+
+```{r 来源判断}
+SRET_RJ_2 <- SRET.0 %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt = as.numeric(rt)) %>%
+ mutate(correct = as.numeric(coalesce(correct,-1))) %>% #对新词按键判断的试次的correct记为-1
+  filter(screen_id %in% c("RJ_formal_2")) %>%
+  filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙")) %>%
+  filter(!is.na(identity))%>%
+  filter(!is.na(response))%>%
+  select(ID,valence,domain,correct,identity,response,responses)%>%
+   mutate(sdt = case_when((identity == "self" & (correct=="1") )~ "hit",##以自我为信号，朋友为噪音
+                          #自我条件下的击中，信号是“self”，反应是“self”
+                          (identity == "self" & (correct=="0") )~ "miss",
+                          #自我条件下的漏报，信号是“self”，反应是“friend”
+                          (identity == "friend" & (correct=="1" )) ~ "cr",
+                          #朋友条件下的击中，噪音是“friend”，反应是“friend”
+                           (identity == "friend" & (correct=="0" )) ~ "fa",
+                          #朋友条件下的漏报，噪音是“friend”，反应是“self”
+                       
+                       ))%>%
+  group_by(ID,valence,domain) %>%
+  summarize( 
+      H = sum(sdt == "hit"),
+      M = sum(sdt == "miss"),
+      FA = sum(sdt == "fa"),#根据RJ_formal2判断，本身是new，但是被判断为self/friend
+      CR = sum(sdt == "cr"),#每个被试在效价*领域 的条件
+  )%>%
+   mutate(
+      P_H = (H+0.5)/(H+M+1), # if hit rate is 1, standardize it    P_H = ifelse(P_H == 1, 1 - 1 / (2 * (H + M)), P_H),
+    P_FA = (FA+0.5)/(FA+CR+1),# if FA rate is 0, standardize it    P_FA = ifelse(P_FA == 0, 1 / (2 * (H + M)), P_FA), 
+      dprime = qnorm(P_H) -qnorm(P_FA))%>%
+  filter(valence=="Positive")%>%
+  ungroup()%>%
+  select(c("ID","domain","dprime"))%>%
+  pivot_wider(names_from = domain,values_from = dprime)%>%
+  rename(moral_SRET_RJ2_d=morality,
+         ability_SRET_RJ2_d=ability)
+head(SRET_RJ_2)
+```
+
+
+## 5.2 SRET descriptive-analyses pipeline (original notebook)
+**Source: `descrip/SRET.Rmd` (EW / RJ_formal1 / RJ_formal2)**
+
+```{r 修正数据_2}
+# 选择ID为phase_016_subj_84和phase_016_subj_85的数据
+selected_SRET <- SRET %>%
+  filter(ID %in% c("phase_016_subj_84", "phase_016_subj_85")) %>%
+  filter(screen_id == "EW_formal")%>%
+filter(!word %in% c("务实", "迷糊", "坚贞", "说谎", "主见", "缓慢", "素养", "低俗"))  %>%
+  mutate(person = ifelse(person == "自己", "self",
+                          ifelse(person == "朋友", "friend", person)))%>%
+  select(ID,person,word)
+# 选择screen_id为"RJ_formal1"的行
+SRET_update <- SRET %>%
+  filter(screen_id == "RJ_formal1") %>%
+   filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙"))%>% 
+  mutate(person = ifelse(ID %in% c("phase_016_subj_84", "phase_016_subj_85"),
+                          selected_SRET$person, person))
+selected2_SRET <- SRET %>%
+  filter(screen_id == "RJ_formal_2") %>%
+  select(c("ID", "word",  "identity")) %>%
+  rename(person2 = identity)%>%
+  filter(!is.na(person))
+
+ SRET_update <- SRET_update %>%
+  filter(screen_id %in% c("RJ_formal1")) %>%
+  left_join(., selected2_SRET, by = c("ID", "word")) %>%
+  mutate(person = ifelse(is.na(person), selected2_SRET$person2, person))
+# SRET_update <- SRET_update %>%filter(!grepl("phase_017", ID))
+#SRET<-SRET%>%filter(!grepl("phase_017", ID))
+```
+```{r}
+SRET_EW.0<-SRET %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  mutate(correct= as.numeric(correct))%>% ##重编码correct
+  filter(screen_id%in%c("EW_formal") )%>% #选择正式实验的数据
+   filter(!word %in% c("务实", "迷糊", "坚贞", "说谎", "主见", "缓慢", "素养", "低俗"))%>% #筛除首尾的干扰词
+ 
+ #每个被试在 person(self,friend) * valence(positive,negative) * domain(ability,moral)的词汇评估的按'yes'比例 
+
+  mutate(con = paste(valence, person, sep = "_"))%>%
+  group_by(ID,con,domain)%>%
+  summarize(N_Yes = sum(responses == "yes"),
+            N_No = sum(responses == "no"))%>%
+  ungroup()%>%
+ select(ID,domain,N_Yes,con)%>%
+  pivot_wider(
+    names_from = con,  # con列的值将成为新列的名称
+    values_from = N_Yes,  # N_Yes列的值将填充到新列中
+    values_fill = list(N_Yes = 0)  # 如果没有值，则填充为0
+  )%>%
+ group_by(ID,domain)%>%
+  mutate(SRET_SE=Positive_self-Negative_self)
+
+SRET_EW.0.1<-SRET_EW.0%>%
+  select(ID,domain,SRET_SE)%>%
+  pivot_wider(names_from = domain,values_from = SRET_SE)%>%
+  rename(moral_SRET_EW=morality,
+         ability_SRET_EW=ability)
+```
+```{r SRET EW}
+SRET_EW<-function(data){
+  
+  # EW阶段的数据
+SRET_EW<-data %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  mutate(correct= as.numeric(correct))%>% ##重编码correct
+  filter(screen_id%in%c("EW_formal") )%>% #选择正式实验的数据
+   filter(!word %in% c("务实", "迷糊", "坚贞", "说谎", "主见", "缓慢", "素养", "低俗")) #筛除首尾的干扰词
+ 
+
+SRET_EW<-SRET_EW%>%
+  group_by(ID,person,valence,domain)%>%
+  summarize(N_Yes = sum(responses == "yes"),
+            N_No = sum(responses == "no"),
+            N=n(),
+           pro_yes=N_Yes,
+            avg_rt = mean(rt, na.rm = TRUE),
+            sd_rt=sd(rt, na.rm = TRUE),
+           )
+print(SRET_EW)
+a<-describe(SRET_EW)
+print(a)
+
+
+
+ # 领域（道德，能力）*参照（我，朋友）*效价（积极，消极），方差分析，yes比例
+SRET_EW_ANOVA<-SRET_EW%>%
+MANOVA(.,
+       subID="ID",
+       dv="pro_yes",    # 认为词汇描述了参照对象的比例
+       within=c("domain","person","valence"),
+       file = "SRET_EW.doc")%>% 
+# EMMEANS("valence", by="domain") %>%
+ # EMMEANS("person", by="domain") %>%
+ #  EMMEANS("person", by="valence") %>%
+  EMMEANS(c("valence", "person"), by="domain") %>%
+   EMMEANS(c("valence","person","domain")) 
+  
+print(SRET_EW_ANOVA)
+
+ # 领域（道德，能力）*参照（我，朋友）*效价（积极，消极），方差分析，rt
+SRET_EW_ANOVA2<-SRET_EW%>%
+MANOVA(.,
+       subID="ID",
+       dv="avg_rt",    # 认为词汇描述了参照对象的比例
+       within=c("domain","person","valence"),
+       file="SRET_EW_rt.doc")%>% 
+# EMMEANS("valence", by="domain") %>%
+ # EMMEANS("person", by="domain") %>%
+  # EMMEANS("person", by="valence") %>%
+  EMMEANS(c("valence", "person"), by="domain") %>%
+  EMMEANS(c("valence","person","domain"))  
+print(SRET_EW_ANOVA2)
+
+ # 评估词按yes的比例
+   pro_yes_EW <- SRET_EW %>%
+    ggplot(., aes(x = valence, y = pro_yes, fill = person, colour = person)) +
+    geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = 2, trim = FALSE, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5) +
+    geom_boxplot(aes(x = valence, y = pro_yes), outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+    ylab('pro_yes') + xlab('valence') + coord_flip() +
+    theme_cowplot() + guides(fill = FALSE, colour = FALSE) +
+     facet_wrap(~domain)+
+    scale_colour_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2") +
+    ggtitle("Figure 1a: pro_yes of SRET_EW")+
+  guides(fill = guide_legend(title = "condition"), colour = guide_legend(title = "condition"))
+
+ print(pro_yes_EW)
+  
+  ###############################
+  # 评估阶段rt plot
+  rt_EW_rt <- SRET_EW %>%
+    ggplot(., aes(x = valence, y = avg_rt, fill = person, colour = person)) +
+    geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = 2, trim = FALSE, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5) +
+    geom_boxplot(aes(x = valence, y = avg_rt), outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+    ylab('RT') + xlab('valence') + coord_flip() +
+    theme_cowplot() + guides(fill = FALSE, colour = FALSE) +
+     facet_wrap(~domain)+
+    scale_colour_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2") +
+    ggtitle("Figure 1a: RT of SRET_EW")+
+  guides(fill = guide_legend(title = "condition"), colour = guide_legend(title = "condition"))
+
+ 
+  print(rt_EW_rt)
+  
+  
+  
+ 
+}
+SRET<-SRET%>%
+  filter(ID!="phase_017_subj_13")
+SRET_EW(SRET)
+```
+
+```{r 计算题}
+SRET_math<-function(data){
+  
+  # EW阶段的yes比例和rt汇总
+SRET_math<-data %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt=as.numeric(rt))%>% #转变被试编号和反应时类型为字符型与数值型
+  mutate(correct= as.numeric(correct))%>% ##重编码correct
+  filter(screen_id%in%c("SRET_math_calculate") )%>% #选择正式实验的数据
+  group_by(ID)%>%
+  summarize(total_rt = sum(rt, na.rm = TRUE),
+    n_correct = sum(correct == "1"),
+            N=n(),
+            mean_rt=mean(rt, na.rm = TRUE),
+acc=n_correct/N  )
+print(SRET_math)
+print(describe(SRET_math))
+
+
+rt_SRET_math <- ggplot(SRET_math, aes(x = mean_rt)) +
+  geom_density(fill = "skyblue", alpha = 0.7) +
+  labs(title = "Density Plot of mean_rt",
+       x = "mean_rt") +
+  theme_minimal()
+
+# 绘制acc的概率密度分布图
+acc_SRET_math <-ggplot(SRET_math, aes(x = acc)) +
+  geom_density(fill = "lightcoral", alpha = 0.7) +
+  labs(title = "Density Plot of acc",
+       x = "acc") +
+  theme_minimal()
+
+  print(rt_SRET_math/acc_SRET_math)
+
+
+}
+SRET_math(SRET)
+```
+```{r SRET RJ_formal1}
+SRET_RJ <- function(data) {
+  #############新旧词再认数据
+
+
+# 选择screen_id为RJ_formal_2的行
+# 并选择ID, word, domain, valence, identity列
+
+
+# 现在selected_SRET包含了筛选后的数据，且identity列已重命名为person
+
+  SRET_RJ <- data %>%
+     filter(screen_id %in% c("RJ_formal1")) %>%
+      filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙"))%>% 
+     mutate(correct = ifelse(correct != 1, 0, correct))%>%
+    mutate(ID = as.character(ID),
+           rt = as.numeric(rt),
+           correct = as.numeric(correct))  %>%
+    mutate(sdt = case_when((identity == "old" & (responses %in% c("familiar", "old"))) ~ "hit",
+                          (identity == "old" & (responses == "new" )) ~ "miss",
+                          (identity == "new" & (responses %in% c("familiar", "old"))) ~ "fa",
+                          (identity == "new" & (responses == "new")) ~ "cr"),) %>%
+   group_by(ID,domain, valence,person) %>%
+    filter(!is.na(person))%>%
+    summarize( 
+      H = sum(sdt == "hit"),
+      M = sum(sdt == "miss"),
+      FA = sum(sdt == "fa"),#根据RJ_formal2判断，本身是new，但是被判断为self/friend
+      CR = 10-FA,
+      new= sum(responses %in% c("new")),#按键为新词
+      old=sum(responses %in% c("old")),
+      familiar=sum(responses %in% c("familiar")),
+     #self_H = sum(sdt == "hit"& person=="self")/40,
+     #friend_H = sum(sdt == "hit"& person=="friend")/40,
+      #recognition = (H + CR) / (H + CR + M + FA),### valence * domain,4个条件 *（20 new+ 20 old）, 20 old = 10 self +10 friend
+      #avg_rt = mean(rt, na.rm = TRUE),
+      #sd_rt = sd(rt, na.rm = TRUE),
+      #max_rt = max(rt, na.rm = TRUE),
+    #min_rt = min(rt, na.rm = TRUE),
+    ) %>%
+    mutate(
+      P_H = (H+0.5)/(H+M+1), # if hit rate is 1, standardize it    P_H = ifelse(P_H == 1, 1 - 1 / (2 * (H + M)), P_H),
+    P_FA = (FA+0.5)/(FA+CR+1),# if FA rate is 0, standardize it    P_FA = ifelse(P_FA == 0, 1 / (2 * (H + M)), P_FA), 
+      d_prime = qnorm(P_H) -qnorm(P_FA))
+   
+ print(SRET_RJ) 
+
+     SRET_RJ_ANOV0<-SRET_RJ%>%
+   select(ID,domain,valence,person,d_prime)%>%
+      MANOVA(.,subID="ID",dv="d_prime",
+       within=c("domain","valence","person"),#
+       file="SRET_RJ_1r.doc")%>%
+ EMMEANS("valence", by="domain") %>%
+  EMMEANS("domain", by="valence")%>%
+      EMMEANS("valence", by="person")%>%
+       EMMEANS(c("valence", "person"), by="domain") %>%
+         EMMEANS(c("valence","person","domain")) 
+     
+
+assign("SRET_RJ1_d", SRET_RJ, envir = .GlobalEnv)
+
+
+     
+}
+SRET_update<-SRET_update%>%
+  filter(ID!="phase_017_subj_13")
+# 调用函数并存储结果
+SRET_RJ(SRET_update)
+```
+```{r SRET RJ_formal2_source_memory}
+SRET_Source_M<-function(data){
+SRET_RJ_2 <- data %>%
+  mutate(ID = as.character(ID)) %>%
+  mutate(rt = as.numeric(rt)) %>%
+ mutate(correct = as.numeric(coalesce(correct,-1))) %>% #对新词按键判断的试次的correct记为-1
+  filter(screen_id %in% c("RJ_formal_2")) %>%
+  filter(!word %in% c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙")) %>%
+  filter(!is.na(identity))%>%
+  filter(!is.na(response))%>%
+  select(ID,valence,domain,correct,identity,response,responses)%>%
+   mutate(sdt = case_when((identity == "self" & (correct=="1") )~ "hit",
+                          #自我条件下的击中，信号是“self”，反应是“self”
+                          (identity == "self" & (correct=="0") )~ "miss",
+                          #自我条件下的漏报，信号是“self”，反应是“friend”
+                          (identity == "friend" & (correct=="1" )) ~ "cr",
+                          #朋友条件下的击中，噪音是“friend”，反应是“friend”
+                           (identity == "friend" & (correct=="0" )) ~ "fa",
+                          #朋友条件下的漏报，噪音是“friend”，反应是“self”
+                       
+                       ))%>%
+  group_by(ID,valence,domain) %>%
+  summarize( 
+      H = sum(sdt == "hit"),
+      M = sum(sdt == "miss"),
+      FA = sum(sdt == "fa"),#根据RJ_formal2判断，本身是new，但是被判断为self/friend
+      CR = sum(sdt == "cr"),#每个被试在效价*领域 的条件
+  )%>%
+   mutate(
+      P_H = (H+0.5)/(H+M+1), # if hit rate is 1, standardize it    P_H = ifelse(P_H == 1, 1 - 1 / (2 * (H + M)), P_H),
+    P_FA = (FA+0.5)/(FA+CR+1),# if FA rate is 0, standardize it    P_FA = ifelse(P_FA == 0, 1 / (2 * (H + M)), P_FA), 
+      d_prime = qnorm(P_H) -qnorm(P_FA))
+print(SRET_RJ_2)
+
+                 
+print(SRET_RJ_2)
+ assign("SRET_RJ2_d", SRET_RJ_2, envir = .GlobalEnv)
+ SRET_RJ2_ANOV<-SRET_RJ_2%>%
+      MANOVA(.,subID="ID",dv="d_prime",
+       within=c("domain","valence"),
+       file="SRET_RJ2_d.doc")%>%
+ EMMEANS("valence", by="domain") 
+     print(SRET_RJ2_ANOV)
+
+ SRET_RJ2_plot <- SRET_RJ_2 %>% 
+    ggplot(.,aes(x=domain,y=d_prime, fill =valence, colour =valence))+
+  geom_flat_violin(position = position_nudge(x = .25, y = 0),adjust =2, trim = FALSE, alpha = 0.5)+
+  geom_point(position = position_jitter(width = .15), size = .25, alpha = 0.5)+
+  geom_boxplot(aes(x =domain, y =d_prime),outlier.shape = NA, alpha = 0.5, width = .1, colour = "BLACK") +
+ylab('d 值')+xlab('领域')+coord_flip()+theme_cowplot()+guides(fill = FALSE, colour = FALSE) +
+  scale_colour_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Dark2")+
+  ggtitle("Figure 10: acc of SRET_RJ ")+
+  guides(fill = guide_legend(title = "Valence"), colour = guide_legend(title = "Valence"))
+   
+   print(SRET_RJ2_plot)
+   
+  SRET_RJ2_ANOV.1<-SRET_RJ_2%>%
+      MANOVA(.,subID="ID",dv="d_prime",
+       within=c("domain","valence"),
+       file="SRET_RJ2_d.doc")%>%
+ EMMEANS("domain", by="valence") 
+     print(SRET_RJ2_ANOV.1)
+}
+SRET_Source_M(SRET)
+```
+
+
+# Section 6. Merging and standardization of derived measures
+
+## 6.1 Questionnaire merging and scale totals
+**Source: `analysis_code/analysis_st.Rmd` (数据加载/预处理)**
+
+```{r}
+# 更新后的路径
+path <- "/Users/sunxinru/Desktop/Measuring_posit_self/4_Analysis/Analysis_data_SunXR/analysis_XR"
+
+# 读取文件
+day3_q_all <- read.csv(file.path(path, "day3_q_all.csv"))
+SRET_all <- read.csv(file.path(path, "SRET_all.csv")) %>%
+  subset(., ID %in% day3_q_all$ID)
+ALT1_all <- read.csv(file.path(path, "ALT1_all.csv")) %>%
+  subset(., ID %in% day3_q_all$ID)
+day0_all <- read.csv(file.path(path, "day0_all.csv")) %>%
+  subset(., ID %in% day3_q_all$ID)
+day1_q_all <- read.csv(file.path(path, "day1_q_all.csv")) %>%
+  subset(., ID %in% day3_q_all$ID)
+day2_q_all <- read.csv(file.path(path, "day2_q_all.csv")) %>%
+  subset(., ID %in% day3_q_all$ID)
+IAT_all <- read.csv(file.path(path, "IAT_all.csv")) %>%
+  subset(., ID %in% day3_q_all$ID)
+ALT2_all <- read.csv(file.path(path, "ALT2_all.csv")) %>%
+  subset(., ID %in% day3_q_all$ID)
+
+```
+
+#数据预处理
+##问卷部分处理
+### 合并day0到day2的数据，结果包含每个被试在每个原始题目得分，以及各量表总分，包括人口学变量
+```{r}
+#day0t2_q.csv
+day0t2_q<- merge(day0_all, day1_q_all, by = "ID", all = TRUE) %>%
+   merge(day2_q_all, by = "ID", all = TRUE)%>%
+  mutate(    #总分计算
+    phq_al = rowSums(select(., starts_with("phq")), na.rm = TRUE),
+    gad_al = rowSums(select(., starts_with("gad")), na.rm = TRUE),
+    selfclarity_al = rowSums(select(., starts_with("selfclarity")), na.rm = TRUE),
+    ses_al = rowSums(select(., starts_with("ses")), na.rm = TRUE),
+    coreself_al =rowSums(select(., starts_with("coreself")), na.rm = TRUE),
+    SGPS_al = rowSums(select(., starts_with("SGPS")), na.rm = TRUE),
+    hsns_al = rowSums(select(., starts_with("hsns")), na.rm = TRUE),
+    NPI_al = rowSums(select(., starts_with("NPI")), na.rm = TRUE),
+    swb_al = rowSums(select(., starts_with("swb")), na.rm = TRUE),
+    LOT_al = rowSums(select(., starts_with("LOT")), na.rm = TRUE),
+    sde_al= rowSums(select(., starts_with("sde")), na.rm = TRUE),
+    IM_al= rowSums(select(., starts_with("IM")), na.rm = TRUE),
+    MorIden_al= rowSums(select(., starts_with("MorIden")), na.rm = TRUE),
+    moralSeImag_al= rowSums(select(., starts_with("moralSeImag")), na.rm = TRUE),
+    IPC_al = (rowSums(select(., starts_with("IPC")), na.rm = TRUE)+24) #以7分制评分，评分从-3（很不同意）到+3（很同意），计算时需要在原始总分基础上加上24分，分类表的分值范围为0 – 48
+  )%>%mutate(gad = case_when(
+    gad_al >= 0 & gad_al <= 4 ~ "无",
+    gad_al >= 5 & gad_al <= 9 ~ "轻度",
+    gad_al >= 10 & gad_al <= 14 ~ "中度",
+    gad_al >= 15 ~ "重度",
+    TRUE ~ NA_character_ ##为焦虑分级
+  ))%>%
+   mutate(phq = case_when(
+    phq_al >= 0 & phq_al <= 4 ~ "无",
+    phq_al >= 5 & phq_al <= 9 ~ "轻度",
+    phq_al >= 10 & phq_al <= 14 ~ "中度",
+    phq_al >= 15 & phq_al <= 19 ~ "中重度",
+     phq_al >= 20  ~ "重度",
+    TRUE ~ NA_character_ ##为抑郁分级
+  ))
+day0t2_q<-day0t2_q%>%
+  select(-c("X.x","No","ParticipantID.x","subj_idx","subj_name","X.1.x","X.y","ParticipantID.y","friend_name.x","trap1",
+"correct_answer","trap1_item","ParticipantID","trap2","trap2_item","friend_name.y","X.1.y"))%>%
+  rename(friend_sex=Sex)
+
+##因"phase_017_subj_13"的SRET数据部分遗失，去除他的数据
+day0t2_q<-day0t2_q%>%
+  filter(ID!="phase_017_subj_13")
+```
+
+### 包括day3原始条目得分，以及量表总分，包括领域自尊
+```{r}
+#####此步可不运行，处理后的数据已经覆盖原始数据
+#day3_q_all.csv数据处理，处理后仍保存为day3_q_all.csv
+# day3_q_all<-day3_q_all%>%
+#   mutate(
+#     phq_al = rowSums(select(., starts_with("phq")), na.rm = TRUE),
+#     gad_al = rowSums(select(., starts_with("gad")), na.rm = TRUE),
+#     selfclarity_al = rowSums(select(., starts_with("selfclarity")), na.rm = TRUE),
+#     ses_al = rowSums(select(., starts_with("ses")), na.rm = TRUE),
+#     coreself_al =rowSums(select(., starts_with("coreself")), na.rm = TRUE),
+#     SGPS_al = rowSums(select(., starts_with("SGPS")), na.rm = TRUE),
+#     hsns_al = rowSums(select(., starts_with("hsns")), na.rm = TRUE),
+#     NPI_al = rowSums(select(., starts_with("NPI")), na.rm = TRUE),
+#     swb_al = rowSums(select(., starts_with("swb")), na.rm = TRUE),
+#     LOT_al = rowSums(select(., starts_with("LOT")), na.rm = TRUE),
+#     sde_al= rowSums(select(., starts_with("sde")), na.rm = TRUE),
+#     IM_al= rowSums(select(., starts_with("IM")), na.rm = TRUE),
+#     MorIden_al= rowSums(select(., starts_with("MorIden")), na.rm = TRUE),
+#     moralSeImag_al= rowSums(select(., starts_with("moralSeImag")), na.rm = TRUE),
+#     IPC_al = (rowSums(select(., starts_with("IPC")), na.rm = TRUE)+24)
+#   )%>%mutate(gad = case_when(
+#     gad_al >= 0 & gad_al <= 4 ~ "无",
+#     gad_al >= 5 & gad_al <= 9 ~ "轻度",
+#     gad_al >= 10 & gad_al <= 14 ~ "中度",
+#     gad_al >= 15 ~ "重度",
+#     TRUE ~ NA_character_
+#   ))%>%
+#    mutate(phq = case_when(
+#     phq_al >= 0 & phq_al <= 4 ~ "无",
+#     phq_al >= 5 & phq_al <= 9 ~ "轻度",
+#     phq_al >= 10 & phq_al <= 14 ~ "中度",
+#     phq_al >= 15 & phq_al <= 19 ~ "中重度",
+#      phq_al >= 20  ~ "重度",
+#     TRUE ~ NA_character_
+#   ))%>%
+#    rename(Ability =domain_rating_1,##能力
+#          Attraction=domain_rating_2,##身体吸引力
+#          Wealth=domain_rating_3, ##物质财富
+#          Social=domain_rating_4,##社交技能
+#          Moral=domain_rating_5)%>%##道德
+# mutate(domain_al=Ability+Attraction+Wealth+Social+Moral)
+# 
+# day3_q_all<-day3_q_all%>%
+#   select(-c("X","trap3", "ParticipantID", "trap3_item"))
+# 
+# ##因"phase_017_subj_13"的SRET数据部分遗失，去除他的数据
+# day3_q_all<-day3_q_all%>%
+#   filter(ID!="phase_017_subj_13")
+```
+
+
+## 6.2 Z-standardization and merging of the 26 behavioral indices
+**Source: `analysis_code/merge_data.Rmd`**
+
+```{r setup, include=FALSE}
+library(haven)
+library(tidyverse)
+library(psych)
+```
+
+```{r}
+# 读取positive_self_view_indices.csv文件
+positive_self <- read.csv("/Users/sunxinru/Desktop/Measuring_posit_self/4_Analysis/Analysis_data_SunXR/analysis_code/positive_self_view_indices.csv", stringsAsFactors = FALSE)
+
+# 读取data_z.csv文件
+data_z <- read.csv("/Users/sunxinru/Desktop/Measuring_posit_self/4_Analysis/Analysis_data_SunXR/analysis_data/data_z.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+# 对positive_self_view_indices.csv中除ID列外的所有数值列进行z分数标准化
+positive_self_numeric <- positive_self[, -1]
+positive_self_z <- as.data.frame(apply(positive_self_numeric, 2, scale))
+names(positive_self_z) <- names(positive_self_numeric)
+
+# 将序号与标准化后的数据合并
+positive_self_z <- cbind(ID = 1:nrow(positive_self_z), positive_self_z)
+```
+
+```{r}
+# 处理data_z.csv，将第一列重命名为ID
+names(data_z)[1] <- "ID"
+data_z$ID <- as.integer(data_z$ID)
+```
+
+```{r}
+# 按照序号合并两个数据集
+merged_data <- merge(positive_self_z, data_z, by = "ID", all = FALSE)
+
+# 删除ID列
+merged_data <- merged_data[, -1]
+
+# 保存合并后的数据
+write.csv(merged_data, "/Users/sunxinru/Desktop/Measuring_posit_self/4_Analysis/Analysis_data_SunXR/analysis_data/merged_data.csv", row.names = FALSE)
+```
+
+
+# Section 7. Questionnaire scores and test–retest reliability
+
+## 7.1 Test–retest reliability (Day 3 retest)
+**Source: `descrip/preprocess/SEE_day3_clean.Rmd` (计算重测信度)**
+
+```{r 计算重测信度}
+
+#选择要算重测信度的量表
+questionnaires <- c("IPC_al", "LOT_al", "swb_al", "NPI_al", "hsns_al", "SGPS_al", "coreself_al", "ses_al", "selfclarity_al", "gad_al", "phq_al","MorIden_al","moralSeImag_al","sde_al","IM_al")
+
+# 计算重测信度
+
+# 存储计算的重测信度
+reliabilities <- data.frame(questionnaire = character(0), reliability = numeric(0))
+
+for (questionnaire in questionnaires) {
+  # 选择两次测量的数据，for循环
+  data1 <- day0t2_q [, c("ID", questionnaire)]
+  data2 <- day3_q_1 [, c("ID", questionnaire)]
+  
+  # 合并数据框
+  combined_data <- merge(data1, data2, by = "ID", suffixes = c("_1", "_2"))
+  
+  # 计算重测信度，利用pearson积差相关
+  reliability <- cor(combined_data[, paste(questionnaire, "_1", sep = "")], combined_data[, paste(questionnaire, "_2", sep = "")],method = "pearson", use = "pairwise")
+  
+  # 存储结果
+  reliabilities <- rbind(reliabilities, data.frame(questionnaire = questionnaire, reliability = reliability))
+}
+
+# 输出重测信度
+print(reliabilities)
+
+```
+
+
+## 7.2 Retest reliability tables
+**Source: `descrip/preprocess/SEE_day3_clean.Rmd` (重测信度后续段)**
+
+```{r}
+day0t2_1<-  day0t2_q%>%
+  select(starts_with("selfclarity_"), 
+         starts_with("phq_"), 
+         starts_with("gad_"), 
+         starts_with("swb_"), 
+         starts_with("LOT_"), 
+         starts_with("IPC_"), 
+         starts_with("ses_"), 
+         starts_with("coreself_"), 
+         starts_with("SGPS_"), 
+         starts_with("NPI"), 
+         starts_with("hsns"), 
+         starts_with("MorIden_"), 
+         starts_with("moralSeImag_"), 
+         starts_with("sde_"), 
+         starts_with("IM_"),
+         ID)%>%
+  mutate(time="1")
+ day3_q_2<-day3_q_1 %>%
+  select(starts_with("selfclarity_"), 
+         starts_with("phq_"), 
+         starts_with("gad_"), 
+         starts_with("swb_"), 
+         starts_with("LOT_"), 
+         starts_with("IPC_"), 
+         starts_with("ses_"), 
+         starts_with("coreself_"), 
+         starts_with("SGPS_"), 
+         starts_with("NPI"), 
+         starts_with("hsns"), 
+         starts_with("MorIden_"), 
+         starts_with("moralSeImag_"), 
+         starts_with("sde_"), 
+         starts_with("IM_"),
+         ID)%>%
+  mutate(time="2")
+day0t2_1.1<-  day0t2_q%>%
+  select(c("IPC_al", "LOT_al", "swb_al", "NPI_al", "hsns_al", "SGPS_al", "coreself_al", "ses_al", "selfclarity_al", "gad_al", "phq_al","MorIden_al","moralSeImag_al","sde_al","IM_al"),ID)
+day3_q_2.1<- day3_q_1%>%
+  select(c("IPC_al", "LOT_al", "swb_al", "NPI_al", "hsns_al", "SGPS_al", "coreself_al", "ses_al", "selfclarity_al", "gad_al", "phq_al","MorIden_al","moralSeImag_al","sde_al","IM_al"),ID) 
+
+day0t3_q_reliability<-merge(day0t2_1.1, day3_q_2.1,by="ID")%>%
+  select(sort(names(.)))
+
+```
+
+```{r}
+day0t3_q <- day3_q_1 %>%
+  select(ID, ability_rating, physical_attraction, material_wealth, social_ability, moral_rating)%>%
+ left_join(day0t2_q, ., by = "ID")%>%
+  select(-c("X.y","ParticipantID.y","X.x","No","birthday","sex","ParticipantID.x","friend_name","X","ParticipantID"))
+
+```
+```{r}
+describe_day0t3_q<-day0t3_q%>%
+  select(-ID,
+    -starts_with("selfclarity_"), 
+         -starts_with("phq_"), 
+         -starts_with("gad_"), 
+         -starts_with("swb_"), 
+        -starts_with("LOT_"), 
+         -starts_with("IPC_"), 
+         -starts_with("ses_"), 
+         -starts_with("coreself_"), 
+         -starts_with("SGPS_"), 
+         -starts_with("NPI"), 
+         -starts_with("hsns"), 
+         -starts_with("MorIden_"), 
+         -starts_with("moralSeImag_"), 
+         -starts_with("sde_"), 
+         -starts_with("IM_"),ends_with("_al"))%>%
+  describe()
+  
+```
+
+
+# Section 8. Split-half reliability of the 26 behavioral indices
+
+**Source: `local_additions/extract_26_behavioral_indices_split_half.R`**
+
+```{r splithalf, eval=FALSE}
+# Extract the 26 behavioral indicators and estimate split-half reliability.
+# The final participant-level values are copied exactly. Reliability is
+# calculated from the cleaned trial-level data using an odd/even split.
+
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(tidyr)
+  library(readr)
+  library(stringr)
+  library(officer)
+  library(flextable)
+})
+
+DATA_ROOT <- "/Users/sunxinru/Desktop/PSV_Dataset"
+ANALYSIS_ROOT <- "/Users/sunxinru/Desktop/Measuring_posit_self/4_Analysis/Analysis_data_all"
+WORK_ROOT <- "/Users/sunxinru/Documents/Codex/2026-09-04/wo"
+OUTPUT_DIR <- file.path(WORK_ROOT, "outputs", "behavioral_26_split_half")
+dir.create(OUTPUT_DIR, recursive = TRUE, showWarnings = FALSE)
+
+INDICATOR_FILE <- file.path(DATA_ROOT, "03_derived_indices",
+  "Merge_task&questionnaires", "positive_self_view_indices.csv")
+IAT_FILE <- file.path(ANALYSIS_ROOT, "IAT_data", "IAT_all_st.csv")
+SMT_ZIP <- file.path(DATA_ROOT, "02_cleaned_data", "SMT", "ALT2_all.zip")
+SRET_FILE <- file.path(DATA_ROOT, "02_cleaned_data", "SRET", "SRET_clean.csv")
+
+to_num <- function(x) suppressWarnings(as.numeric(as.character(x)))
+first_nonmissing <- function(x) {
+  x <- as.character(x)
+  x <- x[!is.na(x) & nzchar(x)]
+  if (length(x) == 0) NA_character_ else x[[1]]
+}
+domain_name <- function(x) {
+  x <- tolower(as.character(x))
+  ifelse(x %in% c("moral", "morality"), "morality", x)
+}
+valence_name <- function(x) tolower(as.character(x))
+spearman_brown <- function(r) ifelse(is.na(r), NA_real_, 2 * r / (1 + r))
+
+# 1. Extract the 26 final participant-level indicators without recalculation.
+indices <- read_csv(INDICATOR_FILE, show_col_types = FALSE)
+indicator_names <- names(indices)[-1]
+if (length(indicator_names) != 26) stop("Expected exactly 26 indicators.")
+behavioral_indices <- indices %>% select(ID, all_of(indicator_names))
+write_csv(behavioral_indices,
+  file.path(OUTPUT_DIR, "behavioral_indices_26_extracted.csv"))
+
+# 2. IAT D scores.
+iat_raw <- read_csv(IAT_FILE, show_col_types = FALSE, name_repair = "minimal")
+names(iat_raw)[names(iat_raw) == ""] <- "row_index"
+iat_raw$row_index <- seq_len(nrow(iat_raw))
+iat <- iat_raw %>%
+  mutate(ID = as.character(ID), task_id = as.character(task_id),
+         screen_id_num = to_num(screen_id), rt = to_num(rt),
+         correct_chr = tolower(as.character(correct))) %>%
+  group_by(ID) %>%
+  mutate(va = ifelse(task_id == "ability", first_nonmissing(version_attrib),
+                     as.character(version_attrib)),
+         vt = ifelse(task_id == "ability", first_nonmissing(version_target),
+                     as.character(version_target)),
+         va2 = ifelse(task_id == "moral", first_nonmissing(version_attrib2),
+                      as.character(version_attrib2)),
+         vt2 = ifelse(task_id == "moral", first_nonmissing(version_target2),
+                      as.character(version_target2))) %>%
+  ungroup() %>%
+  mutate(version = case_when(
+    task_id == "ability" & va == vt & screen_id_num == 3 ~ "A1",
+    task_id == "ability" & va == vt & screen_id_num == 4 ~ "A2",
+    task_id == "ability" & va == vt & screen_id_num == 6 ~ "B1",
+    task_id == "ability" & va == vt & screen_id_num == 7 ~ "B2",
+    task_id == "ability" & va != vt & screen_id_num == 3 ~ "B1",
+    task_id == "ability" & va != vt & screen_id_num == 4 ~ "B2",
+    task_id == "ability" & va != vt & screen_id_num == 6 ~ "A1",
+    task_id == "ability" & va != vt & screen_id_num == 7 ~ "A2",
+    task_id == "moral" & va2 == vt2 & screen_id_num == 3 ~ "A1",
+    task_id == "moral" & va2 == vt2 & screen_id_num == 4 ~ "A2",
+    task_id == "moral" & va2 == vt2 & screen_id_num == 6 ~ "B1",
+    task_id == "moral" & va2 == vt2 & screen_id_num == 7 ~ "B2",
+    task_id == "moral" & va2 != vt2 & screen_id_num == 3 ~ "B1",
+    task_id == "moral" & va2 != vt2 & screen_id_num == 4 ~ "B2",
+    task_id == "moral" & va2 != vt2 & screen_id_num == 6 ~ "A1",
+    task_id == "moral" & va2 != vt2 & screen_id_num == 7 ~ "A2",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(screen_id_num %in% c(3, 4, 6, 7), !is.na(rt), rt <= 10000,
+         !is.na(version)) %>%
+  group_by(ID, task_id, version) %>%
+  mutate(half = if_else(row_number() %% 2 == 1, "A", "B")) %>%
+  ungroup()
+iat_means <- iat %>% group_by(ID, task_id, version) %>%
+  summarise(mean_rt = mean(rt), .groups = "drop")
+iat <- iat %>% left_join(iat_means, by = c("ID", "task_id", "version")) %>%
+  mutate(rt_corrected = if_else(correct_chr == "false", mean_rt + 600, rt))
+iat_scores <- iat %>%
+  group_by(ID, task_id, half, version) %>%
+  summarise(mean_rt = mean(rt_corrected), sd_rt = sd(rt_corrected),
+            n = n(), .groups = "drop") %>%
+  pivot_wider(id_cols = c(ID, task_id, half), names_from = version,
+              values_from = c(mean_rt, sd_rt, n), names_sep = "_") %>%
+  mutate(
+    sd_B1A1 = sqrt(((n_A1 - 1) * sd_rt_A1^2 + (n_B1 - 1) * sd_rt_B1^2 +
+      (n_A1 + n_B1) * (mean_rt_A1 - mean_rt_B1)^2 / 4) /
+      (n_A1 + n_B1 - 1)),
+    sd_B2A2 = sqrt(((n_A2 - 1) * sd_rt_A2^2 + (n_B2 - 1) * sd_rt_B2^2 +
+      (n_A2 + n_B2) * (mean_rt_A2 - mean_rt_B2)^2 / 4) /
+      (n_A2 + n_B2 - 1)),
+    score = ((mean_rt_B1 - mean_rt_A1) / sd_B1A1 +
+      (mean_rt_B2 - mean_rt_A2) / sd_B2A2) / 2,
+    indicator = if_else(task_id == "ability", "ability_IAT", "moral_IAT")
+  ) %>% select(ID, half, indicator, score)
+
+# 3. SMT/ALT2 RT and d-prime scores.
+smt_member <- unzip(SMT_ZIP, list = TRUE)$Name[[1]]
+smt_raw <- read_csv(unz(SMT_ZIP, smt_member), show_col_types = FALSE,
+                    name_repair = "minimal")
+names(smt_raw)[names(smt_raw) == ""] <- "row_index"
+smt_raw$row_index <- seq_len(nrow(smt_raw))
+smt <- smt_raw %>%
+  mutate(ID = as.character(ID), rt = to_num(rt),
+         correct = if_else(is.na(to_num(correct)), 0, to_num(correct)),
+         person = tolower(as.character(person)),
+         identity = tolower(as.character(identity)),
+         domain = domain_name(domain), valence = valence_name(valence)) %>%
+  filter(screen_id %in% c("ability", "moral"), rt >= 200, rt <= 1200) %>%
+  group_by(ID, domain, valence) %>%
+  mutate(half = if_else(row_number() %% 2 == 1, "A", "B")) %>%
+  ungroup()
+smt_rt_scores <- smt %>% filter(identity == "match") %>%
+  filter(person %in% c("self", "friend")) %>%
+  group_by(ID, domain, valence, person, half) %>%
+  summarise(score_person = mean(rt), .groups = "drop") %>%
+  pivot_wider(names_from = person, values_from = score_person) %>%
+  mutate(score = friend - self,
+         indicator = paste0("SMT_rt_",
+           if_else(domain == "morality", "moral", domain), "_", valence)) %>%
+  select(ID, half, indicator, score)
+smt_d_input <- bind_rows(
+  smt %>% filter(identity == "match", person %in% c("self", "friend")) %>%
+    select(everything()),
+  smt %>% filter(identity == "nonmatch") %>%
+    select(-person) %>%
+    crossing(person = c("self", "friend"))
+)
+smt_d_scores <- smt_d_input %>%
+  mutate(sdt = case_when(
+    correct == 1 & identity == "match" ~ "hit",
+    correct == 0 & identity == "match" ~ "miss",
+    correct == 1 & identity == "nonmatch" ~ "CR",
+    correct == 0 & identity == "nonmatch" ~ "FA",
+    TRUE ~ NA_character_
+  )) %>% filter(!is.na(sdt)) %>%
+  group_by(ID, domain, valence, person, half) %>%
+  summarise(H = sum(sdt == "hit"), M = sum(sdt == "miss"),
+            FA = sum(sdt == "FA"), CR = sum(sdt == "CR"), .groups = "drop") %>%
+  mutate(P_H = (H + .5) / (H + M + 1),
+         P_FA = (FA + .5) / (FA + CR + 1),
+         score_person = qnorm(P_H) - qnorm(P_FA)) %>%
+  select(ID, domain, valence, half, person, score_person) %>%
+  pivot_wider(names_from = person, values_from = score_person) %>%
+  mutate(score = self - friend,
+         indicator = paste0("SMT_d_",
+           if_else(domain == "morality", "moral", domain), "_", valence)) %>%
+  select(ID, half, indicator, score)
+
+# 4. SRET cleaning, correction, and four families of indicators.
+sret_raw <- read_csv(SRET_FILE, show_col_types = FALSE, name_repair = "minimal")
+names(sret_raw)[names(sret_raw) == ""] <- "row_index"
+sret_raw$row_index <- seq_len(nrow(sret_raw))
+interference_words <- c("务实", "迷糊", "坚贞", "说谎", "主见", "缓慢", "素养", "低俗")
+practice_words <- c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙")
+sret_base <- sret_raw %>%
+  mutate(ID = as.character(ID), rt = to_num(rt), correct = to_num(correct),
+    person_clean = case_when(
+      person %in% c("self", "自己") ~ "self",
+      person %in% c("friend", "朋友") ~ "friend",
+      TRUE ~ NA_character_),
+    domain = domain_name(domain), valence = valence_name(valence))
+special_ids <- c("phase_016_subj_84", "phase_016_subj_85")
+ew_map <- sret_base %>% filter(ID %in% special_ids, screen_id == "EW_formal",
+  !word %in% interference_words, !is.na(person_clean)) %>%
+  select(ID, word, person_from_ew = person_clean) %>% distinct()
+rj2_map <- sret_base %>% filter(screen_id == "RJ_formal_2",
+  !word %in% practice_words, identity %in% c("self", "friend")) %>%
+  select(ID, word, person_from_rj2 = identity) %>% distinct()
+rj1_corrected <- sret_base %>% filter(screen_id == "RJ_formal1",
+  !word %in% practice_words) %>%
+  left_join(ew_map, by = c("ID", "word")) %>%
+  left_join(rj2_map, by = c("ID", "word")) %>%
+  mutate(person_clean = if_else(ID %in% special_ids,
+    coalesce(person_from_ew, person_clean, person_from_rj2),
+    coalesce(person_clean, person_from_rj2))) %>%
+  select(names(sret_base))
+sret <- bind_rows(sret_base %>% filter(screen_id != "RJ_formal1"),
+                  rj1_corrected)
+sret_ew <- sret %>% filter(screen_id == "EW_formal",
+  !word %in% interference_words, person_clean %in% c("self", "friend")) %>%
+  group_by(ID, domain, valence, person_clean) %>%
+  mutate(half = if_else(row_number() %% 2 == 1, "A", "B")) %>% ungroup()
+sret_yes_scores <- sret_ew %>% group_by(ID, domain, valence, person_clean, half) %>%
+  summarise(score_person = sum(responses == "yes", na.rm = TRUE), .groups = "drop") %>%
+  group_by(ID, domain, valence, half) %>%
+  summarise(score = mean(score_person), .groups = "drop") %>%
+  mutate(indicator = paste0("SRET_yes_", domain, "_",
+    if_else(valence == "positive", "Positive", "Negative"))) %>%
+  select(ID, half, indicator, score)
+sret_rt_scores <- sret_ew %>% group_by(ID, domain, valence, person_clean, half) %>%
+  summarise(score_person = mean(rt), .groups = "drop") %>%
+  group_by(ID, domain, valence, half) %>%
+  summarise(score = mean(score_person), .groups = "drop") %>%
+  mutate(indicator = paste0("SRET_rt_", domain, "_",
+    if_else(valence == "positive", "Positive", "Negative"))) %>%
+  select(ID, half, indicator, score)
+rj1 <- sret %>% filter(screen_id == "RJ_formal1",
+  !word %in% practice_words, identity %in% c("old", "new")) %>%
+  group_by(ID, domain, valence) %>%
+  mutate(half = if_else(row_number() %% 2 == 1, "A", "B")) %>% ungroup()
+rj1_old <- rj1 %>% filter(identity == "old",
+  person_clean %in% c("self", "friend")) %>%
+  transmute(ID, domain, valence, half, person_clean,
+    sdt = case_when(responses %in% c("familiar", "old") ~ "hit",
+                    responses == "new" ~ "miss", TRUE ~ NA_character_))
+rj1_new <- rj1 %>% filter(identity == "new") %>%
+  transmute(ID, domain, valence, half,
+    sdt = case_when(responses %in% c("familiar", "old") ~ "FA",
+                    responses == "new" ~ "CR", TRUE ~ NA_character_)) %>%
+  filter(!is.na(sdt)) %>% crossing(person_clean = c("self", "friend"))
+rj1_scores <- bind_rows(rj1_old, rj1_new) %>% filter(!is.na(sdt)) %>%
+  group_by(ID, domain, valence, half, person_clean) %>%
+  summarise(H = sum(sdt == "hit"), M = sum(sdt == "miss"),
+            FA = sum(sdt == "FA"), CR = sum(sdt == "CR"), .groups = "drop") %>%
+  mutate(P_H = (H + .5) / (H + M + 1),
+         P_FA = (FA + .5) / (FA + CR + 1),
+         score_person = qnorm(P_H) - qnorm(P_FA)) %>%
+  group_by(ID, domain, valence, half) %>%
+  summarise(score = mean(score_person), .groups = "drop") %>%
+  mutate(indicator = paste0("REC_", domain, "_",
+    if_else(valence == "positive", "Positive", "Negative"))) %>%
+  select(ID, half, indicator, score)
+rj2 <- sret %>% filter(screen_id == "RJ_formal_2",
+  !word %in% practice_words, identity %in% c("self", "friend"),
+  correct %in% c(0, 1)) %>%
+  group_by(ID, domain, valence) %>%
+  mutate(half = if_else(row_number() %% 2 == 1, "A", "B")) %>% ungroup() %>%
+  mutate(sdt = case_when(
+    identity == "self" & correct == 1 ~ "hit",
+    identity == "self" & correct == 0 ~ "miss",
+    identity == "friend" & correct == 1 ~ "CR",
+    identity == "friend" & correct == 0 ~ "FA",
+    TRUE ~ NA_character_)) %>% filter(!is.na(sdt)) %>%
+  group_by(ID, domain, valence, half) %>%
+  summarise(H = sum(sdt == "hit"), M = sum(sdt == "miss"),
+            FA = sum(sdt == "FA"), CR = sum(sdt == "CR"), .groups = "drop") %>%
+  mutate(P_H = (H + .5) / (H + M + 1),
+         P_FA = (FA + .5) / (FA + CR + 1),
+         score = qnorm(P_H) - qnorm(P_FA),
+         indicator = paste0("SOURCE_", domain, "_",
+           if_else(valence == "positive", "Positive", "Negative"))) %>%
+  select(ID, half, indicator, score)
+
+trial_scores <- bind_rows(iat_scores, smt_d_scores, smt_rt_scores,
+  sret_yes_scores, sret_rt_scores, rj1_scores, rj2) %>%
+  filter(indicator %in% indicator_names)
+trial_duplicates <- trial_scores %>%
+  count(ID, indicator, half, name = "n_rows") %>%
+  filter(n_rows > 1)
+write_csv(trial_duplicates,
+  file.path(OUTPUT_DIR, "trial_score_duplicate_diagnostic.csv"))
+
+# 5. Split-half correlation and Spearman-Brown coefficient.
+reliability <- trial_scores %>% select(ID, indicator, half, score) %>%
+  group_by(ID, indicator, half) %>%
+  summarise(score = mean(score, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(names_from = half, values_from = score) %>%
+  group_by(indicator) %>%
+  summarise(N = sum(complete.cases(A, B)),
+    r_half = {
+      ok <- complete.cases(A, B)
+      if (sum(ok) < 2) NA_real_ else
+        suppressWarnings(cor(A[ok], B[ok], method = "spearman"))
+    },
+    SB = spearman_brown(r_half), .groups = "drop") %>%
+  mutate(Task = case_when(str_detect(indicator, "IAT") ~ "IAT",
+                          str_detect(indicator, "^SMT") ~ "SMT",
+                          TRUE ~ "SRET"),
+    Domain = case_when(str_detect(indicator, "ability") ~ "Ability",
+                       str_detect(indicator, "moral") ~ "Morality",
+                       TRUE ~ "Mixed"),
+    Valence = case_when(str_detect(tolower(indicator), "negative") ~ "Negative",
+                        str_detect(tolower(indicator), "positive") ~ "Positive",
+                        TRUE ~ "Both")) %>%
+  select(Task, Indicator = indicator, Domain, Valence, N, r_half, SB) %>%
+  arrange(match(Indicator, indicator_names))
+write_csv(reliability,
+  file.path(OUTPUT_DIR, "behavioral_indices_split_half_reliability.csv"))
+write_csv(trial_scores,
+  file.path(OUTPUT_DIR, "behavioral_indices_split_half_scores.csv"))
+
+# 6. English three-line Word table.
+table_data <- reliability %>%
+  mutate(No = row_number(), half_rho = if_else(is.na(r_half), "NA",
+    sprintf("%.3f", r_half)), sb_r = if_else(is.na(SB), "NA",
+    sprintf("%.3f", SB)), N_chr = as.character(N)) %>%
+  select(No, Task, Indicator, Domain, Valence, N = N_chr, half_rho, sb_r)
+names(table_data) <- c("No.", "Task", "Indicator", "Domain", "Valence", "N",
+                       "Half 1-Half 2 rho", "Spearman-Brown r")
+ft <- flextable(table_data) %>%
+  theme_booktabs() %>%
+  font(fontname = "Times New Roman", part = "all") %>%
+  fontsize(size = 9, part = "all") %>%
+  align(align = "center", part = "all") %>%
+  align(j = 3, align = "left", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 3, part = "all") %>%
+  set_table_properties(layout = "fixed", width = 1) %>%
+  width(j = 1, width = 0.45) %>%
+  width(j = 2, width = 0.65) %>%
+  width(j = 3, width = 3.35) %>%
+  width(j = 4, width = 0.95) %>%
+  width(j = 5, width = 0.95) %>%
+  width(j = 6, width = 0.55) %>%
+  width(j = 7, width = 1.35) %>%
+  width(j = 8, width = 1.35)
+doc <- read_docx()
+doc <- body_set_default_section(doc, prop_section(
+  page_size = page_size(width = 11, height = 8.5, orient = "landscape", unit = "in"),
+  page_margins = page_mar(top = 0.55, bottom = 0.55, left = 0.55, right = 0.55)
+))
+doc <- body_add_par(doc, "Table 1", style = "Normal")
+doc <- body_add_par(doc,
+  "Split-Half Reliability of the 26 Behavioral Task Indicators",
+  style = "Normal")
+doc <- body_add_flextable(doc, ft)
+print(doc, target = file.path(OUTPUT_DIR,
+  "behavioral_indices_split_half_reliability.docx"))
+message("Finished. Outputs written to ", OUTPUT_DIR)
+
+```
+
+# Session information
+
+```{r session_info}
+sessionInfo()
+```
