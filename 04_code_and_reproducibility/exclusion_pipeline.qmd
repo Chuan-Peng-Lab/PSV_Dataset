@@ -1,0 +1,1274 @@
+---
+title: "被排除被试记录与流程（PSV_Dataset）"
+subtitle: "从 777 到 503：排除环节、判据与逐人明细"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    embed-resources: true
+    code-fold: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: true
+params:
+  delete_legacy: true
+  iat_clean_scope: "final_503"
+---
+
+本文件按 `analysis/analysis.Rmd` 的实际实现，逐步复现论文从 **777** 条 Day 1 记录到 **503** 名最终样本的全部排除过程，并输出三张记录表。
+所有输入文件除本文件明确写出的对象外均只读。
+
+# 1. 目的、判定定义与决策记录
+
+```{r libs}
+#| cache: false
+suppressPackageStartupMessages({
+  library(data.table)
+  library(glue)
+  library(readr)
+})
+# 显式探测仓库根目录（兼容任意渲染工作目录；不依赖 here 的标记启发式）
+find_root <- function(start = getwd()) {
+  d <- normalizePath(start)
+  repeat {
+    if (dir.exists(file.path(d, "01_raw")) && dir.exists(file.path(d, "05_Reports"))) return(d)
+    parent <- dirname(d)
+    if (identical(parent, d)) stop("找不到仓库根目录")
+    d <- parent
+  }
+}
+ROOT <- find_root()
+P <- function(...) file.path(ROOT, ...)
+knitr::opts_chunk$set(cache.path = P("_cache/exclusion_pipeline/"))
+setDTthreads(0)
+```
+
+## 1.1 决策记录（decision log）
+
+| 编号 | 决定 |
+|---|---|
+| D1 | 每个被排除个案只归入**一个排除环节**（`exclusion_stage`，按预设顺序唯一归类，各环节互斥）；环节内若同时未达到多条判据，`primary_reason` 取最明确的一条，其余写入 `secondary_notes` |
+| D2 | 年龄未达标者归 `exclusion_stage = age_ineligible`；未达标但仍进入最终样本者归入“未达标但保留” |
+| D3 | 无有效标识的记录（空 ID、字符串 `"NA"`）记入主表，`record_type` 分别标 `missing_id_record` / `literal_NA_record`，`note` 注明疑为测试数据、待定 |
+| D4 | 未达标但保留人数与论文自陈不一致时**仅记录**，不改论文与 README |
+| D5 | 复算值与作者记录不一致时双列并存（`recomputed_value` / `author_value`） |
+| D6 | 两份旧排除表在冗余核验 180/180 通过后删除，内容归档为 `removed_subjects_legacy_content.csv` |
+| D7 | `positive_SMT.csv` 补被试标识 `ID`，置于第一列 |
+| D8 | `IAT_raw.csv` 不处理：保留原 HTML 符号与内嵌换行，字节与列名均不变 |
+| D9 | `rt` 与 `RT` 列名与取值保持原样不改名：质量筛选用 `rt`，分析运算用 `RT` |
+| D10 | `IAT_cleaned.csv` 就地重建（唯一一份，不产出重复文件） |
+| D11 | 3 张 Mermaid 图用源文件级 Quarto 语法，图内数字写实值并由紧随的 R 块做一致性校验 |
+| D12 | **判据以 `analysis/analysis.Rmd` 为实现权威**，论文正文措辞仅作说明 |
+| D13 | 术语采用心理学/社会科学数据预处理的惯用说法（以第 1.3 节为唯一术语表），不再使用“宇宙/门控/触标/幽灵”等工程化说法；**已发布 CSV 的列名与列内取值不在本轮改动范围**（见 1.3 末注） |
+| D14 | `day2_cleaned` 中同一 ID 出现多行（重复提交）时，按 ID 去重后计数，明细仍逐行保留在记录表中 |
+
+## 1.2 判定界值与常量（对应 `analysis.Rmd` 行号）
+
+```{r const}
+AGE_MIN <- 18; AGE_MAX <- 59                       # analysis.Rmd:327-339
+IAT_LONG <- 10000; IAT_SHORT <- 300; IAT_PROP <- 0.1  # :476-486
+ALT1_ACC <- 0.6                                    # :447-467
+ALT2_ACC <- 0.2; ALT2_DOMAIN_ACC <- 0.6            # :543-584
+SRET_REC <- 0.55; SRET_SRC_PROP <- 0.3; SRET_SRC_RT <- 200  # :610-644, :692-729
+RT_MIN <- 200; RT_MAX <- 1200                      # 试次级 RT 窗
+FILLER_RJ <- c("严谨", "认真", "刻板", "白痴", "忠实", "宽宏", "徇私", "可鄙")  # :615, :656, :697
+LEGACY_RM <- P("04_code_and_reproducibility/removed_subjects_590_to_503.csv")
+LEGACY_OT <- P("04_code_and_reproducibility/removed_subjects_others.csv")
+LEGACY_SNAPSHOT <- P("04_code_and_reproducibility/removed_subjects_legacy_content.csv")
+PATH_IAT_RAW <- P("01_raw/IAT_raw.csv")
+PATH_IAT_CLEAN <- P("02_cleaned/IAT_cleaned.csv")
+PATH_SMT2_ZIP <- P("02_cleaned/SMT_2_cleaned.zip")
+PATH_PSMT <- P("03_derived/positive_SMT.csv")
+PATH_ZIP_DAY3 <- P("01_raw/questionnaires_day3_raw.zip")
+```
+
+## 1.3 术语对照
+
+### 1.3.1 既有对照（旧称 → 现用）
+
+| 原用（工程/口语） | 本文件改用 | 说明 |
+|---|---|---|
+| 宇宙 | **初始样本** | 进入流程的全部记录集合 |
+| 门控（旧称） | **质量筛选** | 对应 `analysis.Rmd` 中按判据写 `Eligible = "no"` 的变量；该变量的实际用途与可核实性见附录 A |
+| 触标 | **未达标** | 未达到质量筛选判据 |
+| 触标但保留 | **未达标但保留** | 未达标但仍在最终 503 人之内 |
+| 流失 | **失访** | 未参加后续测试 |
+| 幽灵记录 | **无标识记录** | ID 变量为空、无法对应被试 |
+| 层（旧称） | **排除环节** | `exclusion_stage`；正文不再使用“XX 层” |
+| 终筛 | **最终数据质量核查** | 3 次测试全勤后的一次性核查 |
+
+### 1.3.2 本轮新增对照（工程/会计/法律口径 → 心理学与社会科学口径）
+
+| 原用 | 本文件改用 | 说明 |
+|---|---|---|
+| first-match（规则引擎） | **按预设顺序唯一归类** | 各环节互斥，一个个案只落一个环节 |
+| 决策台账 | **决策记录**（decision log） | 方法学惯用 analysis decision log |
+| 对账表 | **流程核对表** | 各环节人数与论文逐项比对 |
+| 结构画像 | **结构概览**（data profile） | 描述文件结构，与“用户画像”无关 |
+| 留证 | **存档（备查）** | 旧表内容的归档证据 |
+| 双跑 / 双跑者 | **重复提交**（duplicate submission） | 与论文 C7 原文一致 |
+| 整人排除 / 整人 N | **个案层面排除 / 个案层面 N** | 与“任务级”相对，对应 participant-level |
+| 复算命中 | **复算一致** | 避免与信号检测论的“击中（hit）”混淆（H 已专指 hit） |
+| 指纹 | **匹配键**（linking key） | 用于跨文件个案链接 |
+| 回填 | **补录**（补齐被试标识） | — |
+| 幂等重跑 | **重复运行结果不变** | — |
+| 断言 / 硬断言 | **一致性校验 / 强制校验** | `stopifnot()` 函数名保留不改 |
+| 落盘 | **写入文件** | — |
+| 字段 | **变量** | 与论文 variables 对齐 |
+| 键 | **组合标识** | 如 (PID, screen_id) |
+| 快照 | **存档副本 / 校验和** | md5 保留原名 |
+| 回退 | **改读** | — |
+| 映射 | **对应关系**（编码还原） | — |
+| 就地重建 | **覆盖式重建** | 在原文件上重建，不另存副本 |
+| 字面 NA | **字符串 `"NA"`** | 被误读为缺失值的字符型取值 |
+| 上游数据 | **原始数据 / 源数据** | — |
+| 批次 | **招募轮次**（data-collection wave） | 与论文 wave 一致 |
+| 阈值（指质量判据的 cutoff） | **判定界值** | 心理物理/信号检测论语境的“阈值（threshold）”不改 |
+| 被试人当量 | **折算被试数** | 如 108360/168 |
+| 区块 | **组块**（IAT block） | 与 IAT 中文文献“相容/不相容组块”一致 |
+| 本库 | **本数据集 / 本复现包** | — |
+| 口径 | **判定定义** | 首次括注后统一用“定义” |
+
+> 本轮待定（会改变已发布 CSV 的内容，留待下一轮与列名调整一并处理）：①“第 N 次测试”与论文的 Day 1/2/3/10 并非一一对应，宜统一为“第 N 次测量（Day X）”；②`primary_reason`、`exclusion_stage_zh`、`condition_or_domain`、`note`、`secondary_notes`、`resolution` 等列内的既有取值仍沿用旧词。
+
+
+## 1.4 排除环节与唯一主要原因
+
+顺序与 `analysis.Rmd` 的处理顺序一致（按预设顺序唯一归类）：一个个案只落一个环节；环节内若同时未达到多条判据，`primary_reason` 记录最明确的一条，其余记入 `secondary_notes`。
+
+| 顺序 | 排除环节 `exclusion_stage` | 判定依据 | 人数 |
+|---|---|---|---|
+| 1 | `age_ineligible` 年龄不符合纳入标准 | `analysis.Rmd:327-339` | 5 |
+| 2 | `absent_after_day1` 第 1 次测试后失访 | 无第 2 次测试问卷记录 | 104 |
+| 3 | `absent_after_day2_with_flag` 第 2 次测试后未参加（携带标记） | `analysis.Rmd:447-507`（ALT1∪IAT）且未参加第 3 次 | 36 |
+| 4 | `absent_after_day2_without_flag` 第 2 次测试后失访 | 未参加第 3 次且无质量标记 | 43 |
+| 5 | `absent_after_day3_with_flag` 第 3 次测试后未参加（携带标记） | `analysis.Rmd:543-799`（ALT2∪SRET）且未完成第 4 次 | 61 |
+| 6 | `absent_after_day3_without_flag` 第 3 次测试后失访 | 未完成第 4 次且无质量标记 | 1 |
+| 7 | `final_qc_excluded` 最终数据质量核查排除 | 全勤后的质量核查 | 24 |
+| — | `task_only_record` 仅任务数据记录 | 无任何问卷记录 | 13 |
+| — | `unidentifiable_record` 无法对应被试的记录 | 空 ID / 字符串 `"NA"` | 2 |
+| | **合计** | | **289** |
+
+流程内排除 = 5+104+36+43+61+1+24 = **274**；加两类非流程记录 15 条 = 289 行。
+
+> 关于“未达标 ≠ 排除”：质量筛选只在**未参加下一场次**时才解释该场次的失访。本数据集实测有 9 人第 2 次测试未达标却仍参加第 3 次、40 人第 3 次测试未达标却仍完成第 4 次（其中 21 人留在 503）。这些情形不作为排除原因，只写入 `secondary_notes` 或计入“未达标但保留”。
+
+## 1.5 论文所述“排除标准”的分类（仅记录）
+
+论文 Participants and Data Quality Control 一节里与排除有关的规定，按下面两类记录：**（一）标准**只含三条；**（二）其余**写在 "behavioral quality control" 里的内容，论文未说明是否构成被试层面的排除标准，一律只作 note 记录，本数据集不据此下判断。
+
+### （一）属于“排除标准”的（3 条）
+
+| 编号 | 标准 | 论文出处 | 规则（原文要点） | 后果（论文所载） |
+|---|---|---|---|---|
+| C1 | 年龄纳入标准 | 37、45；附录 4 注 | 小于 18 岁或大于 59 岁；"prespecified age criterion" | 不进入多日流程，6 人被移除（777 → 771） |
+| C7 | 重复提交 / 未满足数据完整性要求 | 47 | 仅以 "e.g., **duplicate submissions** or **failure to meet data-completeness requirements**" 举例，未给具体规则 | 计入最终数据质量核查剔除的 24 人（论文归为 "other reasons"） |
+| C8 | 注意力核查题 | 215 | Day 2/3/10 嵌入不合逻辑或明显错误的陈述（如 "I am less than three years old"）；原文仅称 "Responses to these items were used during subsequent data processing to **evaluate response quality**"，未给界值、未写是否据此排除 | 论文未说明；代码中 `trap1/2/3` 仅被 `select(-c(...))` 丢弃，未见任何判定实现 |
+
+### （二）仅作 note 记录的（5 条）
+
+| 编号 | 论文所述内容 | 论文出处 | 界值（原文要点） | 本数据集的处理 |
+|---|---|---|---|---|
+| C2 | IAT 数据质量 | 47(a)；246(4)(5) | 剔除 RT > 10 s 的试次；RT < 300 ms 的试次占比 > 10% | 仅记录为标记（`criterion_code = IAT_RT`），不称标准 |
+| C3 | SMT 几何版（Day 2）质量 | 47(b) | 任一正式条件总正确率 < 60% | 仅记录为标记（`ALT1_accuracy`） |
+| C4 | SMT 自我参照版（Day 3）质量 | 47(c) | 任一条件 < 20% 或任一领域 < 60% | 仅记录为标记（`ALT2_condition_accuracy` / `ALT2_domain_accuracy`） |
+| C5 | SRET 质量 | 47(d) | 再认正确率 < 55%，或来源记忆试次 RT < 200 ms 占比 > 30% | 仅记录为标记（`SRET_recognition` / `SRET_source_RT`） |
+| C6 | SRET 数据部分缺失 | 47 | 仅写 "partially missing SRET data"，未给界值 | 记入 `excluded_for_other_reasons`（`incomplete_data`） |
+
+> 说明：论文把 C2–C5 写在 "Behavioral quality control" 段，并称其 "applied at each data-collection wave to monitor task quality and to determine re-invitation eligibility"，同时在附录 4 用 Flagged / Valid 两列给出任务级人数；但这些界值是否构成被试层面的排除标准，论文未明确。故本数据集记录表中凡涉及 C2–C6 的变量，一律按“标记”记录，不作标准解释。
+
+# 2. 环境与输入清单
+
+```{r inputs}
+DAY_FILES <- c(
+  D1  = P("02_cleaned/questionnaires_day1_cleaned.csv"),
+  D2  = P("02_cleaned/questionnaires_day2_cleaned.csv"),
+  D3  = P("02_cleaned/questionnaires_day3_cleaned.csv"),
+  D10 = P("02_cleaned/questionnaires_day10_cleaned.csv")
+)
+READONLY_INPUTS <- c(DAY_FILES, PATH_IAT_RAW, P("01_raw/SMT_1_raw.csv"), P("01_raw/SRET_raw.csv"),
+                     PATH_SMT2_ZIP, PATH_ZIP_DAY3,
+                     P("03_derived/positive_IAT.csv"), P("03_derived/positive_SRET.csv"),
+                     P("03_derived/positive_self_view_indices.csv"))
+
+md5_before <- tools::md5sum(READONLY_INPUTS)
+
+fread_utf8 <- function(path, select = NULL, ...) {
+  data.table::fread(path, select = select, encoding = "UTF-8",
+                    showProgress = FALSE, na.strings = c("", "NA"), ...)
+}
+fread_zip <- function(zip, select = NULL, enc = "UTF-8") {
+  data.table::fread(cmd = paste("unzip -p", shQuote(zip)), select = select,
+                    encoding = enc, showProgress = FALSE, na.strings = c("", "NA"))
+}
+# 旧表读取：原件存在则读原件，否则改读存档副本（两表已按 D6 删除）
+LEGACY_590_COLS <- c("ID", "removed_by", "未达标标准/原因", "具体条件/领域/对应",
+                     "正确率/比例", "试次数", "重复标记")
+LEGACY_OTH_COLS <- c("ID", "removed_by", "status", "reason", "related_removed_subject",
+                     "ParticipantID", "phase")
+read_legacy <- function(path, table_name, cols) {
+  if (file.exists(path)) {
+    x <- fread_utf8(path)
+  } else {
+    if (!file.exists(LEGACY_SNAPSHOT)) stop("旧表与存档副本均不存在：", path)
+    x <- fread_utf8(LEGACY_SNAPSHOT)[source_table == table_name]
+  }
+  x[, ..cols]
+}
+ids_of_zip <- function(zip, col = "ID") {
+  # .zip 用 readr + unz() 读取（data.table::fread 的 select 在 zip 连接上不生效）
+  inner <- utils::unzip(zip, list = TRUE)$Name[1]
+  x <- suppressMessages(readr::read_csv(unz(zip, inner),
+                                        col_select = tidyselect::all_of(col),
+                                        show_col_types = FALSE, progress = FALSE))
+  v <- trimws(as.character(x[[col]]))
+  unique(v[!is.na(v) & v != ""])
+}
+ids_of <- function(path, col = "ID") {
+  # na.strings = character(0)：保留字符串 "NA" 记录（SRET_raw 中确有该 ID），仅剔除空白
+  x <- data.table::fread(path, select = col, encoding = "UTF-8",
+                         showProgress = FALSE, na.strings = character(0))[[col]]
+  x <- trimws(as.character(x))
+  unique(x[!is.na(x) & x != ""])
+}
+```
+
+```{r input-sizes}
+input_tbl <- data.table(file = READONLY_INPUTS, md5 = unname(md5_before))
+knitr::kable(input_tbl, caption = "输入文件 md5 校验和")
+```
+
+```{r session}
+cat(R.version.string, "| data.table", as.character(packageVersion("data.table")), "\n")
+```
+
+# 3. 初始样本
+
+```{r initial-sample}
+D1  <- ids_of(DAY_FILES["D1"])
+D2q <- ids_of(DAY_FILES["D2"])
+D3q <- ids_of(DAY_FILES["D3"])
+D10q <- ids_of(DAY_FILES["D10"])
+
+IAT_IDS  <- ids_of(PATH_IAT_RAW)
+ALT1_IDS <- ids_of(P("01_raw/SMT_1_raw.csv"))
+SRET_ALL <- ids_of(P("01_raw/SRET_raw.csv"))
+SRET_IDS <- setdiff(SRET_ALL, "NA")
+
+ALT2_ALL <- fread_zip(PATH_ZIP_DAY3,
+                      select = c("ID", "screen_id", "condition", "rt", "correct", "identity"))
+ALT2_FORMAL <- ALT2_ALL[screen_id %in% c("ability", "moral")]
+# 平台导出未带 domain/valence/person 派生列，由词标签还原（对应关系经 cleaned 文件按 rt 与 identity 核对）
+ALT2_FORMAL[, `:=`(
+  domain_d  = screen_id,
+  person_d  = fifelse(grepl("我$", condition), "self", "friend"),
+  valence_d = fifelse(substr(condition, 1, 1) %in% c("好", "强"), "positive", "negative")
+)]
+ALT2_IDS <- unique(ALT2_FORMAL$ID[!is.na(ALT2_FORMAL$ID)])
+BLANK_ID_ROWS <- ALT2_ALL[is.na(ID), .N]                            # zip 内全部空 ID 行
+BLANK_ID_ALT2 <- ALT2_FORMAL[is.na(ID), .N]                          # 其中 ALT2 正式试次
+SRET_NA_ROWS <- nrow(fread_utf8(P("01_raw/SRET_raw.csv"), select = "ID")[is.na(ID)])
+
+FINAL503 <- ids_of_zip(PATH_SMT2_ZIP)
+
+INITIAL_SAMPLE <- sort(unique(c(D1, IAT_IDS, ALT1_IDS, SRET_ALL, ALT2_IDS)))  # SRET_ALL 含字符串 "NA" 记录
+NON777 <- setdiff(INITIAL_SAMPLE, D1)
+
+initial_sample_tbl <- data.table(
+  集合 = c("Day1 问卷", "IAT_raw / SMT_1_raw", "SRET_raw（剔除字符串 \"NA\"）", "ALT2（zip 内）",
+           "最终样本 503", "初始样本（并集）", "其中非流程记录", "无标识记录（空 ID 行）"),
+  数量 = c(length(D1), length(IAT_IDS), length(SRET_IDS), length(ALT2_IDS),
+           length(FINAL503), length(INITIAL_SAMPLE), length(NON777), BLANK_ID_ROWS)
+)
+knitr::kable(initial_sample_tbl, caption = "第 0 步：初始样本构成")
+
+stopifnot(length(D1) == 777, length(INITIAL_SAMPLE) == 791, length(NON777) == 14)
+```
+
+**一致性校验**：`791 = 777 + 13 + 1`。
+
+# 4. 第 1 步：年龄纳入标准核查
+
+```{r age}
+day1 <- fread_utf8(DAY_FILES["D1"], select = c("ID", "ParticipantID", "age", "sex"))
+day1[, age_num := suppressWarnings(as.numeric(age))]
+AGE_BAD <- day1[is.na(age_num) | age_num > AGE_MAX | age_num < AGE_MIN]
+AGE_IDS <- AGE_BAD$ID
+AGE_EXCL <- setdiff(AGE_IDS, FINAL503)    # 实际被排除者
+AGE_KEPT <- intersect(AGE_IDS, FINAL503)  # 年龄未达标但仍在 503 内
+
+knitr::kable(AGE_BAD[, .(ID, ParticipantID, age,
+                         判定 = fifelse(is.na(age_num), "缺失/无效", "越界"))],
+             caption = "第 1 步：年龄核查排除个案")
+
+stopifnot(length(AGE_IDS) == 6, length(AGE_EXCL) == 5, length(AGE_KEPT) == 1)
+```
+
+# 5. 第 2 步：各测量场次失访
+
+```{r attrition}
+ATTR_D2  <- setdiff(D1, c(D2q, AGE_IDS))
+ATTR_D3  <- setdiff(intersect(D1, D2q), D3q)
+ATTR_D10 <- setdiff(D3q, D10q)
+
+dup_rows <- fread_utf8(DAY_FILES["D2"], select = "ID")[, .N, by = ID][N > 1]
+
+knitr::kable(data.table(
+  流程区段 = c("771 → 668 未返回 Day 2", "668 → 589 未返回 Day 3", "589 → 527 未完成 Day 10"),
+  人数 = c(length(ATTR_D2), length(ATTR_D3), length(ATTR_D10)),
+  论文 = c(103, 79, 62)
+), caption = "第 2 步：各场次失访")
+
+knitr::kable(dup_rows, caption = "day2_cleaned 中的重复 ID 行（重复提交；按 D14 去重计数）")
+
+stopifnot(length(ATTR_D2) == 104, length(ATTR_D3) == 79, length(ATTR_D10) == 62)
+# ATTR_D2 = 104：771 名年龄合格者中 667 人参加 Day 2（phase_013_subj_30 年龄未达标但仍在 503）
+```
+
+# 6. 第 2 次测试后的质量筛选（IAT + ALT1）
+
+```{r iat-qc}
+iat <- fread_utf8(PATH_IAT_RAW,
+                  select = c("ID", "ParticipantID", "screen_id", "task_id",
+                             "rt", "RT", "response", "correct", "word", "condition"))
+iat_trials <- iat[screen_id %in% c("3", "4", "6", "7")]
+iat_trials[, rt := suppressWarnings(as.numeric(rt))]
+
+iat_qc <- iat_trials[, .(rt_les300 = sum(rt <= IAT_SHORT, na.rm = TRUE),
+                         row_count = sum(rt <= IAT_LONG, na.rm = TRUE)),
+                     by = .(ID, task_id)]
+iat_qc[, proportion := rt_les300 / row_count]
+IAT_FLAG_DT <- iat_qc[proportion > IAT_PROP,
+                      .(ID, flag_task = "IAT", flag_criterion = "IAT_RT",
+                        condition_or_domain = paste0(task_id, " · rt<=", IAT_SHORT, " 占比"),
+                        observed_value = round(proportion, 4), threshold = ">0.10",
+                        n_trials = row_count, evidence_file = "01_raw/IAT_raw.csv")]
+IAT_FLAG <- unique(IAT_FLAG_DT$ID)
+```
+
+```{r alt1-qc}
+alt1 <- fread_utf8(P("01_raw/SMT_1_raw.csv"),
+                   select = c("ID", "screen_id", "con", "conditionType", "rt", "correct"))
+alt1 <- alt1[screen_id %in% c("formal_ALT1_1", "formal_ALT1_2")]
+alt1[, rt := suppressWarnings(as.numeric(rt))]
+alt1[, cor := fifelse(tolower(correct) == "true", 1L,
+                      fifelse(tolower(correct) == "false", 0L, NA_integer_))]
+alt1_qc <- alt1[, .(n = .N, ncor = sum(cor == 1 & rt >= RT_MIN & rt <= RT_MAX, na.rm = TRUE)),
+                by = .(ID, con, conditionType)]
+alt1_qc[, acc := ncor / n]
+alt1_worst <- alt1_qc[, .(acc = min(acc), cond = con[which.min(acc)], n = n[which.min(acc)]), by = ID]
+ALT1_FLAG_DT <- alt1_worst[acc < ALT1_ACC,
+                           .(ID, flag_task = "ALT1", flag_criterion = "ALT1_accuracy",
+                             condition_or_domain = cond,
+                             observed_value = round(acc, 4), threshold = "<0.60",
+                             n_trials = n, evidence_file = "01_raw/SMT_1_raw.csv")]
+ALT1_FLAG <- unique(ALT1_FLAG_DT$ID)
+DAY2_FLAG <- union(IAT_FLAG, ALT1_FLAG)
+
+knitr::kable(data.table(
+  标记 = c("IAT（rt<=300 占比 >0.1）", "ALT1（任一正式条件 acc<0.6）", "第 2 次测试质量筛选并集"),
+  复算 = c(length(IAT_FLAG), length(ALT1_FLAG), length(union(IAT_FLAG, ALT1_FLAG))),
+  论文 = c(4, 44, 46)
+), caption = "第 2 次测试质量筛选复算对照")
+
+stopifnot(length(IAT_FLAG) == 4, length(ALT1_FLAG) == 44,
+          length(union(IAT_FLAG, ALT1_FLAG)) == 46)
+```
+
+# 7. 第 3 次测试后的质量筛选（SRET + ALT2）
+
+```{r sret-qc}
+sret <- fread_utf8(P("01_raw/SRET_raw.csv"),
+                   select = c("ID", "screen_id", "word", "identity", "responses",
+                              "person", "rt", "correct"))
+sret[, rt := suppressWarnings(as.numeric(rt))]
+
+rj1 <- sret[screen_id == "RJ_formal1" & !(word %in% FILLER_RJ)]
+rj1[, sdt := fcase(identity == "old" & responses %in% c("familiar", "old"), "H",
+                   identity == "old" & responses == "new", "M",
+                   identity == "new" & responses %in% c("familiar", "old"), "FA",
+                   identity == "new" & responses == "new", "CR",
+                   default = NA_character_)]
+rec <- rj1[, .(H = sum(sdt == "H"), M = sum(sdt == "M"),
+               FA = sum(sdt == "FA"), CR = sum(sdt == "CR")), by = ID]
+rec[, recognition := (H + CR) / (H + CR + M + FA)]
+SRET_REC_FLAG_DT <- rec[recognition < SRET_REC,
+                        .(ID, flag_task = "SRET", flag_criterion = "SRET_recognition",
+                          condition_or_domain = "整体再认",
+                          observed_value = round(recognition, 4), threshold = "<0.55",
+                          n_trials = H + M + FA + CR, evidence_file = "01_raw/SRET_raw.csv")]
+SRET_REC_FLAG <- unique(SRET_REC_FLAG_DT$ID)
+
+rj2 <- sret[screen_id == "RJ_formal_2" & !(word %in% FILLER_RJ)]
+src <- rj2[, .(n = .N, less200 = sum(rt < SRET_SRC_RT, na.rm = TRUE)), by = ID]
+src[, less_200 := less200 / n]
+SRET_SRC_FLAG_DT <- src[less_200 > SRET_SRC_PROP,
+                        .(ID, flag_task = "SRET", flag_criterion = "SRET_source_RT",
+                          condition_or_domain = paste0("来源判断 rt<", SRET_SRC_RT, "ms 占比"),
+                          observed_value = round(less_200, 4), threshold = ">0.30",
+                          n_trials = n, evidence_file = "01_raw/SRET_raw.csv")]
+SRET_SRC_FLAG <- unique(SRET_SRC_FLAG_DT$ID)
+SRET_FLAG <- union(SRET_REC_FLAG, SRET_SRC_FLAG)
+```
+
+```{r alt2-qc}
+alt2 <- copy(ALT2_FORMAL)
+alt2[, `:=`(rt = suppressWarnings(as.numeric(rt)),
+            correct = suppressWarnings(as.numeric(correct)))]
+alt2[is.na(correct), correct := 0]
+alt2[, ok := as.integer(correct == 1 & !is.na(rt) & rt >= RT_MIN & rt <= RT_MAX)]
+
+alt2_c1 <- alt2[, .(n = .N, ncor = sum(ok, na.rm = TRUE)),
+                by = .(ID, domain_d, person_d, identity, valence_d)][, acc := ncor / n]
+ALT2_FLAG1 <- unique(alt2_c1[, .(bad = any(acc < ALT2_ACC)), by = ID][bad == TRUE, ID])
+alt2_c2 <- alt2[, .(n = .N, ncor = sum(ok, na.rm = TRUE)), by = .(ID, domain_d)][, acc := ncor / n]
+ALT2_FLAG2 <- unique(alt2_c2[, .(bad = any(acc < ALT2_DOMAIN_ACC)), by = ID][bad == TRUE, ID])
+ALT2_FLAG <- union(ALT2_FLAG1, ALT2_FLAG2)
+
+alt2_w1 <- alt2_c1[acc < ALT2_ACC,
+                   .(acc = min(acc), n = n[which.min(acc)],
+                     cond = paste(domain_d, person_d, identity, valence_d, sep = "_")[which.min(acc)]),
+                   by = ID]
+alt2_w2 <- alt2_c2[acc < ALT2_DOMAIN_ACC,
+                   .(acc2 = min(acc), n2 = n[which.min(acc)], cond2 = domain_d[which.min(acc)]),
+                   by = ID]
+ALT2_FLAG_DT <- rbindlist(list(
+  alt2_w1[, .(ID, flag_task = "ALT2", flag_criterion = "ALT2_condition_accuracy",
+              condition_or_domain = cond, observed_value = round(acc, 4), threshold = "<0.20",
+              n_trials = n, evidence_file = "01_raw/questionnaires_day3_raw.zip")],
+  alt2_w2[!(ID %in% alt2_w1$ID),
+          .(ID, flag_task = "ALT2", flag_criterion = "ALT2_domain_accuracy",
+            condition_or_domain = cond2, observed_value = round(acc2, 4), threshold = "<0.60",
+            n_trials = n2, evidence_file = "01_raw/questionnaires_day3_raw.zip")]
+), fill = TRUE)
+
+knitr::kable(data.table(
+  标记 = c("SRET 再认 <0.55", "SRET 来源 RT 占比 >0.3", "SRET 并集",
+           "ALT2 条件 <0.2", "ALT2 领域 <0.6", "ALT2 并集"),
+  复算 = c(length(SRET_REC_FLAG), length(SRET_SRC_FLAG), length(SRET_FLAG),
+           length(ALT2_FLAG1), length(ALT2_FLAG2), length(ALT2_FLAG)),
+  论文 = c(70, 32, 92, NA, NA, 15)
+), caption = "第 3 次测试质量筛选复算对照（ALT2 平台导出覆盖 589/603）")
+
+stopifnot(length(SRET_REC_FLAG) == 70, length(SRET_SRC_FLAG) == 32,
+          length(SRET_FLAG) == 92, length(ALT2_FLAG) == 14, nrow(ALT2_FLAG_DT) == 14)
+```
+
+```{r day3-union}
+DAY3_FLAG <- union(SRET_FLAG, ALT2_FLAG)
+cat("第 3 次测试质量筛选并集 =", length(DAY3_FLAG), "（论文 Appendix 4 = 103）\n")
+```
+
+# 8. 最终数据质量核查（527 → 503）
+
+```{r final-screening}
+FS_IDS <- setdiff(D10q, FINAL503)
+FS_REC_HIT <- intersect(FS_IDS, union(union(IAT_FLAG, ALT1_FLAG), SRET_FLAG))
+
+legacy <- read_legacy(LEGACY_RM, "removed_subjects_590_to_503.csv", LEGACY_590_COLS)
+setnames(legacy, c("ID", "removed_by", "criterion", "condition", "value", "n_trials", "dup"),
+         skip_absent = TRUE)
+legacy[, ID := trimws(ID)]
+
+fs_tbl <- data.table(ID = FS_IDS)
+fs_tbl[, author_reason := legacy$removed_by[match(ID, legacy$ID)]]
+fs_tbl[, recomputed_hit := ID %in% FS_REC_HIT]
+fs_comp <- fs_tbl[, .N, by = .(author_reason, recomputed_hit)][order(-N)]
+
+knitr::kable(fs_comp, caption = "最终数据质量核查 24 人的标记归属（作者记录 × 复算一致）")
+
+# 触发任务质量判据者中，在最终核查被排除的个案
+FLAG_TASK <- union(union(IAT_FLAG, ALT1_FLAG), union(SRET_FLAG, ALT2_FLAG))
+FS_FLAGGED  <- intersect(FS_IDS, FLAG_TASK)     # 触发了任务质量判据
+FS_UNFLAGGED <- setdiff(FS_IDS, FS_FLAGGED)         # 数据缺失或其他原因
+knitr::kable(data.table(
+  判定定义 = c("527 完整个案中触发任务质量判据者", "其中在最终核查中被排除",
+           "其中未被排除（留在最终样本）", "最终核查排除中未触发任务质量判据者",
+           "若以同一判据统一处理时的样本量"),
+  人数 = c(length(intersect(D10q, FLAG_TASK)), length(FS_FLAGGED),
+           length(intersect(FINAL503, FLAG_TASK)), length(FS_UNFLAGGED),
+           length(FINAL503) + length(FS_FLAGGED))
+), caption = "触发任务质量判据者的两种处置")
+stopifnot(length(FS_IDS) == 24, length(FS_REC_HIT) == 15,
+          length(FS_FLAGGED) == 19, length(FS_UNFLAGGED) == 5)
+```
+
+# 9. 非流程记录（仅任务数据、无标识）
+
+```{r non777}
+non777_tbl <- data.table(ID = NON777)
+non777_tbl[, 类别 := fifelse(ID == "NA", "字符串 \"NA\"（SRET_raw）",
+                             fifelse(ID %in% ALT2_IDS, "任务文件独有（有 ALT2）", "任务文件独有（无 ALT2）"))]
+knitr::kable(non777_tbl, caption = "非流程记录 14 条")
+
+d3_all <- fread_utf8(DAY_FILES["D3"])
+blank_d3 <- d3_all[is.na(ID) | trimws(ID) == "", .(行号 = .I, ParticipantID, Sex)]
+knitr::kable(blank_d3, caption = "day3_cleaned 中的空 ID 行（归无标识记录）")
+
+blank_id_tbl <- data.table(
+  来源 = c("questionnaires_day3_raw.zip（ALT2 试次，空 ID）", "questionnaires_day3_cleaned.csv（空 ID 行）"),
+  行数 = c(BLANK_ID_ROWS, nrow(blank_d3)),
+  PID  = c("未记录（原始导出该列为空）",
+           paste(blank_d3$ParticipantID, collapse = ";"))
+)
+knitr::kable(blank_id_tbl, caption = "无标识记录（空 ID）明细，待定：疑为测试数据")
+cat("其中 ALT2 正式试次空 ID 行 =", BLANK_ID_ALT2, "\n")
+```
+
+# 10. 排除个案与未达标但保留个案
+
+```{r retained}
+FLAG_ALL <- rbindlist(list(IAT_FLAG_DT, ALT1_FLAG_DT, SRET_REC_FLAG_DT,
+                           SRET_SRC_FLAG_DT, ALT2_FLAG_DT), fill = TRUE)
+age_keep_row <- data.table(
+  ID = AGE_KEPT, flag_task = "age", flag_criterion = "age_criterion",
+  condition_or_domain = "第 1 次测试（筛查）年龄核查",
+  observed_value = as.character(AGE_BAD$age[match(AGE_KEPT, AGE_BAD$ID)]),
+  threshold = "18-59", n_trials = NA_integer_,
+  evidence_file = "02_cleaned/questionnaires_day1_cleaned.csv")
+KEPT_FLAG <- rbindlist(list(FLAG_ALL[ID %in% FINAL503], age_keep_row), fill = TRUE)
+KEPT_FLAG[, flag_domain := fifelse(flag_task == "age", "inclusion_criterion", "task_quality")]
+KEPT_IDS <- unique(KEPT_FLAG$ID)
+strict_task_n <- length(FINAL503) - uniqueN(KEPT_FLAG[flag_domain == "task_quality", ID])
+strict_n <- length(FINAL503) - length(KEPT_IDS)
+
+knitr::kable(KEPT_FLAG[, .(人数 = uniqueN(ID)), by = .(flag_domain, flag_criterion)][order(-人数)],
+             caption = "503 内未达标但保留者：按判据分布")
+knitr::kable(data.table(
+  判定定义 = c("发布版最终样本", "未达标但保留（任务质量判据，含 ALT2）", "其中：年龄未达标但保留",
+           "论文自陈的未达标但保留", "仅按任务质量判据重施后 N", "重施全部标准后个案层面 N"),
+  人数 = c(length(FINAL503), uniqueN(KEPT_FLAG[flag_domain == "task_quality", ID]),
+           length(AGE_KEPT), 28, strict_task_n, strict_n)
+), caption = "未达标但保留与严格重施定义")
+
+stopifnot(length(intersect(KEPT_IDS, FS_IDS)) == 0)
+```
+
+## 图 1 全流程
+
+```{mermaid}
+%%| label: fig-exclusion-flow
+%%| fig-cap: "从 777 条初始记录到 503 人最终样本：每段减少都拆为“未参加且携带质量标记”与“未参加且无标记”两条并行路径。"
+flowchart TD
+    U791["初始样本 791 = 777 + 13 + 1"] --> N777["777 条第 1 次测试记录"]
+    U791 --> NON777["非流程记录 14<br/>13 x phase_002_* · 1 条字符串 “NA”"]
+    NON777 --> BLANKID["另有无标识记录 1 条<br/>空 ID（3577 行）· 疑测试数据"]
+
+    N777 -->|"年龄核查：6 人未达标，其中 5 人排除"| N771["771 年龄符合"]
+    N771 -->|"第 1 次测试后失访 · 104"| N668["668 完成第 2 次测试"]
+
+    N668 --> S2{"第 2 次测试后减少 79"}
+    S2 -->|"36 人"| Q2["第 2 次测试未达标 46<br/>ALT1 44 · IAT 4<br/>其中 36 人未参加第 3 次测试<br/>9 人仍参加 · 1 人无问卷记录"]
+    S2 -->|"43 人"| L2["未参加第 3 次测试且无标记 43"]
+    Q2 --> N589["589 完成第 3 次测试"]
+    L2 --> N589
+
+    N589 --> S3{"第 3 次测试后减少 62"}
+    S3 -->|"61 人"| Q3["第 3 次测试未达标 102<br/>SRET 92 · ALT2 14<br/>其中 61 人未参加第 4 次测试<br/>40 人仍参加 · 1 人无问卷记录"]
+    S3 -->|"1 人"| L3["未参加第 4 次测试且无标记 1"]
+    Q3 --> N527["527 完整个案"]
+    L3 --> N527
+
+    N527 -->|"最终数据质量核查排除 · 24"| EXC24["排除个案 24<br/>19 人在最终核查中因任务质量判据被排除<br/>5 人数据缺失或其他原因"]
+    EXC24 -.->|"若以同一判据统一处理"| N522["样本将为 522"]
+    N527 -->|"纳入"| N503["503 最终样本"]
+
+    N503 --> KEEP["未达标但保留 29<br/>任务质量判据 28（= 论文 28）+ 年龄 1"]
+    N503 --> REST["其余 474 人"]
+    KEEP -.->|"重施全部标准"| N474["个案层面 N = 474<br/>仅任务质量判据为 475"]
+
+    classDef qc_failed fill:#fff2cc,stroke:#bf9000,color:#000;
+    classDef final_excluded fill:#f8cecc,stroke:#b85450,color:#000;
+    classDef retained fill:#d5e8d4,stroke:#82b366,color:#000;
+    classDef nonflow fill:#eeeeee,stroke:#999999,color:#000;
+    classDef flow_split fill:#e8f0fe,stroke:#4a6fa5,color:#000;
+    class Q2,Q3 qc_failed;
+    class EXC24 final_excluded;
+    class N503 retained;
+    class BLANKID nonflow;
+    class S2,S3 flow_split;
+```
+
+```{r fig-flow-check}
+fig1 <- c(initial_sample = 791, d1 = 777, non777 = 14, blank_id = 3577, age = 6, age_excluded = 5,
+          flag_continued2 = 9, flag_continued3 = 40,
+          lost1 = 104, n668 = 668,
+          drop2 = 79, qc2 = 46, iat = 4, alt1 = 44, not_reinv2 = 36, lost2 = 43,
+          n589 = 589,
+          drop3 = 62, qc3 = 102, sret = 92, alt2 = 14, not_reinv3 = 61, lost3 = 1,
+          n527 = 527, final_qc = 24, soft_excluded = 19, other_excluded = 5,
+          alt_n = 522, flag_in_527 = 47, kept_flagged = 28,
+          final = 503, kept_total = 29, strict_all = 474, strict_task = 475)
+actual1 <- c(initial_sample = length(INITIAL_SAMPLE), d1 = length(D1), non777 = length(NON777),
+             blank_id = BLANK_ID_ROWS, age = length(AGE_IDS), age_excluded = length(AGE_EXCL),
+             flag_continued2 = length(intersect(union(IAT_FLAG, ALT1_FLAG), D3q)),
+             flag_continued3 = length(intersect(DAY3_FLAG, D10q)),
+             lost1 = length(ATTR_D2), n668 = length(D2q),
+             drop2 = length(ATTR_D3), qc2 = length(union(IAT_FLAG, ALT1_FLAG)),
+             iat = length(IAT_FLAG), alt1 = length(ALT1_FLAG),
+             not_reinv2 = length(intersect(ATTR_D3, DAY2_FLAG)),
+             lost2 = length(setdiff(ATTR_D3, DAY2_FLAG)), n589 = length(D3q),
+             drop3 = length(ATTR_D10), qc3 = length(DAY3_FLAG), sret = length(SRET_FLAG),
+             alt2 = length(ALT2_FLAG),
+             not_reinv3 = length(intersect(ATTR_D10, DAY3_FLAG)),
+             lost3 = length(setdiff(ATTR_D10, DAY3_FLAG)), n527 = length(D10q),
+             final_qc = length(FS_IDS), soft_excluded = length(FS_FLAGGED),
+             other_excluded = length(FS_UNFLAGGED),
+             alt_n = length(FINAL503) + length(FS_FLAGGED),
+             flag_in_527 = length(intersect(D10q, FLAG_TASK)),
+             kept_flagged = uniqueN(KEPT_FLAG[flag_domain == "task_quality", ID]),
+             final = length(FINAL503), kept_total = length(KEPT_IDS),
+             strict_all = strict_n, strict_task = strict_task_n)
+cmp <- data.table(项 = names(fig1), 图内 = unname(fig1), 计算 = unname(actual1))
+cmp[, 一致 := 图内 == 计算]
+if (any(!cmp$一致)) fwrite(cmp, P("_cache/fig1_cmp.csv"))
+stopifnot(length(fig1) == length(actual1), all(fig1 == actual1))
+stopifnot(fig1[["not_reinv2"]] + fig1[["lost2"]] == fig1[["drop2"]],
+          fig1[["not_reinv3"]] + fig1[["lost3"]] == fig1[["drop3"]],
+          fig1[["flag_continued2"]] + fig1[["not_reinv2"]] + 1 == fig1[["qc2"]],
+          fig1[["flag_continued3"]] + fig1[["not_reinv3"]] + 1 == fig1[["qc3"]])
+knitr::kable(data.table(图内数字 = names(fig1), 值 = unname(fig1), 与计算一致 = "是"),
+             caption = "图 1 内数字校验（含两段减少的并行拆分）")
+```
+
+**图 1** 每段减少都由两条可观察路径构成：携带质量标记且未参加（36 / 61）与未携带标记且未参加（43 / 1）；`79 = 36 + 43`、`62 = 61 + 1`。红色框内的 19 人完成了全部测试、最终仍因任务质量判据被排除；另有 28 人触发同一批判据但未被排除。注意 46 人中有 9 人、102 人中有 40 人在触发判据后仍继续参加——判据与实际到场之间是否存在其他判定环节，发布数据未记录，本数据集不作归因（详见附录 A）。
+
+## 图 2 两套互斥的判定定义
+
+```{mermaid}
+%%| label: fig-two-groups
+%%| fig-cap: "排除个案与未达标但保留个案分属两套互斥的判定定义；因任务质量判据被排除的 19 人标注了替代定义。"
+flowchart LR
+    P527["527 完整个案"] -->|"最终数据质量核查排除 24"| X24["排除个案 24<br/>因任务质量判据 19 + 其他 5"]
+    X24 -.->|"若以同一判据统一处理"| N522["样本 522"]
+    P527 -->|"纳入 503"| S503["503 最终样本"]
+    S503 -->|"最终样本内质量核查"| B29["未达标但保留 29<br/>任务质量 28 + 年龄 1"]
+    S503 --> B474["其余 474 人"]
+    B29 -.->|"重施全部标准"| N474["474（仅任务质量判据为 475）"]
+    X24 -.->|"与右侧集合互斥"| B29
+
+    classDef excluded fill:#f8cecc,stroke:#b85450,color:#000;
+    classDef retained fill:#fff2cc,stroke:#bf9000,color:#000;
+    classDef base_sample fill:#d5e8d4,stroke:#82b366,color:#000;
+    class X24 excluded;
+    class B29,N474 retained;
+    class S503,B474,N522 base_sample;
+```
+
+```{r fig-two24-check}
+fig2 <- c(complete = 527, final_qc = 24, soft_excluded = 19, other_excluded = 5,
+          final = 503, alt_n = 522, kept = 29, rest = 474, strict_all = 474, strict_task = 475)
+actual2 <- c(complete = length(D10q), final_qc = length(FS_IDS), soft_excluded = length(FS_FLAGGED),
+             other_excluded = length(FS_UNFLAGGED), final = length(FINAL503),
+             alt_n = length(FINAL503) + length(FS_FLAGGED), kept = length(KEPT_IDS),
+             rest = length(FINAL503) - length(KEPT_IDS),
+             strict_all = strict_n, strict_task = strict_task_n)
+stopifnot(length(fig2) == length(actual2), all(fig2 == actual2))
+knitr::kable(data.table(图内数字 = names(fig2), 值 = unname(fig2), 与计算一致 = "是"),
+             caption = "图 2 内数字校验")
+```
+
+## 图 3 判据触发后的两种处置
+
+```{mermaid}
+%%| label: fig-qc-mechanism
+%%| fig-cap: "同一条任务质量判据在数据中呈现的两种处置：触发后未参加下一次测试，或触发后仍完成全部测试。"
+flowchart TD
+    F0["某被试在某次测试中触发任务质量判据"] --> Q{"判定发生在何时？"}
+    Q -->|"触发后未参加下一次测试"| R1["计入该段减少（36 / 61）"]
+    Q -->|"触发后仍完成全部测试"| R2["继续参加（9 / 40）"]
+    R2 --> R3["最终数据质量核查"]
+    R3 --> R4["保留：未达标但保留 28 人"]
+    R3 --> R5["在最终核查中被排除 19 人<br/>（同一批判据下另有 28 人未被排除）"]
+    R5 -.->|"替代定义"| R6["仅该任务数据不纳入分析，个案保留（样本 522）"]
+
+    classDef qc_failed fill:#fff2cc,stroke:#bf9000,color:#000;
+    classDef final_excluded fill:#f8cecc,stroke:#b85450,color:#000;
+    classDef retained fill:#d5e8d4,stroke:#82b366,color:#000;
+    class R1 qc_failed;
+    class R5 final_excluded;
+    class R4,R6 retained;
+```
+
+**图 3** 触发同一批判据的 47 人中，19 人在最终核查中被个案层面排除、28 人未被排除——两种处置并存，论文 Limitation 亦自陈判据“未在最终样本上统一施测”。图内不含任何关于处置原因的推断。
+
+# 11. 输出三张记录表
+
+```{r master-table}
+stage_dt <- rbindlist(list(
+  data.table(ID = AGE_EXCL,                        exclusion_stage = "age_ineligible"),
+  data.table(ID = ATTR_D2,                         exclusion_stage = "absent_after_day1"),
+  data.table(ID = intersect(ATTR_D3, DAY2_FLAG),   exclusion_stage = "absent_after_day2_with_flag"),
+  data.table(ID = setdiff(ATTR_D3, DAY2_FLAG),     exclusion_stage = "absent_after_day2_without_flag"),
+  data.table(ID = intersect(ATTR_D10, DAY3_FLAG),  exclusion_stage = "absent_after_day3_with_flag"),
+  data.table(ID = setdiff(ATTR_D10, DAY3_FLAG),    exclusion_stage = "absent_after_day3_without_flag"),
+  data.table(ID = FS_FLAGGED,                         exclusion_stage = "excluded_by_task_criterion_reapplied"),
+  data.table(ID = FS_UNFLAGGED,                        exclusion_stage = "excluded_for_other_reasons"),
+  data.table(ID = setdiff(NON777, "NA"),           exclusion_stage = "task_only_record"),
+  data.table(ID = "NA",                            exclusion_stage = "unidentifiable_record")
+), fill = TRUE)
+stopifnot(!any(duplicated(stage_dt$ID)), nrow(stage_dt) == 288)
+
+STAGE_ZH <- c(age_ineligible = "年龄不符合纳入标准",
+              absent_after_day1 = "第 1 次测试后未参加",
+              absent_after_day2_with_flag = "第 2 次测试后未参加（携带质量标记）",
+              absent_after_day2_without_flag = "第 2 次测试后未参加（无质量标记）",
+              absent_after_day3_with_flag = "第 3 次测试后未参加（携带质量标记）",
+              absent_after_day3_without_flag = "第 3 次测试后未参加（无质量标记）",
+              excluded_by_task_criterion_reapplied = "最终数据质量核查排除（事后重施任务质量判据）",
+              excluded_for_other_reasons = "最终数据质量核查排除（数据缺失或其他原因）",
+              task_only_record = "仅任务数据记录（无问卷）",
+              unidentifiable_record = "无法对应被试的记录")
+
+master <- stage_dt
+master[, `:=`(
+  exclusion_stage_zh = STAGE_ZH[exclusion_stage],
+  ParticipantID = day1$ParticipantID[match(ID, day1$ID)],
+  att_D1 = as.integer(ID %in% D1), att_D2 = as.integer(ID %in% D2q),
+  att_D3 = as.integer(ID %in% D3q), att_D10 = as.integer(ID %in% D10q),
+  in_released_503 = as.integer(ID %in% FINAL503),
+  phase_batch = sub("^phase_([0-9]+)_.*$", "\\1", ID)
+)]
+master[, att_task := vapply(ID, function(id) {
+  p <- c(if (id %in% IAT_IDS) "IAT", if (id %in% ALT1_IDS) "ALT1",
+         if (id %in% SRET_IDS) "SRET", if (id %in% ALT2_IDS) "ALT2")
+  if (length(p)) paste(p, collapse = "+") else "无任务数据"
+}, character(1))]
+master[, last_session := fcase(att_D10 == 1, "Day10", att_D3 == 1, "Day3",
+                               att_D2 == 1, "Day2", att_D1 == 1, "Day1",
+                               default = "无问卷记录")]
+master[, record_type := fcase(ID == "NA", "literal_NA_record",
+                              exclusion_stage == "unidentifiable_record", "missing_id_record",
+                              exclusion_stage == "task_only_record", "task_only_record",
+                              default = "unique_subject")]
+master[, ID_status := fcase(ID == "NA", "literal_NA",
+                            exclusion_stage == "unidentifiable_record", "missing",
+                            default = "regular")]
+
+knitr::kable(master[, .(人数 = .N), by = .(排除环节 = exclusion_stage_zh)][order(-人数)],
+             caption = "排除环节分布（每案只归一个环节）")
+```
+
+```{r master-reason}
+d2_detail <- rbindlist(list(ALT1_FLAG_DT, IAT_FLAG_DT), fill = TRUE)   # 顺序即优先级
+d3_detail <- rbindlist(list(SRET_REC_FLAG_DT, SRET_SRC_FLAG_DT, ALT2_FLAG_DT), fill = TRUE)
+d2_first  <- d2_detail[!duplicated(ID)]
+d3_first  <- d3_detail[!duplicated(ID)]
+
+master[, `:=`(
+  age_value     = as.character(AGE_BAD$age[match(ID, AGE_BAD$ID)]),
+  d2_criterion  = d2_first$flag_criterion[match(ID, d2_first$ID)],
+  d2_cond       = d2_first$condition_or_domain[match(ID, d2_first$ID)],
+  d2_value      = as.character(d2_first$observed_value[match(ID, d2_first$ID)]),
+  d2_n          = d2_first$n_trials[match(ID, d2_first$ID)],
+  d3_criterion  = d3_first$flag_criterion[match(ID, d3_first$ID)],
+  d3_cond       = d3_first$condition_or_domain[match(ID, d3_first$ID)],
+  d3_value      = as.character(d3_first$observed_value[match(ID, d3_first$ID)]),
+  d3_n          = d3_first$n_trials[match(ID, d3_first$ID)],
+  author_reason = legacy$removed_by[match(ID, legacy$ID)],
+  author_value_raw = as.character(legacy$value[match(ID, legacy$ID)]),
+  author_cond   = legacy$condition[match(ID, legacy$ID)]
+)]
+
+master[, criterion_code := NA_character_]
+master[exclusion_stage == "age_ineligible", criterion_code := "age_ineligible"]
+master[exclusion_stage == "absent_after_day1", criterion_code := "no_show"]
+master[exclusion_stage == "absent_after_day2_with_flag", criterion_code := d2_criterion]
+master[exclusion_stage == "absent_after_day2_without_flag", criterion_code := "no_show"]
+master[exclusion_stage == "absent_after_day3_with_flag", criterion_code := d3_criterion]
+master[exclusion_stage == "absent_after_day3_without_flag", criterion_code := "no_show"]
+master[exclusion_stage == "task_only_record", criterion_code := "no_questionnaire_record"]
+master[exclusion_stage == "unidentifiable_record", criterion_code := "unidentifiable_record"]
+master[exclusion_stage == "excluded_for_other_reasons" & author_reason == "missing_SRET",
+       criterion_code := "incomplete_data"]
+master[exclusion_stage == "excluded_by_task_criterion_reapplied",
+       criterion_code := "quality_below_threshold"]
+master[exclusion_stage == "excluded_for_other_reasons" & is.na(criterion_code),
+       criterion_code := "reason_unavailable"]
+
+master[, `:=`(condition_or_domain = "", observed_value = "", threshold = "",
+              n_trials = NA_integer_)]
+master[criterion_code == "age_ineligible",
+       `:=`(condition_or_domain = "年龄（第 1 次测试筛查）", observed_value = age_value,
+            threshold = "18-59")]
+master[exclusion_stage == "absent_after_day2_with_flag",
+       `:=`(condition_or_domain = d2_cond, observed_value = d2_value, n_trials = d2_n)]
+master[exclusion_stage == "absent_after_day3_with_flag",
+       `:=`(condition_or_domain = d3_cond, observed_value = d3_value, n_trials = d3_n)]
+master[exclusion_stage %in% c("excluded_by_task_criterion_reapplied", "excluded_for_other_reasons"),
+       `:=`(condition_or_domain = fifelse(is.na(author_cond), "", author_cond),
+            observed_value = fifelse(is.na(author_value_raw), "", author_value_raw))]
+master[, threshold := fcase(
+  criterion_code == "age_ineligible", "18-59",
+  criterion_code == "ALT1_accuracy", ">=0.60",
+  criterion_code == "IAT_RT", "<=0.10",
+  criterion_code == "SRET_recognition", ">=0.55",
+  criterion_code == "SRET_source_RT", "<=0.30",
+  criterion_code == "ALT2_condition_accuracy", ">=0.20",
+  criterion_code == "ALT2_domain_accuracy", ">=0.60",
+  default = "")]
+
+master[, primary_reason := fcase(
+  criterion_code == "age_ineligible", paste0("年龄不符合纳入标准（", age_value, " 岁）"),
+  exclusion_stage == "absent_after_day1", "未参加第 2 次测试",
+  exclusion_stage == "absent_after_day2_without_flag", "未参加第 3 次测试",
+  exclusion_stage == "absent_after_day3_without_flag", "未参加第 4 次测试",
+  criterion_code == "ALT1_accuracy", "第 2 次测试未达标（ALT1 条件正确率<0.60）且其后未参加第 3 次测试",
+  criterion_code == "IAT_RT", "第 2 次测试未达标（IAT 短反应时占比>0.10）且其后未参加第 3 次测试",
+  criterion_code == "SRET_recognition", "第 3 次测试未达标（SRET 再认正确率<0.55）且其后未参加第 4 次测试",
+  criterion_code == "SRET_source_RT", "第 3 次测试未达标（SRET 来源判断快反应占比>0.30）且其后未参加第 4 次测试",
+  criterion_code == "ALT2_condition_accuracy", "第 3 次测试未达标（ALT2 条件正确率<0.20）且其后未参加第 4 次测试",
+  criterion_code == "ALT2_domain_accuracy", "第 3 次测试未达标（ALT2 领域正确率<0.60）且其后未参加第 4 次测试",
+  exclusion_stage == "absent_after_day2_without_flag", "未参加第 3 次测试（未触发任何质量判据）",
+  exclusion_stage == "absent_after_day3_without_flag", "未参加第 4 次测试（未触发任何质量判据）",
+  criterion_code == "quality_below_threshold", "最终数据质量核查排除（事后重施任务质量判据：行为质量不达标）",
+  criterion_code == "incomplete_data", "最终数据质量核查排除（SRET 数据部分缺失）",
+  criterion_code == "reason_unavailable", "最终数据质量核查排除（原因在匿名数据中不可考）",
+  criterion_code == "no_questionnaire_record", "仅存于任务文件，无任何问卷记录",
+  criterion_code == "unidentifiable_record", "记录无法对应被试（无有效标识）",
+  default = NA_character_)]
+
+master[, recomputed_value := fifelse(
+  criterion_code %in% c("age_ineligible", "ALT1_accuracy", "IAT_RT", "SRET_recognition",
+                        "SRET_source_RT", "ALT2_condition_accuracy", "ALT2_domain_accuracy"),
+  observed_value, "")]
+master[, author_value := fifelse(is.na(author_value_raw), "", author_value_raw)]
+master[, evidence_status := fcase(
+  exclusion_stage %in% c("absent_after_day1", "absent_after_day2_without_flag", "absent_after_day3_without_flag"),
+    "attendance_record",
+  exclusion_stage == "age_ineligible", "screening_record",
+  exclusion_stage %in% c("absent_after_day2_with_flag", "absent_after_day3_with_flag"),
+    "recomputed_from_raw",
+  exclusion_stage %in% c("excluded_by_task_criterion_reapplied", "excluded_for_other_reasons") &
+    !is.na(author_reason), "author_record",
+  exclusion_stage == "excluded_for_other_reasons", "reason_unavailable",
+  default = "source_record")]
+master[, secondary_notes := {
+  a <- fifelse(ID %in% DAY2_FLAG &
+                 exclusion_stage %in% c("absent_after_day3_with_flag", "absent_after_day3_without_flag",
+                                        "excluded_by_task_criterion_reapplied"),
+               "亦在第 2 次测试质量筛选中未达标（未阻止其继续参加）", "")
+  b <- fifelse(ID %in% DAY3_FLAG & exclusion_stage == "excluded_by_task_criterion_reapplied",
+               "亦在第 3 次测试质量筛选中未达标（未阻止其完成第 4 次测试）", "")
+  gsub("^；+|；+$", "", paste(a, b, sep = "；"))
+}]
+master[, source_ref := fcase(
+  exclusion_stage == "age_ineligible", "analysis/analysis.Rmd:327-339",
+  exclusion_stage == "absent_after_day2_with_flag", "analysis/analysis.Rmd:447-507",
+  exclusion_stage == "absent_after_day3_with_flag", "analysis/analysis.Rmd:543-799",
+  exclusion_stage %in% c("excluded_by_task_criterion_reapplied", "excluded_for_other_reasons"),
+    paste0(basename(LEGACY_SNAPSHOT), " 行 ", match(ID, legacy$ID) + 1),
+  grepl("^attrition", exclusion_stage),
+    "02_cleaned/questionnaires_day1/2/3/10_cleaned.csv 的到场记录",
+  default = "01_raw/*.csv")]
+master[, paper_flow_bucket := fcase(
+  exclusion_stage == "age_ineligible", "777→771 年龄核查",
+  exclusion_stage == "absent_after_day1", "771→668 未参加第 2 次",
+  exclusion_stage == "absent_after_day2_with_flag", "668→589 未参加（携带标记）",
+  exclusion_stage == "absent_after_day2_without_flag", "668→589 失访",
+  exclusion_stage == "absent_after_day3_with_flag", "589→527 未参加（携带标记）",
+  exclusion_stage == "absent_after_day3_without_flag", "589→527 失访",
+  exclusion_stage == "excluded_by_task_criterion_reapplied", "527→503 最终核查（触发任务质量判据）",
+  exclusion_stage == "excluded_for_other_reasons", "527→503 最终核查（其他原因）",
+  default = "非流程记录")]
+# 证据来源：论文记载 / 作者逐人记录 / 仅本数据集按发布数据复算
+master[, evidence_basis := fcase(
+  exclusion_stage == "age_ineligible", "paper_documented",
+  exclusion_stage %in% c("absent_after_day3_with_flag",
+                         "excluded_by_task_criterion_reapplied",
+                         "excluded_for_other_reasons"), "author_recorded",
+  exclusion_stage == "absent_after_day2_with_flag", "recomputed_flag_only",
+  default = "not_applicable")]
+master[exclusion_stage == "excluded_by_task_criterion_reapplied",
+       secondary_notes := trimws(paste(secondary_notes,
+         "完成全部测试后仍因任务质量判据被排除；同一批判据下另有 28 人未被排除（论文 Limitation 自陈判据未在最终样本上统一施测）",
+         sep = "；"))]
+master[exclusion_stage == "excluded_by_task_criterion_reapplied",
+       note := "若以同一判据统一处理，该个案应保留、仅其相应任务数据不纳入分析（样本量将为 522）"]
+
+master[exclusion_stage %in% c("absent_after_day2_with_flag", "absent_after_day3_with_flag"),
+       note := paste0("本行仅记录两项可核实事实：该个案触发了本次测试的任务质量判据，且未参加下一次测试；",
+                      "判据与实际到场之间是否存在其他判定环节，发布数据未记录，本库不作归因")]
+master[, note := fifelse(is.na(note), "", note)]
+master[ID %in% c("phase_003_subj_14", "phase_017_subj_20"),
+       note := "day2_cleaned 中该 ID 有 2 行（双跑/重复提交），按规则去重计数"]
+master[criterion_code == "reason_unavailable",
+       note := "通过全部可核查标准；匿名化数据中原因不可考"]
+```
+
+```{r master-secondary}
+knitr::kable(master[secondary_notes != "", .(人数 = .N), by = .(排除环节 = exclusion_stage_zh, secondary_notes)],
+             caption = "次要标记（多重原因时的附注，不改变唯一主要原因）")
+stopifnot(nrow(master[secondary_notes != ""]) >= 9)
+```
+
+```{r master-blank-id}
+blank_id_row <- data.table(
+  ID = NA_character_, ID_status = "missing", ParticipantID = "201",
+  phase_batch = "015", record_type = "missing_id_record",
+  att_D1 = 0L, att_D2 = 0L, att_D3 = 1L, att_D10 = 0L, att_task = "ALT2",
+  last_session = "Day3", exclusion_stage = "unidentifiable_record",
+  exclusion_stage_zh = STAGE_ZH[["unidentifiable_record"]],
+  evidence_basis = "not_applicable",
+  primary_reason = "空 ID 记录（无法对应被试）",
+  criterion_code = "missing_id", condition_or_domain = "", observed_value = "",
+  threshold = "", n_trials = BLANK_ID_ROWS, recomputed_value = "", author_value = "",
+  evidence_status = "author_record", secondary_notes = "",
+  paper_flow_bucket = "非流程记录", in_released_503 = 0L,
+  note = "空 ID 记录共 3577 行（ALT2 正式试次 768 行）；疑为测试数据，待定",
+  source_ref = paste0(basename(LEGACY_SNAPSHOT), "（旧表中的空 ID 记录行）"))
+master[, c("age_value", "d2_criterion", "d2_cond", "d2_value", "d2_n",
+           "d3_criterion", "d3_cond", "d3_value", "d3_n",
+           "author_reason", "author_value_raw", "author_cond") := NULL]
+master_full <- rbindlist(list(master, blank_id_row), fill = TRUE)
+FINAL_COLS <- c("ID", "ID_status", "ParticipantID", "phase_batch", "record_type",
+                "att_D1", "att_D2", "att_D3", "att_D10", "att_task", "last_session",
+                "exclusion_stage", "exclusion_stage_zh", "evidence_basis", "primary_reason", "criterion_code",
+                "condition_or_domain", "observed_value", "threshold", "n_trials",
+                "recomputed_value", "author_value", "evidence_status", "secondary_notes",
+                "paper_flow_bucket", "in_released_503", "note", "source_ref")
+setcolorder(master_full, FINAL_COLS)
+```
+
+```{r reconcile}
+rec_dt <- data.table(
+  stage_id = 1:13,
+  stage_order = 1:13,
+  stage_name = c("年龄核查（纳入标准）", "第 1 次测试后未参加", "第 2 次测试未达标（携带标记且未参加）",
+                 "第 2 次测试后未参加（无标记）", "第 3 次测试未达标（携带标记且未参加）", "第 3 次测试后未参加（无标记）",
+                 "最终数据质量核查", "非流程记录", "未达标但保留",
+                 "任务级 IAT", "任务级 ALT1（SMT 几何版）", "任务级 ALT2（SMT 自我参照版）", "任务级 SRET"),
+  from_n = c(777, 771, 681, NA, 603, NA, 527, NA, 503, 681, 681, 603, 602),
+  to_n   = c(771, 668, NA, 589, NA, 527, 503, NA, NA, NA, NA, NA, NA),
+  excluded_n = c(length(AGE_EXCL), length(ATTR_D2), length(intersect(ATTR_D3, DAY2_FLAG)),
+                 length(setdiff(ATTR_D3, DAY2_FLAG)), length(intersect(ATTR_D10, DAY3_FLAG)),
+                 length(setdiff(ATTR_D10, DAY3_FLAG)), length(FS_IDS), length(NON777) + 1L,
+                 NA, NA, NA, NA, NA),
+  criterion = c("18<=年龄<=59", "无第 2 次测试问卷记录",
+                "ALT1 条件正确率<0.60 或 IAT 短反应时占比>0.10，且未参加第 3 次测试",
+                "未参加第 3 次测试且未触发上述判据",
+                "SRET 再认<0.55、来源快反应占比>0.30 或 ALT2 条件<0.20/领域<0.60，且未完成第 4 次测试",
+                "未完成第 4 次测试且未触发上述判据",
+                "3 次测试全勤后的质量核查（行为质量、数据缺失、其他原因）",
+                "仅任务数据或无法对应被试的记录", "最终样本内未达标但保留者",
+                "rt<=300 占比>0.10", "任一正式条件 acc<0.60",
+                "任一条件<0.20 或领域<0.60", "再认<0.55 或来源 RT 占比>0.30"),
+  paper_n = c(6, 103, 46, NA, 103, NA, 24, NA, 28, 4, 44, 15, 92),
+  recomputed_n = c(length(AGE_IDS), length(ATTR_D2), length(union(IAT_FLAG, ALT1_FLAG)),
+                   length(setdiff(ATTR_D3, DAY2_FLAG)), length(DAY3_FLAG),
+                   length(setdiff(ATTR_D10, DAY3_FLAG)), length(FS_IDS), length(NON777) + 1L,
+                   uniqueN(KEPT_FLAG[flag_domain == "task_quality", ID]),
+                   length(IAT_FLAG), length(ALT1_FLAG), length(ALT2_FLAG), length(SRET_FLAG)),
+  evidence_files = c("02_cleaned/questionnaires_day1_cleaned.csv",
+                     "02_cleaned/questionnaires_day2_cleaned.csv",
+                     "01_raw/IAT_raw.csv + 01_raw/SMT_1_raw.csv",
+                     "02_cleaned/questionnaires_day3_cleaned.csv",
+                     "01_raw/SRET_raw.csv + 01_raw/questionnaires_day3_raw.zip",
+                     "02_cleaned/questionnaires_day10_cleaned.csv",
+                     "02_cleaned/SMT_2_cleaned.zip + removed_subjects_legacy_content.csv",
+                     "01_raw/IAT_raw.csv + 01_raw/SRET_raw.csv",
+                     "03_derived/positive_IAT.csv 等",
+                     "01_raw/IAT_raw.csv", "01_raw/SMT_1_raw.csv",
+                     "01_raw/questionnaires_day3_raw.zip", "01_raw/SRET_raw.csv")
+)
+rec_dt[, delta := recomputed_n - paper_n]
+rec_dt[, delta_ids := ""]
+rec_dt[stage_name == "第 1 次测试后未参加", delta_ids := "phase_013_subj_30（年龄 60，未达标但随后仍完成全部测试）"]
+rec_dt[stage_name == "未达标但保留", delta_ids := "另有 1 名年龄未达标但保留（phase_013_subj_30）"]
+rec_dt[, resolution := fcase(
+  is.na(paper_n), "论文未单列该口径",
+  stage_name == "最终数据质量核查", "24 = 19（触发任务质量判据）+ 5（数据缺失/不可考）；若以同一判据统一处理，样本量应为 522",
+  delta == 0, "一致",
+  stage_name == "年龄核查（纳入标准）", "6 人未达标（5 人排除，1 人未达标但保留）",
+  stage_name == "第 1 次测试后未参加", "本库实数 104 = 论文 103 + 1 名年龄未达标者仍续做",
+  stage_name == "第 3 次测试未达标（携带标记且未参加）", "ALT2 平台导出覆盖 589/603，复算 14（论文 15）",
+  stage_name == "任务级 ALT2（SMT 自我参照版）", "同上；覆盖 589/603",
+  default = "见附录 A")]
+rec_dt[, status := fcase(is.na(paper_n), "recomputed_only", delta == 0, "match", default = "explained")]
+rec_dt[, note := ""]
+knitr::kable(rec_dt[, .(stage_name, excluded_n, paper_n, recomputed_n, delta, status)],
+             caption = "流程核对表：各环节的排除与未达标人数")
+```
+
+```{r flagged-table}
+kept_agg <- KEPT_FLAG[order(flag_domain, ID, flag_criterion),
+                      .(flag_task = paste(unique(flag_task), collapse = ";"),
+                        flag_criterion = paste(unique(flag_criterion), collapse = ";"),
+                        condition_or_domain = paste(unique(condition_or_domain), collapse = ";"),
+                        observed_value = paste(observed_value, collapse = ";"),
+                        threshold = paste(unique(threshold), collapse = ";"),
+                        n_trials = paste(n_trials, collapse = ";"),
+                        evidence_file = paste(unique(evidence_file), collapse = ";"),
+                        recomputed_value = paste(observed_value, collapse = ";"),
+                        detected_at = fifelse(unique(flag_task)[1] == "age",
+                                              "第 1 次测试筛查（年龄核查）",
+                                              fifelse(unique(flag_task)[1] %in% c("IAT", "ALT1"),
+                                                      "第 2 次测试质量筛选", "第 3 次测试质量筛选"))),
+                      by = .(flag_domain, ID)]
+kept_agg[, `:=`(ParticipantID = day1$ParticipantID[match(ID, day1$ID)],
+                in_released_503 = 1L, paper_reported_total = 28L,
+                strict_N_task_only = strict_task_n, strict_N_all_criteria = strict_n,
+                note = "")]
+setcolorder(kept_agg, c("ID", "ParticipantID", "flag_domain", "flag_task", "flag_criterion",
+                        "condition_or_domain", "observed_value", "threshold", "n_trials",
+                        "evidence_file", "recomputed_value", "detected_at",
+                        "in_released_503", "paper_reported_total",
+                        "strict_N_task_only", "strict_N_all_criteria", "note"))
+knitr::kable(kept_agg[, .(人数 = .N), by = .(flag_domain, detected_at)],
+             caption = "未达标但保留个案（29 人）的来源分布")
+```
+
+```{r write-tables}
+fwrite(master_full, P("04_code_and_reproducibility/excluded_subjects_record.csv"), bom = TRUE, na = "")
+fwrite(rec_dt, P("04_code_and_reproducibility/exclusion_flow_reconciliation.csv"), bom = TRUE, na = "")
+fwrite(kept_agg, P("04_code_and_reproducibility/flagged_but_retained.csv"), bom = TRUE, na = "")
+
+cat("主表 =", nrow(master_full), "行 /", ncol(master_full), "列\n")
+cat("流程核对表 =", nrow(rec_dt), "行 /", ncol(rec_dt), "列\n")
+cat("未达标但保留表 =", nrow(kept_agg), "行 /", ncol(kept_agg), "列\n")
+
+stopifnot(nrow(master_full) == 289, ncol(master_full) == 28,
+          nrow(rec_dt) == 13, ncol(rec_dt) == 15,
+          nrow(kept_agg) == 29, ncol(kept_agg) == 17)
+```
+
+# 12. `IAT_cleaned.csv` 覆盖式重建（在原文件上重建，不另存副本）
+
+```{r iat-profile-before}
+iat_old_raw <- fread_utf8(PATH_IAT_CLEAN)
+old_md5 <- unname(tools::md5sum(PATH_IAT_CLEAN))
+old_profile <- data.table(
+  项目 = c("md5", "行数", "列数", "唯一 ParticipantID", "唯一 (PID, screen_id) 组合标识",
+           "rt 值不在 IAT_raw 的 RT 集合中的行数"),
+  值 = c(old_md5, nrow(iat_old_raw), ncol(iat_old_raw),
+         uniqueN(iat_old_raw$ParticipantID),
+         uniqueN(paste(iat_old_raw$ParticipantID, iat_old_raw$screen_id)),
+         sum(!(round(as.numeric(iat_old_raw$rt), 3) %in% round(as.numeric(iat$RT), 3))))
+)
+knitr::kable(old_profile, caption = "本次运行开始时读取的 IAT_cleaned.csv 结构概览（本仓库中该文件已按 D10 重建，重建前特征见附录 A 第 1 条）")
+```
+
+```{r iat-rebuild}
+scope <- switch(params$iat_clean_scope,
+                final_503 = FINAL503,
+                valid_677 = setdiff(IAT_IDS, IAT_FLAG),
+                all_681   = IAT_IDS,
+                FINAL503)
+
+iat_new <- iat[screen_id %in% c("3", "4", "6", "7") & ID %in% scope]
+iat_new[, rt := suppressWarnings(as.numeric(rt))]
+iat_new <- iat_new[is.na(rt) | rt <= IAT_LONG]
+iat_new[, valence := fifelse(condition %in% c("positive", "negative"), condition, NA_character_)]
+iat_new[, block := as.integer(screen_id)]
+iat_new <- iat_new[, .(ID, ParticipantID, block, task_id, condition, valence,
+                       word, response, correct, rt, RT)]
+setorder(iat_new, ID, block, task_id)
+fwrite(iat_new, PATH_IAT_CLEAN, bom = TRUE, na = "")
+
+knitr::kable(data.table(
+  项目 = c("被试数", "行数", "列数", "组块构成"),
+  值 = c(uniqueN(iat_new$ID), nrow(iat_new), ncol(iat_new),
+         paste(names(table(iat_new$block)), as.integer(table(iat_new$block)), sep = ":", collapse = " "))
+), caption = "重建后：IAT_cleaned.csv")
+
+stopifnot(setequal(unique(iat_new$ID), scope), setequal(unique(iat_new$block), c(3L, 4L, 6L, 7L)))
+```
+
+# 13. `positive_SMT.csv` 补被试标识
+
+```{r smt-index}
+alt2_idx <- copy(ALT2_FORMAL)
+alt2_idx[, `:=`(rt = suppressWarnings(as.numeric(rt)),
+                correct = suppressWarnings(as.numeric(correct)))]
+alt2_idx[is.na(correct), correct := 0]
+alt2_idx <- alt2_idx[!is.na(rt) & rt >= RT_MIN & rt <= RT_MAX]
+alt2_idx[, `:=`(domain = domain_d, val = valence_d, person = person_d)]
+
+rt_idx <- alt2_idx[identity == "match",
+                   .(avg_rt = mean(rt, na.rm = TRUE)), by = .(ID, domain, val, person)]
+rt_idx <- dcast(rt_idx, ID + domain + val ~ person, value.var = "avg_rt")
+rt_idx[, diff := friend - self]
+
+d_idx <- alt2_idx[, .(hit = sum(correct == 1 & identity == "match"),
+                      miss = sum(correct == 0 & identity == "match"),
+                      fa = sum(correct == 0 & identity == "nonmatch"),
+                      cr = sum(correct == 1 & identity == "nonmatch")),
+                  by = .(ID, domain, val, person)]
+d_idx[, `:=`(hitR = hit / (hit + miss), FAR = fa / (fa + cr))]
+d_idx[hitR == 1, hitR := 1 - 1 / (2 * (hit + miss))]
+d_idx[FAR == 0, FAR := 1 / (2 * (hit + miss))]
+d_idx[, dprime := qnorm(hitR) - qnorm(FAR)]
+d_idx <- dcast(d_idx, ID + domain + val ~ person, value.var = "dprime")
+d_idx[, diff := self - friend]
+
+make_col <- function(dt, pref) {
+  w <- dcast(dt, ID ~ domain + val, value.var = "diff")
+  nm <- setdiff(names(w), "ID")
+  setnames(w, nm, paste0(pref, "_", nm))
+  w
+}
+mine <- merge(make_col(d_idx, "SMT_d"), make_col(rt_idx, "SMT_rt"), by = "ID")
+want <- c("SMT_d_ability_negative", "SMT_d_ability_positive",
+          "SMT_d_moral_negative", "SMT_d_moral_positive",
+          "SMT_rt_ability_negative", "SMT_rt_ability_positive",
+          "SMT_rt_moral_negative", "SMT_rt_moral_positive")
+stopifnot(all(want %in% names(mine)))
+```
+
+```{r smt-align}
+psmt <- fread_utf8(PATH_PSMT)
+if (!all(want %in% names(psmt))) stop("positive_SMT.csv 缺少预期列：", setdiff(want, names(psmt)))
+psmt <- psmt[, ..want]        # 可重复运行：若文件已被补过 ID，此处剔除 ID 列后再处理
+setnames(psmt, want)
+dcols <- paste0("SMT_d_", c("ability_negative", "ability_positive", "moral_negative", "moral_positive"))
+dkey <- function(m) apply(round(as.matrix(m), 6), 1, paste, collapse = "|")
+keyM <- dkey(mine[, ..dcols]); keyP <- dkey(psmt[, ..dcols])
+idx <- match(keyP, keyM)
+n_exact <- sum(!is.na(idx))
+nn_d <- rep(0, length(idx))          # 保留变量以兼容附录 B
+psmt_out <- cbind(data.table(ID = mine$ID[idx]), psmt[, ..want])
+
+# 先完成一致性校验，再写入文件（避免失败运行覆盖原文件）
+stopifnot(n_exact == 503, !any(is.na(idx)), uniqueN(psmt_out$ID) == 503,
+          all(psmt_out$ID %in% FINAL503))
+fwrite(psmt_out, PATH_PSMT, bom = TRUE, na = "")
+
+rt_cols <- paste0("SMT_rt_", c("ability_negative", "ability_positive", "moral_negative", "moral_positive"))
+cat("diagnostic: nrow(mine) =", nrow(mine), " ncol(mine) =", ncol(mine),
+    " | nrow(psmt) =", nrow(psmt), " ncol(psmt) =", ncol(psmt), "\n")
+cat("diagnostic: mine 含 rt 列 =", all(rt_cols %in% names(mine)),
+    " | psmt 含 rt 列 =", all(rt_cols %in% names(psmt)), "\n")
+cmpr <- merge(mine[, c("ID", rt_cols), with = FALSE],
+              psmt_out[, c("ID", rt_cols), with = FALSE],
+              by = "ID", suffixes = c(".mine", ".rel"))
+rt_cor <- vapply(rt_cols, function(v) {
+  cor(cmpr[[paste0(v, ".mine")]], cmpr[[paste0(v, ".rel")]], use = "complete.obs")
+}, numeric(1))
+
+knitr::kable(data.table(
+  项目 = c("旧文件行数", "d′ 四项匹配键精确匹配", "唯一 ID 数", "全部 ID 落在 503 内", "是否一一对应"),
+  值 = c(nrow(psmt), n_exact, uniqueN(psmt_out$ID), all(psmt_out$ID %in% FINAL503),
+         uniqueN(psmt_out$ID) == nrow(psmt_out))
+), caption = "positive_SMT.csv 补 ID 结果（以 4 个 d′ 指标为匹配键，503/503 精确匹配）")
+
+knitr::kable(data.table(
+  RT_col = rt_cols,
+  与复算的相关系数 = round(rt_cor, 3),
+  判定 = "方向相反（发布版 = self − friend；analysis.Rmd:1079 = friend − self）且量值不完全对应，提示 RT 指标另有试次筛选差异；仅记录"
+), caption = "仅记录：SMT_rt_* 的符号差异")
+```
+
+# 14. 旧表核验与删除 + 一致性核查 + 附录
+
+```{r legacy-verify}
+legacy_all <- read_legacy(LEGACY_RM, "removed_subjects_590_to_503.csv", LEGACY_590_COLS)
+legacy_other <- read_legacy(LEGACY_OT, "removed_subjects_others.csv", LEGACY_OTH_COLS)
+locatable <- legacy_all[is.na(ID) | ID == "" | ID %in% master_full$ID |
+                          ID == "phase_015_subj_ghost01"]
+verify_tbl <- data.table(
+  项目 = c("旧表 590→503 行数", "旧表 others 行数", "可在新主表中定位的行数",
+           "旧表中落在 503 内的人数", "no_Task2_session → attribution_no_D3",
+           "no_Task2_session → non_777_record"),
+  值 = c(nrow(legacy_all), nrow(legacy_other), nrow(locatable),
+          sum(legacy_all$ID %in% FINAL503),
+          sum(legacy_all[removed_by == "no_Task2_session", ID] %in% ATTR_D3),
+          sum(legacy_all[removed_by == "no_Task2_session", ID] %in% NON777))
+)
+knitr::kable(verify_tbl, caption = "旧表冗余核验")
+stopifnot(nrow(locatable) == nrow(legacy_all), sum(legacy_all$ID %in% FINAL503) == 0)
+```
+
+```{r legacy-delete}
+if (isTRUE(params$delete_legacy)) {
+  unlink(c(LEGACY_RM, LEGACY_OT))
+  cat("已删除：", LEGACY_RM, "|", LEGACY_OT, "\n")
+  cat("删除后仍存在 ?", file.exists(LEGACY_RM), file.exists(LEGACY_OT), "\n")
+}
+```
+
+## 附录 A：仅记录项
+
+```{r appendix-a}
+appendix_a <- data.table(
+  n = 1:20,
+  item = c(
+    "重建前 IAT_cleaned.csv 无 ID、无组块号（screen_id 只有 day1_phase_006 场次标签）、只含特质词试次且其 rt 为校正值，故无法据此复算 D 分数",
+    "重建前 positive_SMT.csv 无 ID 且行序与合并表不同；其 4 个 SMT_rt_* 符号与 analysis.Rmd:1079 的 friend-self 约定相反（相关 -0.91~-0.94）",
+    "01_raw/README.md 提到的 SMT_2_raw.csv 并不存在（ALT2 原始数据在 questionnaires_day3_raw.zip 内）",
+    "论文附录 4 记 SRET attempted=602；库内 SRET_raw 有 603 个 ID 值 = 602 名被试 + 1 条字符串 “NA” 记录",
+    "论文记 771→668 为 103，本数据集实数 104（phase_013_subj_30 年龄 60，未达标但随后仍完成全部测试）",
+    "最终数据质量核查的构成：论文写 20+3+1，本数据集复算为 19+4+1",
+    "未达标但保留：任务质量判据复算 28 人 = 论文自陈的 28；另有 1 名年龄未达标者，合计 29；重施全部标准后 474（仅任务质量判据为 475）",
+    "旧日志把 SRET 两标准的重合数写为 -9，实际为 -10（70+32-10=92）",
+    "质量筛选并非百分之百执行：9 人在第 2 次测试未达标后仍参加第 3 次测试，40 人在第 3 次测试未达标后仍完成第 4 次测试",
+    "空 ID 记录实测 3577 行（ALT2 正式试次 768 行、反馈界面（feedback screen）864 行；旧日志只记了后者）",
+    "150 行 RT 不符合「本人组块正确均值 + 600 ms」（例 phase_003_subj_13 block 4：1555.80 vs 2423.74）",
+    "旧 IAT_cleaned.csv 折算被试数约 645（108360/168），与同目录 cleaned 文件的 503 不一致；其判定定义亦不可完全复原",
+    "年龄上界 59 无文献与预注册依据，且只在第 1 次测试判定一次",
+    "day3_cleaned 存在 1 行空 ID（PID 201）",
+    "ALT2 质量筛选的平台导出只覆盖 589/603 人，复算 14（论文 15）",
+    "注意力核查项 trap1/trap2/trap3 未参与 Eligible 判定——在 analysis.Rmd 中仅被 select(-c(...)) 丢弃",
+    "论文 Table A3 的 final sample 列（503/495/501/483）是任务级有效数据量，与「未达标」属不同概念",
+    "同一批判据下处置不一致：527 个完整个案中 47 人触发任务质量判据，其中 19 人在最终核查中被个案层面排除、28 人未被排除。若以同一判据统一处理，样本量应为 522",
+    "判据与实际到场之间的环节不可考：论文第 47 行与 README 提到未达标者不再被邀请参加后续测试，`analysis.Rmd:447-507、:543-799` 也把未达标者写入 Eligible=no 并导出名册；但全部发布文件都没有记录该决定的变量（唯一疑似变量 status 在 144 万行中全为空），作者侧的 subj_dayX.xlsx / select_dayX.xlsx / invalid_dayX.xlsx 名册不在本数据集内。按发布数据复算，第 2 次测试未达标 46 人中 9 人仍参加第 3 次测试、第 3 次测试未达标 102 人中 40 人仍完成第 4 次测试。该差异的成因无法从本数据集判定，故本数据集不使用任何归因性措辞",
+    "观察（非因果结论）：第 2 次测试「未达标仍参加」的 9 人全部来自最后四个招募轮次（phase_016–019），无一人来自 003–015 轮次；第 3 次测试的 40 人分布于 12 个招募轮次，其中 25 人与未参加者同轮次"
+  )
+)
+knitr::kable(appendix_a, caption = "附录 A：仅记录项")
+```
+
+## 附录 B：旧文件差异存档（备查）
+
+```{r appendix-b}
+knitr::kable(old_profile, caption = "附录 B-1：本次运行开始时读取的 IAT_cleaned.csv 结构概览（本仓库中该文件已重建）")
+knitr::kable(data.table(
+  项目 = c("positive_SMT d′ 匹配键精确匹配行数", "旧 IAT_cleaned 折算被试数（108360/168）"),
+  值 = c(n_exact, round(nrow(iat_old_raw) / 168))
+), caption = "附录 B-2：positive_SMT 与 IAT_cleaned 差异")
+```
+
+## 附录 C：旧表内容存档（删除前，备查）
+
+```{r appendix-c}
+cat("说明：两份旧表已按 D6 删除；以下内容取自存档副本 removed_subjects_legacy_content.csv。\n\n")
+knitr::kable(legacy_all, caption = "附录 C-1：removed_subjects_590_to_503.csv（180 行）")
+knitr::kable(legacy_other, caption = "附录 C-2：removed_subjects_others.csv（6 行）")
+```
+
+## 一致性核查
+
+```{r self-check}
+md5_after <- tools::md5sum(READONLY_INPUTS)
+changed <- names(md5_after)[md5_after != md5_before]
+
+check_dt <- data.table(
+  核查项 = c("主表 289 行 × 28 列", "流程核对表 13 行 × 15 列", "未达标但保留表 29 行 × 17 列",
+           "5+104+36+43+61+1+24 = 274，加 15 条非流程记录 = 289 行", "777 - 274 = 503",
+           "IAT 4 / ALT1 44 / 第 2 次质量筛选未达标 46",
+           "SRET 70+32-10 = 92 / ALT2 14 / 第 3 次质量筛选未达标 102",
+           "最终数据质量核查 24 人中复算一致 15",
+           "未达标但保留 29（任务质量 28 = 论文 28）；重施后 474 / 475",
+           "最终核查 24 = 触发任务质量判据 19 + 其他 5；527 中触发判据 47 人",
+           "旧表 180/180 可定位", "只读输入 md5 未变"),
+  通过 = c(nrow(master_full) == 289 && ncol(master_full) == 28,
+           nrow(rec_dt) == 13 && ncol(rec_dt) == 15,
+           nrow(kept_agg) == 29 && ncol(kept_agg) == 17,
+           (5 + 104 + 36 + 43 + 61 + 1 + 24) == 274 && nrow(master_full) == 289,
+           (777 - 274) == 503,
+           length(IAT_FLAG) == 4 && length(ALT1_FLAG) == 44 &&
+             length(union(IAT_FLAG, ALT1_FLAG)) == 46,
+           length(SRET_REC_FLAG) == 70 && length(SRET_SRC_FLAG) == 32 &&
+             length(SRET_FLAG) == 92 && length(ALT2_FLAG) == 14 && length(DAY3_FLAG) == 102,
+           length(FS_REC_HIT) == 15,
+           length(KEPT_IDS) == 29 && strict_task_n == 475 && strict_n == 474,
+           length(FS_FLAGGED) == 19 && length(FS_UNFLAGGED) == 5 &&
+             length(intersect(D10q, FLAG_TASK)) == 47 && length(FINAL503) + length(FS_FLAGGED) == 522,
+           nrow(locatable) == nrow(legacy_all),
+           length(changed) == 0)
+)
+stopifnot(all(check_dt$通过))
+knitr::kable(check_dt, caption = "一致性核查表")
+cat("md5 发生变化的只读输入：", if (length(changed)) paste(changed, collapse = ", ") else "无", "\n")
+```
