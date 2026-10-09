@@ -63,6 +63,8 @@ setDTthreads(0)
 | D12 | **判据以 `analysis/analysis.Rmd` 为实现权威**，论文正文措辞仅作说明 |
 | D13 | 术语采用心理学/社会科学数据预处理的惯用说法（以第 1.3 节为唯一术语表），不再使用“宇宙/门控/触标/幽灵”等工程化说法；**已发布 CSV 的列名与列内取值不在本轮改动范围**（见 1.3 末注） |
 | D14 | `day2_cleaned` 中同一 ID 出现多行（重复提交）时，按 ID 去重后计数，明细仍逐行保留在记录表中 |
+| D15 | 在排除主表中补充 jsPsych 程序性观测列（`js_trap1`、`js_trap1_unscorable_reason`、`js_trap2`、`js_trap3`、`js_honeypot`、`js_practice_gate_d2`、`js_practice_gate_d3`），**仅记录、不构成排除理由**，不改变现有排除环节与所有既有一致性校验。 |
+
 
 ## 1.2 判定界值与常量（对应 `analysis.Rmd` 行号）
 
