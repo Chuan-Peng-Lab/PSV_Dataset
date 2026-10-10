@@ -12,3 +12,6 @@
 11,11,任务级 ALT1（SMT 几何版）,681,,,任一正式条件 acc<0.60,44,44,01_raw/SMT_1_raw.csv,0,"",一致,match,""
 12,12,任务级 ALT2（SMT 自我参照版）,603,,,任一条件<0.20 或领域<0.60,15,14,01_raw/questionnaires_day3_raw.zip,-1,"",同上；覆盖 589/603,explained,""
 13,13,任务级 SRET,602,,,再认<0.55 或来源 RT 占比>0.30,92,92,01_raw/SRET_raw.csv,0,"",一致,match,""
+14,14,最终数据质量核查：事后重施任务质量判据,527,,19,行为质量（任务级判据：IAT/ALT1/ALT2/SRET 正确率或反应时界值），3 次测试全勤后重施,20,19,removed_subjects_legacy_content.csv（附录 C）+ 判据 analysis/analysis.Rmd,-1,"",复算一致 15；同一判据 47 人（527 完整个案）中 19 人排除、28 人保留；统一处理后样本量应为 522,explained,""
+15,15,最终数据质量核查：数据缺失 / 其他原因,527,,5,SRET 部分缺失（missing_SRET）或匿名化数据中原因不可考（reason_unavailable）,4,5,removed_subjects_legacy_content.csv（附录 C）,1,"",论文记为 3+1、本库复算 4+1（SRET 缺失 4、不可考 1）,explained,""
+16,16,771→503 全部阶段合计,771,503,269,上述各环节判据并集,,269,excluded_subjects_record.csv（各环节逐人计数）,,"",合计 269 = 104+36+43+61+1+19+5；777−274（含 777→771 年龄核查 5）＝503；771−269＝502＋1（年龄未达标但保留 phase_013_subj_30）＝503,recomputed_only,""
