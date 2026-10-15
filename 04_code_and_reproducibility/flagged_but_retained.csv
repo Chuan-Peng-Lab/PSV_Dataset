@@ -1,5 +1,5 @@
 ﻿ID,ParticipantID,flag_domain,flag_task,flag_criterion,condition_or_domain,observed_value,threshold,n_trials,evidence_file,recomputed_value,detected_at,in_released_503,paper_reported_total,strict_N_task_only,strict_N_all_criteria,note
-phase_013_subj_30,640,inclusion_criterion,age,age_criterion,第 1 次测试（筛查）年龄核查,60,18-59,NA,02_cleaned/questionnaires_day1_cleaned.csv,60,第 1 次测试筛查（年龄核查）,1,28,475,474,""
+phase_013_subj_30,640,inclusion_criterion,age,age_criterion,第 1 次测试（筛查）年龄核查,60,18-59,NA,02_cleaned_author_full/questionnaires_day1_cleaned.csv,60,第 1 次测试筛查（年龄核查）,1,28,475,474,""
 phase_010_subj_13,445,task_quality,SRET,SRET_recognition,整体再认,0.5312,<0.55,160,01_raw/SRET_raw.csv,0.5312,第 3 次测试质量筛选,1,28,475,474,""
 phase_014_subj_19,244,task_quality,ALT2;SRET,ALT2_condition_accuracy;SRET_recognition,ability_self_match_negative;整体再认,0.1458;0.5438,<0.20;<0.55,48;160,01_raw/questionnaires_day3_raw.zip;01_raw/SRET_raw.csv,0.1458;0.5438,第 3 次测试质量筛选,1,28,475,474,""
 phase_014_subj_32,373,task_quality,SRET,SRET_recognition,整体再认,0.5438,<0.55,160,01_raw/SRET_raw.csv,0.5438,第 3 次测试质量筛选,1,28,475,474,""
