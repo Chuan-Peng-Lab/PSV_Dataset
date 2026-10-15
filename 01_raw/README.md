@@ -8,11 +8,11 @@ This directory contains data exported from the experimental platform before tria
 
 | File / 文件 | Description / 说明 |
 |---|---|
-| `IAT_raw.csv` | Trial-level data for the Implicit Association Test (IAT), merged across all collection waves (n = 681 participants) / IAT 试次级数据，全部批次合并（681 名被试） |
-| `SMT_1_raw.csv` | Trial-level data for the geometric-shape version of the SMT (Day 2 session; historical label ALT1), all waves (n = 681) / SMT 几何图形版（Day 2；历史标签 ALT1）试次级数据，全部批次（681 人） |
-| `SMT_2_raw.csv` | Trial-level data for the self-referential version of the SMT (Day 3 session; historical label ALT2), all waves (n = 603) / SMT 自我参照版（Day 3；历史标签 ALT2）试次级数据，全部批次（603 人） |
-| `SRET_raw.csv` | Trial-level data for the Self-Referent Encoding Task (SRET), all waves (n = 603) / SRET 试次级数据，全部批次（603 人） |
-| `questionnaires_day1_raw.csv` | Day 1 questionnaire export (platform label `day0`): consent, demographics, SCC, PHQ-9, GAD-7 / Day 1（平台标签 `day0`）：知情同意、人口学、SCC、PHQ-9、GAD-7 |
+| `IAT_raw.csv` | Trial-level data for the Implicit Association Test (IAT), merged across all collection waves/ IAT 试次级数据，全部批次合并（681 名被试） |
+| `SMT_1_raw.csv` | Trial-level data for the geometric-shape version of the SMT (Day 2 session; historical label ALT1), all waves / SMT 几何图形版（Day 2；历史标签 ALT1）试次级数据，全部批次|
+| `SMT_2_raw.csv` | Trial-level data for the self-referential version of the SMT (Day 3 session; historical label ALT2), all waves / SMT 自我参照版（Day 3；历史标签 ALT2）试次级数据，全部批次 |
+| `SRET_raw.csv` | Trial-level data for the Self-Referent Encoding Task (SRET), all waves  / SRET 试次级数据，全部批次 |
+| `questionnaires_day1_raw.csv` | Day 1 questionnaire export (platform label `day0`): consent, demographics, SCC, PHQ-9, GAD-7; 777 participants / Day 1（平台标签 `day0`）：知情同意、人口学、SCC、PHQ-9、GAD-7；共 777 名被试 |
 | `questionnaires_day2_raw.zip` | Compressed Day 2 export (platform label `day1`): questionnaires (RSES, CSES, NPI-16, HNS, SGPS) + IAT + SMT geometric version (ALT1) / Day 2（平台标签 `day1`）：问卷 + IAT + SMT 几何版（ALT1） |
 | `questionnaires_day3_raw.zip` | Compressed Day 3 export (platform label `day2`): questionnaires (SWLS, IPC-I, LOT-R, MIS, MSIS, SDE, IM) + SRET + SMT self-referential version (ALT2) / Day 3（平台标签 `day2`）：问卷 + SRET + SMT 自我参照版（ALT2） |
 | `questionnaires_day10_raw.csv` | Day 10 retest export (platform label `day3`): full questionnaire set, no behavioral tasks / Day 10 重测（平台标签 `day3`）：问卷全量重测，无行为任务 |

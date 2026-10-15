@@ -1,8 +1,8 @@
 # 02_cleaned: Cleaned Data / 清洗后数据
 
-This directory contains cleaned task data and cleaned questionnaire tables used to construct the participant-level indices. Practice trials and invalid trials were removed according to the task-specific preprocessing procedures.
+This directory contains cleaned task data and cleaned questionnaire tables used to construct the participant-level indices. Practice trials and invalid trials were removed according to the task-specific preprocessing procedures. After cleaning, **606 participants** are retained (the union of unique `ID`s across all files in this directory).
 
-本目录包含用于构建参与者层面指标的清洗任务数据和清洗后问卷表。按照各任务的预处理程序删除了练习试次和无效试次。
+本目录包含用于构建参与者层面指标的清洗任务数据和清洗后问卷表。按照各任务的预处理程序删除了练习试次和无效试次。清洗后共保留 **606 名参与者**（本目录各文件唯一 `ID` 的并集）。
 
 ## Files / 文件
 
@@ -19,9 +19,9 @@ This directory contains cleaned task data and cleaned questionnaire tables used 
 
 ## SMT naming note / SMT 命名说明
 
-The directory follows the manuscript naming, which uses **SMT**. The files are named `SMT_1_cleaned.zip` (geometric-shape version) and `SMT_2_clean.zip` (self-referential version) to match the file tree; the corresponding historical labels ALT1 and ALT2 are retained only in the raw files and analysis code.
+The directory follows the manuscript naming, which uses **SMT**. The files are named `SMT_1_cleaned.zip` (geometric-shape version) and `SMT_2_clean.zip` (self-referential version) ; the corresponding historical labels ALT1 and ALT2 are retained only in the raw files and analysis code.
 
-目录命名与论文一致，采用 **SMT**。文件 `SMT_1_clean.zip`（几何图形版）与 `SMT_2_cleaned.zip`（自我参照版）与文件树保持一致；历史标签 ALT1/ALT2 仅保留在原始文件与分析代码中。
+目录命名与论文一致，采用 **SMT**。文件 `SMT_1_clean.zip`（几何图形版）与 `SMT_2_cleaned.zip`（自我参照版）；历史标签 ALT1/ALT2 仅保留在原始文件与分析代码中。
 
 The cleaned files are not a substitute for the raw files when users need to implement a new trial-exclusion rule. Use the raw files together with the preprocessing code for such analyses.
 
