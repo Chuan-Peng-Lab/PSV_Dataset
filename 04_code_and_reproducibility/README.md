@@ -43,17 +43,11 @@ Contains the integrated analysis pipeline in manuscript order, together with the
 | `analysis.Rmd` | Main analysis file integrating all analysis code for the manuscript / 主分析文件，整合文章内全部分析流程的代码 |
 | `analysis.html` | HTML report generated from `analysis.Rmd` / 由该 Rmd 生成的 HTML |
 
-## excluded_record_paper/ — Exclusion per the Paper / 按论文思路的被试排除
-
-Contains the participant-exclusion records reconstructed by following the manuscript's own analysis logic (`analysis/analysis.Rmd`), from the 777 Day-1 records to the **503**-participant final sample. The single reproduction entry point is `exclusion_pipeline.qmd` (R + Quarto), which also renders `exclusion_pipeline.html`; it writes the per-subject detail `excluded_subjects_record.csv`, the stage-flow `exclusion_flow_reconciliation.csv`, and `flagged_but_retained.csv`. See the folder's `README.md` for details.
-
-包含按照论文自身分析逻辑（`analysis/analysis.Rmd`）重建的被试排除记录，即从 Day 1 的 777 条记录到 **503** 名最终样本。唯一复现入口为 `exclusion_pipeline.qmd`（R + Quarto），同时渲染出 `exclusion_pipeline.html`；并生成逐人明细 `excluded_subjects_record.csv`、流程核对 `exclusion_flow_reconciliation.csv` 及 `flagged_but_retained.csv`。详见该文件夹的 `README.md`。
-
 ## subject _screening/ — Standard Cleaning / 标准清洗
 
-Contains the standard participant- and task-level cleaning records, reducing the 777 Day-1 records to **606** retained participants and then to the **466** complete-and-valid set. It holds the hard-criterion exclusions `excluded_subjects_171.csv`, the task-level `invalidated_task_data_140.csv`, the three-layer ledger `exclusion_ledger_three_layer.csv`, the full removal ledger `removal_ledger_777_to_466.csv`, and the timeline log `timeline_quality_screen.csv`, together with the R scripts that rebuild them. See the folder's `README.md` for details.
+Contains the standard participant- and task-level cleaning records, reducing the 777 Day-1 records to **606** retained participants and then to the **466** complete-and-valid set. 
 
-包含被试层面与任务层面的标准清洗记录，将 Day 1 的 777 条记录缩减为 **606** 名保留参与者，再得到 **466** 名完整且合格的数据集合。内含硬标准排除 `excluded_subjects_171.csv`、任务级 `invalidated_task_data_140.csv`、三层明细账 `exclusion_ledger_three_layer.csv`、完整排除明细账 `removal_ledger_777_to_466.csv` 与时间线日志 `timeline_quality_screen.csv`，以及重建这些表格的 R 脚本。详见该文件夹的 `README.md`。
+包含被试层面与任务层面的标准清洗记录，将 Day 1 的 777 条记录缩减为 **606** 名保留参与者，再得到 **466** 名完整且合格的数据集合。
 
 ## Notes / 说明
 

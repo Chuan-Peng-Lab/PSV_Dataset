@@ -1,0 +1,172 @@
+﻿ID,ParticipantID,排除原因,排除阶段,具体判据,参加场次,观测值
+phase_003_subj_14,681,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=40; honeypot=0; IAT_prop=0.0069(ability,n=288); ALT1_min_acc=0.6042(trapezoid_nonmatch,n=96)"
+phase_003_subj_7,251,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=30; honeypot=0
+phase_004_subj_14,467,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=25; honeypot=0
+phase_004_subj_20,686,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_005_subj_11,503,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_005_subj_15,636,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_007_subj_15,490,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_007_subj_2,71,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_007_subj_20,639,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_007_subj_7,173,年龄不符合要求,Day1,年龄=71（18–59 之外）,1,age=71; honeypot=0
+phase_008_subj_9,284,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=26; honeypot=0
+phase_009_subj_17,442,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7292(pentagon_nonmatch,n=48)"
+phase_010_subj_4,178,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=36; honeypot=0
+phase_011_subj_11,359,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_011_subj_12,375,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=33; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6042(pentagon_nonmatch,n=48); trap1=2(ans=2)"
+phase_011_subj_14,440,trap2≥4（第3次）,Day3,trap2=4（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=23; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.6042(ellipse_match,n=48); trap1=1(ans=1); SRET_rec=0.6500(n=160); SRET_src_lt200=0.0000(n=96); ALT2_min_cond=0.5417(ability_self_nonmatch_negative); ALT2_min_domain=0.7109(ability); trap2=4(我今天没有填过任何问卷。)"
+phase_011_subj_15,444,trap1答错（第2次）,Day2,trap1=3（答案应为 1，答错）,"1,2","age=20; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.5625(hexagon_nonmatch,n=48); trap1=3(ans=1)"
+phase_011_subj_16,446,trap2≥4（第3次）,Day3,trap2=6（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7292(circle_nonmatch,n=48); trap1=4(ans=4); SRET_rec=0.6750(n=160); SRET_src_lt200=0.0109(n=92); ALT2_min_cond=0.7083(moral_self_nonmatch_positive); ALT2_min_domain=0.8490(ability); trap2=6(我今天没有填过任何问卷。)"
+phase_011_subj_21,562,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_011_subj_24,651,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6042(diamond_match,n=48); trap1=1(ans=1); SRET_rec=0.8063(n=160); SRET_src_lt200=0.0000(n=67); ALT2_min_cond=0.5833(ability_friend_match_positive); ALT2_min_domain=0.7656(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_012_subj_1,49,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=25; honeypot=0
+phase_012_subj_9,345,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(hexagon_nonmatch,n=48); trap1=4(ans=4)"
+phase_013_subj_16,393,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_013_subj_20,433,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=26; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(trapezoid_match,n=48); trap1=5(ans=5)"
+phase_013_subj_3,96,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_013_subj_30,640,年龄不符合要求,Day1,年龄=60（18–59 之外）,"1,2,3,4","age=60; honeypot=0; IAT_prop=0.0139(moral,n=144); ALT1_min_acc=0.6875(trapezoid_nonmatch,n=48); trap1=4(ans=4); SRET_rec=0.7438(n=160); SRET_src_lt200=0.0000(n=93); ALT2_min_cond=0.3750(moral_self_nonmatch_positive); ALT2_min_domain=0.6615(moral); trap2=1(我从来没有用过电脑。)"
+phase_014_subj_1,51,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_014_subj_2,51,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7708(hexagon_match,n=48); trap1=1(ans=1)"
+phase_014_subj_20,254,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_014_subj_22,280,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=31; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7083(pentagon_match,n=48)"
+phase_014_subj_25,308,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_014_subj_26,308,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_014_subj_27,328,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7292(pentagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.6312(n=160); SRET_src_lt200=0.0000(n=55); ALT2_min_cond=0.7708(ability_self_nonmatch_positive); ALT2_min_domain=0.8984(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_014_subj_3,67,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_014_subj_30,362,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=27; honeypot=0
+phase_014_subj_35,388,年龄不符合要求,Day1,年龄=84（18–59 之外）,1,age=84; honeypot=0
+phase_014_subj_43,451,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=25; honeypot=0
+phase_014_subj_46,471,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_014_subj_52,621,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_014_subj_54,664,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_014_subj_56,666,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_014_subj_57,672,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_014_subj_58,678,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=24; honeypot=0
+phase_014_subj_6,129,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_014_subj_60,693,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_014_subj_7,131,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_015_subj_14,193,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=26; honeypot=0
+phase_015_subj_17,223,trap1答错（第2次）,Day2,trap1=3（答案应为 1，答错）,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6875(diamond_nonmatch,n=48); trap1=3(ans=1); SRET_rec=0.6687(n=160); SRET_src_lt200=0.0000(n=85); ALT2_min_cond=0.7083(moral_self_nonmatch_negative); ALT2_min_domain=0.8177(moral); trap2=1(我今年不到3岁。)"
+phase_015_subj_36,575,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_015_subj_44,664,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_016_subj_1,6,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(trapezoid_match,n=48); trap1=5(ans=5); SRET_rec=0.5687(n=160); SRET_src_lt200=0.2871(n=101); ALT2_min_cond=0.6250(moral_friend_nonmatch_positive); ALT2_min_domain=0.7578(moral); trap2=7(我今天没有填过任何问卷。)"
+phase_016_subj_12,118,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_016_subj_15,128,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_016_subj_18,144,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_016_subj_19,146,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_016_subj_21,157,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_016_subj_22,157,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_016_subj_23,160,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_016_subj_26,182,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_016_subj_27,185,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_016_subj_31,238,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.7917(pentagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5500(n=160); SRET_src_lt200=0.1591(n=88); ALT2_min_cond=0.7292(moral_self_nonmatch_negative); ALT2_min_domain=0.8724(moral); trap2=7(我今天没有填过任何问卷。)"
+phase_016_subj_39,308,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_016_subj_4,27,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5625(trapezoid_match,n=48); trap1=4(ans=4); SRET_rec=0.5250(n=160); SRET_src_lt200=0.0541(n=148); ALT2_min_cond=0.5833(ability_self_match_negative); ALT2_min_domain=0.8333(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_016_subj_41,336,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_016_subj_46,368,trap2≥4（第3次）,Day3,trap2=4（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7708(trapezoid_nonmatch,n=48); trap1=3(ans=3); SRET_rec=0.7250(n=160); SRET_src_lt200=0.5957(n=94); ALT2_min_cond=0.6875(ability_self_match_negative); ALT2_min_domain=0.8229(moral); trap2=4(我今天没有填过任何问卷。)"
+phase_016_subj_47,381,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.9375(hexagon_nonmatch,n=48); trap1=2(ans=2)"
+phase_016_subj_57,447,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=35; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.8333(hexagon_match,n=48); trap1=3(ans=3)"
+phase_016_subj_58,451,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=25; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8125(diamond_match,n=48); SRET_rec=0.6125(n=160); SRET_src_lt200=0.0865(n=104); ALT2_min_cond=0.4583(ability_friend_nonmatch_positive); ALT2_min_domain=0.6771(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_016_subj_61,524,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=34; honeypot=0; IAT_prop=0.0486(ability,n=144); ALT1_min_acc=0.7292(ellipse_match,n=48); trap1=4(ans=4)"
+phase_016_subj_64,558,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_016_subj_65,563,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_016_subj_67,584,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(trapezoid_nonmatch,n=48); trap1=1(ans=1)"
+phase_016_subj_7,51,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_016_subj_72,639,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6667(square_match,n=48)"
+phase_016_subj_75,654,trap2≥4（第3次）,Day3,trap2=4（“我曾经去过月球。”，≥4 视为未通过）,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6875(diamond_nonmatch,n=48); SRET_rec=0.5875(n=160); SRET_src_lt200=0.4231(n=130); ALT2_min_cond=0.4792(ability_friend_nonmatch_positive); ALT2_min_domain=0.6536(ability); trap2=4(我曾经去过月球。)"
+phase_016_subj_76,656,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_016_subj_80,669,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=30; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7292(hexagon_nonmatch,n=48); trap1=2(ans=2)"
+phase_016_subj_9,77,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8958(hexagon_nonmatch,n=48); trap1=5(ans=5); SRET_rec=0.7312(n=160); SRET_src_lt200=0.0000(n=67); ALT2_min_cond=0.3750(ability_friend_match_negative); ALT2_min_domain=0.7604(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_017_subj_105,434,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7292(triangle_match,n=48)"
+phase_017_subj_107,443,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_017_subj_109,452,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_017_subj_11,57,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=38; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6458(pentagon_match,n=48)"
+phase_017_subj_110,453,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_017_subj_112,458,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.8750(triangle_match,n=48)"
+phase_017_subj_116,466,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_017_subj_118,473,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_017_subj_119,478,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=27; honeypot=0
+phase_017_subj_12,60,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_017_subj_126,511,trap1答错（第2次）,Day2,trap1=5（答案应为 1，答错）,"1,2","age=26; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7500(trapezoid_nonmatch,n=48); trap1=5(ans=1)"
+phase_017_subj_129,534,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=24; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6875(triangle_match,n=48); trap1=1(ans=1)"
+phase_017_subj_131,538,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6667(diamond_match,n=48)"
+phase_017_subj_137,550,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_017_subj_139,562,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_017_subj_140,565,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=31; honeypot=0
+phase_017_subj_143,582,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6250(diamond_match,n=48); trap1=1(ans=1)"
+phase_017_subj_146,602,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.8125(diamond_match,n=48)"
+phase_017_subj_148,616,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(square_nonmatch,n=48)"
+phase_017_subj_150,623,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=37; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(trapezoid_nonmatch,n=48); trap1=1(ans=1)"
+phase_017_subj_151,623,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=21; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.6667(pentagon_nonmatch,n=48); trap1=1(ans=1)"
+phase_017_subj_162,685,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=28; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7500(trapezoid_nonmatch,n=48)"
+phase_017_subj_164,687,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=30; honeypot=0
+phase_017_subj_165,688,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_017_subj_167,694,trap1答错（第2次）,Day2,trap1=4（答案应为 1，答错）,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.9167(trapezoid_nonmatch,n=48); trap1=4(ans=1); SRET_rec=0.5500(n=160); SRET_src_lt200=0.0000(n=24); ALT2_min_cond=0.8125(ability_friend_nonmatch_positive); ALT2_min_domain=0.9245(ability)"
+phase_017_subj_17,80,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7708(hexagon_match,n=48); trap1=1(ans=1)"
+phase_017_subj_20,85,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=24; honeypot=0; IAT_prop=0.0000(ability,n=288); ALT1_min_acc=0.8750(diamond_match,n=96)"
+phase_017_subj_25,93,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=55; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(ellipse_match,n=48)"
+phase_017_subj_26,95,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8333(trapezoid_nonmatch,n=48)"
+phase_017_subj_28,96,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8750(diamond_match,n=48)"
+phase_017_subj_39,151,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_017_subj_42,169,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=29; honeypot=0
+phase_017_subj_44,175,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=22; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.7708(trapezoid_match,n=48)"
+phase_017_subj_48,186,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=28; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8333(ellipse_match,n=48)"
+phase_017_subj_50,196,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(pentagon_match,n=48)"
+phase_017_subj_52,219,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_017_subj_57,239,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=31; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(square_match,n=48)"
+phase_017_subj_66,296,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=22; honeypot=0
+phase_017_subj_72,323,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=41; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(hexagon_match,n=48); trap1=1(ans=1)"
+phase_017_subj_74,338,年龄不符合要求,Day1,年龄=0（18–59 之外）,1,age=0; honeypot=0
+phase_017_subj_80,355,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=47; honeypot=0
+phase_017_subj_81,357,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7083(pentagon_nonmatch,n=48); trap1=1(ans=1)"
+phase_017_subj_85,367,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7083(pentagon_match,n=48)"
+phase_017_subj_9,47,年龄不符合要求,Day1,年龄=109（18–59 之外）,1,age=109; honeypot=0
+phase_017_subj_92,386,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_017_subj_96,398,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=26; honeypot=0
+phase_018_subj_1,24,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=34; honeypot=0
+phase_018_subj_10,103,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=35; honeypot=0
+phase_018_subj_100,658,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=24; honeypot=0; IAT_prop=0.0139(ability,n=144); ALT1_min_acc=0.6875(hexagon_nonmatch,n=48)"
+phase_018_subj_102,670,年龄不符合要求,Day1,年龄=71（18–59 之外）,1,age=71; honeypot=0
+phase_018_subj_105,684,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=36; honeypot=0
+phase_018_subj_12,112,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=38; honeypot=0
+phase_018_subj_18,130,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(hexagon_nonmatch,n=48)"
+phase_018_subj_19,137,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=31; honeypot=0
+phase_018_subj_2,34,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=39; honeypot=0
+phase_018_subj_20,139,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_018_subj_22,144,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_018_subj_24,158,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_018_subj_25,160,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=25; honeypot=0
+phase_018_subj_27,184,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_018_subj_30,230,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=24; honeypot=0
+phase_018_subj_31,233,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0278(ability,n=144); ALT1_min_acc=0.7500(diamond_nonmatch,n=48)"
+phase_018_subj_32,240,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=32; honeypot=0
+phase_018_subj_35,248,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_018_subj_37,249,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=24; honeypot=0
+phase_018_subj_40,271,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=37; honeypot=0
+phase_018_subj_49,323,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=39; honeypot=0
+phase_018_subj_52,338,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_018_subj_58,385,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_018_subj_63,423,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=33; honeypot=0
+phase_018_subj_64,428,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8958(hexagon_nonmatch,n=48)"
+phase_018_subj_66,436,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_018_subj_67,442,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=34; honeypot=0
+phase_018_subj_68,447,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=33; honeypot=0
+phase_018_subj_7,90,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_018_subj_83,554,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=37; honeypot=0
+phase_018_subj_85,567,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=20; honeypot=0
+phase_018_subj_90,596,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=24; honeypot=0
+phase_018_subj_91,601,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=29; honeypot=0
+phase_018_subj_92,611,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_018_subj_93,615,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=25; honeypot=0
+phase_018_subj_94,618,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6458(diamond_nonmatch,n=48)"
+phase_018_subj_95,620,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=23; honeypot=0
+phase_018_subj_96,621,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=21; honeypot=0
+phase_019_subj_1,16,第2次后失访：未参加第3次,Day2,未参加第3次测试（自愿退出）,"1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(trapezoid_match,n=48); trap1=4(ans=4)"
+phase_019_subj_10,111,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(trapezoid_nonmatch,n=48); trap1=5(ans=5); SRET_rec=0.6937(n=160); SRET_src_lt200=0.0000(n=93); ALT2_min_cond=0.6042(ability_friend_nonmatch_positive); ALT2_min_domain=0.8255(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_019_subj_11,123,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=24; honeypot=0
+phase_019_subj_27,344,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.7083(triangle_match,n=48); trap1=2(ans=2); SRET_rec=0.5750(n=160); SRET_src_lt200=0.0352(n=142); ALT2_min_cond=0.6458(moral_self_match_negative); ALT2_min_domain=0.8099(moral); trap2=7(我今天没有填过任何问卷。)"
+phase_019_subj_32,412,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0
+phase_019_subj_41,531,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3,4","age=46; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8542(trapezoid_match,n=48); trap1=2(ans=2); SRET_rec=0.7063(n=160); SRET_src_lt200=0.0000(n=103); ALT2_min_cond=0.6667(ability_friend_nonmatch_negative); ALT2_min_domain=0.8255(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_019_subj_51,654,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=18; honeypot=0
+phase_019_subj_52,667,trap2≥4（第3次）,Day3,trap2=7（“我今天没有填过任何问卷。”，≥4 视为未通过）,"1,2,3","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6458(diamond_match,n=48); SRET_rec=0.5062(n=160); SRET_src_lt200=0.0345(n=145); ALT2_min_cond=0.2083(moral_self_match_negative); ALT2_min_domain=0.6771(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_019_subj_7,73,第1次后失访：未参加第2次,Day1,未参加第2次测试（自愿退出）,1,age=19; honeypot=0

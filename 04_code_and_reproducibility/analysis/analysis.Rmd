@@ -1,6 +1,10 @@
 ---
 title: "PSV_Dataset: Integrated analysis pipeline for the positive self-view dataset"
 author: "Xinru Sun, Yi Ding, Shuting Sun, Hu Chuan-Peng"
+params:
+  run_current: true
+  install_derived: false
+  validate_derived: true
 output:
   html_document:
     toc: true
@@ -8,11 +12,20 @@ output:
     number_sections: true
 ---
 
+<!-- Historical chunks remain visible but are not run against the current data. -->
+
+```{r psv_document_options, include=FALSE, eval=TRUE}
+knitr::opts_chunk$set(eval=FALSE)
+if (!exists("params", inherits=TRUE)) {
+  params <- list(run_current=TRUE, install_derived=FALSE, validate_derived=TRUE)
+}
+```
+
 # Overview
 
 This document integrates, in manuscript order, all analysis code used to produce the released dataset and the results reported in the manuscript *"An integrated dataset of self-report and behavioral measures of positive self-view"*.
 
-Each section corresponds to a manuscript section and contains the original code copied verbatim from the archived project scripts (source noted in each header). Code is not rewritten; chunk headers from the original scripts are preserved.
+Sections 1–8 preserve the historical scripts and are not executed by default. Section 9 contains the complete current 606-pool pipeline: derivation from 02_cleaned, publication of exactly nine CSVs, and independent validation. Current calculations are maintained in this Rmd; command-line R files are compatibility launchers only.
 
 **Manuscript → code map**
 
@@ -2549,8 +2562,526 @@ message("Finished. Outputs written to ", OUTPUT_DIR)
 
 ```
 
+# Section 9. 当前606池：新02数据的派生指标与九文件输出
+
+本节是当前版本的唯一计算实现（2026-10-22）。将此前新增的派生计算、输出整理和独立核验代码完整内嵌于此，不依赖外部R脚本提供计分函数。第1—8节保留为历史参考，默认不执行。
+
+输入为当前02_cleaned和04中的retained_606_IDs.csv。保留全部160个首次测量问卷条目及26个行为指标，按真实ID合并，不因某个任务失败删除其他有效数据。IAT 602人、SMT2 557人、SRET 483人；SOURCE_morality_Negative因6人缺少可计分试次而477人有值。问卷有效性及条目数继承02，不再次反向计分。
+
+**运行方式**
+
+- 在项目内打开本Rmd并Knit：默认重新计算到04审计目录的暂存区，核验当前九个正式CSV；不替换03文件。
+- 需要更新03时，将YAML参数install_derived改为true，或使用rmarkdown::render传入该参数。安装前备份旧文件，03只保留下列9个CSV。
+- 命令行运行：Rscript 04_code_and_reproducibility/analysis/run_analysis_current.R --install。该入口直接提取执行本节代码，不复制算法。
+- 仅核验：同一命令使用--mode=validate；仅整理输出目录：使用--mode=organize。
+- 如只想渲染历史代码说明，可设置run_current=false。不要直接执行含旧路径的历史代码块。
+
+| 参数 | 默认值 | 含义 |
+|---|---|---|
+| run_current | true | 执行本节 |
+| install_derived | false | true时备份并更新03，false时仅生成04暂存结果 |
+| validate_derived | true | 独立核验正式输出；若02有更新，应同时安装后再核验 |
+
+**九个正式CSV**
+
+1. positive_IAT.csv
+2. positive_SMT.csv
+3. positive_SRET.csv
+4. questionnaire_indices_day1.csv
+5. questionnaire_indices_day2.csv
+6. questionnaire_indices_day3.csv
+7. questionnaire_indices_day10.csv
+8. questionnaire_indices_all_sessions.csv
+9. all_derived_indices.csv
+
+沿用已确认的文件内容：四份问卷及问卷合并表为量表总分；综合主表为606行、ID加160个首次测量条目和26个行为指标，共187列。Day10总分在重测及问卷合并表中，不另加进首次测量主表。z分数、条目中间表、人数统计与变量字典保存在04审计目录，不增加03的CSV数量。
+
+**计分约定**
+
+IAT按区块原平均RT+600ms惩罚错误试次。SMT RT为friend−self，d′为self−friend并共享不匹配噪声。SRET yes、RT和REC为两个人物指标的等权平均，SOURCE按self为信号、friend为噪声计算d′。这些方向以Rmd实际运算为准，不套用旧字典中冲突的差值描述。
+
+SRET编码RT采用正文的可用试次均值，不填补226条缺失RT。对仅一类SDT试次的条件沿用0.5校正；完全无可计分试次的条件留NA。phase_017_subj_16保留，缺失再认反应不虚构分类。所有特殊条件及有效试次数有独立审计记录。
+
+
+## 9.1 路径、参数与通用函数
+
+```{r psv_current_setup, eval=params$run_current, message=FALSE, warning=TRUE}
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(tidyr)
+  library(readr)
+})
+find_psv_root <- function(start) {
+  if (!length(start) || is.na(start) || !nzchar(start)) return(NULL)
+  p <- normalizePath(start, mustWork=FALSE)
+  if (!dir.exists(p)) p <- dirname(p)
+  repeat {
+    if (dir.exists(file.path(p, "02_cleaned")) &&
+        file.exists(file.path(p, "04_code_and_reproducibility", "analysis", "analysis.Rmd"))) return(p)
+    parent <- dirname(p)
+    if (identical(parent, p)) return(NULL)
+    p <- parent
+  }
+}
+input_path <- if (requireNamespace("knitr", quietly=TRUE)) knitr::current_input(dir=TRUE) else NULL
+cli_path <- sub("^--file=", "", grep("^--file=", commandArgs(FALSE), value=TRUE))
+candidates <- c(getwd(), input_path, cli_path)
+roots <- Filter(Negate(is.null), lapply(candidates, find_psv_root))
+if (!length(roots)) stop("Cannot locate PSV_Dataset. Run from the project directory or open this Rmd in RStudio.")
+root <- roots[[1]]
+script <- file.path(root, "04_code_and_reproducibility", "analysis", "analysis.Rmd")
+if (!exists("params", inherits=TRUE)) params <- list(run_current=TRUE, install_derived=FALSE, validate_derived=TRUE)
+clean <- file.path(root, '02_cleaned')
+audit <- file.path(root, '04_code_and_reproducibility', 'analysis', 'derived_606_audit')
+stage <- file.path(audit, 'staged_03_derived')
+dir.create(stage, recursive=TRUE, showWarnings=FALSE)
+out <- function(x, name, where=stage) write_excel_csv(x, file.path(where, name), na='')
+read <- function(name) read_csv(file.path(clean, name), show_col_types=FALSE, progress=FALSE)
+pool_file <- file.path(root, '04_code_and_reproducibility', 'subject _screening', 'retained_606_IDs.csv')
+pool <- read_csv(pool_file, show_col_types=FALSE) %>% select(ID) %>% arrange(ID)
+stopifnot(nrow(pool)==606L, !anyNA(pool$ID), !anyDuplicated(pool$ID))
+check_ids <- function(x, expected=NULL, unique=FALSE) {
+  stopifnot(!anyNA(x$ID), all(x$ID %in% pool$ID))
+  if (!is.null(expected)) stopifnot(n_distinct(x$ID)==expected)
+  if (unique) stopifnot(!anyDuplicated(x$ID))
+  invisible(x)
+}
+mean_available <- function(x) if (all(is.na(x))) NA_real_ else mean(x, na.rm=TRUE)
+dp <- function(H,M,FA,CR) {
+  # Follow the Rmd's loglinear correction exactly, even for one empty category.
+  # Completely absent groups are never manufactured as scored observations.
+  qnorm((H+.5)/(H+M+1))-qnorm((FA+.5)/(FA+CR+1))
+}
+to_wide <- function(x) {
+  stopifnot(!anyDuplicated(x[c('ID','indicator')]))
+  pivot_wider(x, names_from=indicator, values_from=score) %>% arrange(ID)
+}
+norm <- function(x) x %>% mutate(domain=recode(tolower(domain), moral='morality'), valence=tolower(valence))
+ind <- function(prefix, domain, valence) paste0(prefix, '_', domain, '_', ifelse(valence=='positive','Positive','Negative'))
+```
+
+
+## 9.2 九个正式CSV及可恢复归档
+
+```{r psv_current_output_layout, eval=params$run_current, message=FALSE, warning=TRUE}
+# Keep exactly the nine requested CSV deliverables in 03_derived.
+# Other CSVs are recoverably moved to the audit directory, not deleted.
+derived_output_files <- c(
+  'positive_IAT.csv', 'positive_SMT.csv', 'positive_SRET.csv',
+  'questionnaire_indices_day1.csv', 'questionnaire_indices_day2.csv',
+  'questionnaire_indices_day3.csv', 'questionnaire_indices_day10.csv',
+  'questionnaire_indices_all_sessions.csv', 'all_derived_indices.csv'
+)
+organize_derived_outputs <- function(root) {
+  dest <- file.path(root,'03_derived')
+  audit <- file.path(root,'04_code_and_reproducibility','analysis','derived_606_audit')
+  keep <- file.path(dest,derived_output_files)
+  stopifnot(all(file.exists(keep)))
+  before <- unname(tools::md5sum(keep))
+  extras <- setdiff(list.files(dest,pattern='\\.csv$',full.names=TRUE),keep)
+  if(length(extras)) {
+    archive <- file.path(audit,paste0('removed_from_03_',format(Sys.time(),'%Y%m%d_%H%M%S',tz='Asia/Shanghai')))
+    stopifnot(!dir.exists(archive))
+    dir.create(archive,recursive=TRUE)
+    oldhash <- unname(tools::md5sum(extras))
+    target <- file.path(archive,basename(extras))
+    for(i in seq_along(extras)) stopifnot(file.rename(extras[i],target[i]))
+    stopifnot(identical(unname(tools::md5sum(target)),oldhash))
+    readr::write_excel_csv(data.frame(file=basename(extras),md5=oldhash,archive=archive),
+      file.path(audit,'removed_from_03_manifest.csv'))
+    cat('Archived',length(extras),'CSV files to',archive,'\n')
+  }
+  stopifnot(identical(unname(tools::md5sum(keep)),before),
+            setequal(list.files(dest,pattern='\\.csv$'),derived_output_files))
+  inventory <- do.call(rbind,lapply(keep,function(f) {
+    x <- readr::read_csv(f,show_col_types=FALSE,progress=FALSE)
+    stopifnot('ID' %in% names(x),!anyNA(x$ID),!anyDuplicated(x$ID),!anyDuplicated(names(x)))
+    data.frame(file=basename(f),subjects=nrow(x),columns=ncol(x),md5=unname(tools::md5sum(f)))
+  }))
+  readr::write_excel_csv(inventory,file.path(audit,'nine_file_inventory.csv'))
+  print(inventory[c('file','subjects','columns')],row.names=FALSE)
+  invisible(inventory)
+}
+```
+
+
+## 9.3 IAT：2个指标
+
+```{r psv_current_iat, eval=params$run_current, message=FALSE, warning=TRUE}
+# IAT: original block means (all retained RTs), error penalty +600 ms,
+# then the Rmd's pooled SD and average of the two block-pair D scores.
+iat <- read('IAT_cleaned.csv'); check_ids(iat,602)
+stopifnot(all(iat$correct %in% 0:1), all(iat$version %in% c('A1','A2','B1','B2')), all(is.finite(iat$rt)))
+ib <- iat %>% group_by(ID,task_id,version) %>%
+  mutate(original_mean=mean(rt), adjusted_rt=if_else(correct==0,original_mean+600,rt)) %>%
+  summarise(original_mean=first(original_mean), mean_rt=mean(adjusted_rt), sd_rt=sd(adjusted_rt), n=n(), errors=sum(correct==0),.groups='drop')
+stopifnot(all(count(ib,ID)$n==8L))
+iw <- ib %>% select(ID,task_id,version,mean_rt,sd_rt,n) %>%
+  pivot_wider(names_from=version,values_from=c(mean_rt,sd_rt,n)) %>% mutate(
+    sd1=sqrt(((n_A1-1)*sd_rt_A1^2+(n_B1-1)*sd_rt_B1^2+(n_A1+n_B1)*(mean_rt_A1-mean_rt_B1)^2/4)/(n_A1+n_B1-1)),
+    sd2=sqrt(((n_A2-1)*sd_rt_A2^2+(n_B2-1)*sd_rt_B2^2+(n_A2+n_B2)*(mean_rt_A2-mean_rt_B2)^2/4)/(n_A2+n_B2-1)),
+    score=((mean_rt_B1-mean_rt_A1)/sd1+(mean_rt_B2-mean_rt_A2)/sd2)/2,
+    indicator=paste0(task_id,'_IAT'))
+iat_scores <- to_wide(select(iw,ID,indicator,score))
+out(ib,'IAT_block_components.csv',audit)
+```
+
+
+## 9.4 SMT2：8个指标
+
+```{r psv_current_smt, eval=params$run_current, message=FALSE, warning=TRUE}
+# SMT2 (the self-referential task, not SMT1): matching RT friend-self;
+# d-prime self-friend with shared nonmatching noise for each person.
+z <- file.path(clean,'SMT_2_cleaned.zip')
+member <- unzip(z,list=TRUE)$Name
+stopifnot(length(member)==1)
+smt <- read_csv(unz(z,member),show_col_types=FALSE,progress=FALSE) %>% norm()
+check_ids(smt,557)
+stopifnot(all(smt$rt>=200 & smt$rt<=1200),all(smt$correct %in% 0:1))
+sr <- smt %>% filter(identity=='match',person %in% c('self','friend')) %>%
+  group_by(ID,domain,valence,person) %>% summarise(rt=mean(rt),n=n(),.groups='drop')
+srt <- sr %>% select(-n) %>% pivot_wider(names_from=person,values_from=rt) %>%
+  transmute(ID,indicator=paste0('SMT_rt_',if_else(domain=='morality','moral',domain),'_',valence),score=friend-self)
+sc <- bind_rows(smt %>% filter(identity=='match',person %in% c('self','friend')),
+                smt %>% filter(identity=='nonmatch') %>% select(-person) %>%
+                  tidyr::expand_grid(person=c('self','friend'))) %>%
+  group_by(ID,domain,valence,person) %>% summarise(
+    H=sum(identity=='match' & correct==1), M=sum(identity=='match' & correct==0),
+    FA=sum(identity=='nonmatch' & correct==0), CR=sum(identity=='nonmatch' & correct==1),.groups='drop') %>%
+  mutate(d=dp(H,M,FA,CR))
+sd <- sc %>% select(ID,domain,valence,person,d) %>% pivot_wider(names_from=person,values_from=d) %>%
+  transmute(ID,indicator=paste0('SMT_d_',if_else(domain=='morality','moral',domain),'_',valence),score=self-friend)
+smt_scores <- to_wide(bind_rows(srt,sd))
+out(sr,'SMT_RT_components.csv',audit); out(sc,'SMT_SDT_components.csv',audit)
+```
+
+
+## 9.5 SRET：16个指标及任务合并
+
+```{r psv_current_sret, eval=params$run_current, message=FALSE, warning=TRUE}
+# SRET: equal-person means of EW endorsement counts, EW mean RT and
+# recognition d-prime; source sensitivity uses self as signal, friend as noise.
+sret <- read('SRET_cleaned.csv') %>% norm(); check_ids(sret,483)
+ew <- sret %>% filter(screen_id=='EW_formal',person %in% c('self','friend')) %>%
+  group_by(ID,domain,valence,person) %>% summarise(
+    yes=sum(responses=='yes',na.rm=TRUE), rt=mean_available(rt), n=n(),
+    rt_available=sum(!is.na(rt)), response_missing=sum(is.na(responses)),.groups='drop')
+stopifnot(all(ew$n==10L),all(count(ew,ID)$n==8L))
+ey <- ew %>% group_by(ID,domain,valence) %>% summarise(score=mean(yes),.groups='drop') %>%
+  mutate(indicator=ind('SRET_yes',domain,valence)) %>% select(ID,indicator,score)
+er <- ew %>% group_by(ID,domain,valence) %>% summarise(score=mean(rt),.groups='drop') %>%
+  mutate(indicator=ind('SRET_rt',domain,valence)) %>% select(ID,indicator,score)
+rj <- sret %>% filter(screen_id=='RJ_formal1')
+rec <- bind_rows(rj %>% filter(identity=='old',person %in% c('self','friend')),
+                 rj %>% filter(identity=='new') %>% select(-person) %>%
+                   tidyr::expand_grid(person=c('self','friend'))) %>%
+  filter(responses %in% c('old','familiar','new')) %>%
+  group_by(ID,domain,valence,person) %>% summarise(
+    H=sum(identity=='old' & responses %in% c('old','familiar')),
+    M=sum(identity=='old' & responses=='new'),
+    FA=sum(identity=='new' & responses %in% c('old','familiar')),
+    CR=sum(identity=='new' & responses=='new'),.groups='drop') %>% mutate(d=dp(H,M,FA,CR))
+rc <- rec %>% group_by(ID,domain,valence) %>% summarise(score=mean(d),.groups='drop') %>%
+  mutate(indicator=ind('REC',domain,valence)) %>% select(ID,indicator,score)
+source <- sret %>% filter(screen_id=='RJ_formal_2',identity %in% c('self','friend'),correct %in% c(0,1)) %>%
+  group_by(ID,domain,valence) %>% summarise(
+    H=sum(identity=='self' & correct==1),M=sum(identity=='self' & correct==0),
+    FA=sum(identity=='friend' & correct==0),CR=sum(identity=='friend' & correct==1),.groups='drop') %>%
+  mutate(score=dp(H,M,FA,CR))
+ss <- source %>% mutate(indicator=ind('SOURCE',domain,valence)) %>% select(ID,indicator,score)
+sret_scores <- to_wide(bind_rows(ey,er,rc,ss))
+out(ew,'SRET_EW_components.csv',audit); out(rec,'SRET_REC_components.csv',audit); out(source,'SRET_SOURCE_components.csv',audit)
+source_coverage <- expand_grid(ID=sort(unique(sret$ID)),domain=c('ability','morality'),valence=c('positive','negative')) %>%
+  left_join(source,by=c('ID','domain','valence')) %>%
+  mutate(status=case_when(is.na(H)~'No scoreable source trials: indicator remains NA',
+    H+M==0 | FA+CR==0~'One empty SDT category: Rmd +0.5 correction retained',TRUE~'Both categories observed'))
+out(source_coverage %>% filter(status!='Both categories observed'),'SRET_SOURCE_sparse_conditions.csv',audit)
+out(sret %>% filter((screen_id=='EW_formal' & (is.na(rt)|is.na(responses))) |
+                    (screen_id=='RJ_formal1' & !responses %in% c('old','familiar','new')) |
+                    (screen_id=='RJ_formal_2' & identity %in% c('self','friend') & !correct %in% 0:1)) %>%
+      select(ID,screen_id,domain,valence,person,identity,word,rt,responses,correct), 'SRET_missing_trials.csv',audit)
+check_ids(iat_scores,602,TRUE); check_ids(smt_scores,557,TRUE); check_ids(sret_scores,483,TRUE)
+behavior <- pool %>% left_join(iat_scores,by='ID') %>% left_join(smt_scores,by='ID') %>% left_join(sret_scores,by='ID')
+mapping <- read_csv(file.path(root,'codebook_variable_mapping.csv'),show_col_types=FALSE)
+behavior_names <- mapping$released_variable[1:26]
+stopifnot(setequal(names(behavior)[-1],behavior_names))
+behavior <- select(behavior,ID,all_of(behavior_names))
+out(iat_scores,'positive_IAT.csv'); out(smt_scores,'positive_SMT.csv'); out(sret_scores,'positive_SRET.csv')
+out(behavior,'positive_self_view_indices.csv')
+validity <- pool %>% mutate(valid_IAT=ID %in% iat_scores$ID, valid_SMT=ID %in% smt_scores$ID,
+                           valid_SRET=ID %in% sret_scores$ID)
+out(validity,'task_validity.csv')
+```
+
+
+## 9.6 四场次问卷、160条目与综合主表
+
+```{r psv_current_questionnaires, eval=params$run_current, message=FALSE, warning=TRUE}
+# Questionnaire items retain already-cleaned scoring, including reverse coding.
+# No second reversal and no replacement of missing values with zero.
+sets <- list(
+  day1=list(selfclarity=paste0('selfclarity_',1:12),phq=paste0('phq_',1:9),gad=paste0('gad_',1:7)),
+  day2=list(ses=paste0('ses_',1:10),coreself=paste0('coreself_',1:10),SGPS=paste0('SGPS_',1:9),NPI=paste0('NPI',1:15),hsns=paste0('hsns_',1:10)),
+  day3=list(swb=paste0('swb_',1:5),LOT=paste0('LOT_',1:6),IPC=paste0('IPC_',1:8),MorIden=paste0('MorIden_',1:10),moralSeImag=paste0('moralSeImag_',1:9),sde=paste0('sde_',1:20),IM=paste0('IM_',1:20)))
+initial_sets <- sets
+sets$day10 <- unlist(initial_sets,recursive=FALSE)
+names(sets$day10) <- sub('^day[123]\\.', '', names(sets$day10))
+item_names <- unname(unlist(initial_sets))
+stopifnot(length(item_names)==160, !anyDuplicated(item_names))
+questionnaire <- pool; questionnaire_totals <- pool; qa <- list(); dict <- list()
+expected_q <- c(day1=606,day2=606,day3=571,day10=512)
+for (day in names(sets)) {
+  q <- read(paste0('questionnaires_',day,'_cleaned.csv')); check_ids(q,expected_q[[day]],TRUE)
+  items <- unname(unlist(sets[[day]]))
+  stopifnot(all(items %in% names(q)), all(vapply(q[items],is.numeric,logical(1))))
+  totals <- select(q,ID)
+  for (scale_name in names(sets[[day]])) {
+    cols <- sets[[day]][[scale_name]]
+    valid <- complete.cases(q[cols])
+    flag <- paste0('valid_',scale_name)
+    stopifnot(flag %in% names(q),identical(valid,q[[flag]]))
+    score <- rowSums(q[cols]); score[!valid] <- NA_real_
+    if (scale_name=='IPC') score <- score+24
+    totals[[paste0(scale_name,'_al')]] <- score
+    qa[[paste(day,scale_name)]] <- tibble(session=day,scale=scale_name,item_count=length(cols),
+      n_rows=nrow(q),n_valid=sum(valid),n_missing_in_606=606-sum(valid))
+    if (day!='day10') dict[[paste(day,scale_name)]] <- tibble(variable=cols,type='questionnaire_item',
+      session=day,scale=scale_name,definition='Retain the numeric value in 02_cleaned; no additional reverse scoring.',
+      unit='cleaned item score',source=paste0('02_cleaned/questionnaires_',day,'_cleaned.csv'))
+  }
+  for (sc in intersect(c('phq','gad'),names(sets[[day]]))) {
+    score <- totals[[paste0(sc,'_al')]]
+    totals[[sc]] <- case_when(is.na(score)~NA_character_,score<=4~'none',score<=9~'mild',score<=14~'moderate',
+                              sc=='phq' & score<=19~'mod to severe',TRUE~'severe')
+  }
+  if (day!='day10') questionnaire <- left_join(questionnaire,select(q,ID,all_of(items)),by='ID')
+  else {
+    out(select(q,ID,all_of(item_names)),'questionnaire_items_day10.csv')
+    dcols <- paste0('domain_rating_',1:5)
+    stopifnot(all(dcols %in% names(q)))
+    for (i in seq_along(dcols)) totals[[c('Ability','Attraction','Wealth','Social','Moral')[i]]] <- q[[dcols[i]]]
+    totals$domain_al <- rowSums(q[dcols])
+    qa[[paste(day,'domain_rating')]] <- tibble(session=day,scale='domain_rating',item_count=5L,
+      n_rows=nrow(q),n_valid=sum(complete.cases(q[dcols])),n_missing_in_606=606-sum(complete.cases(q[dcols])))
+  }
+  out(totals,paste0('questionnaire_indices_',day,'.csv'))
+  questionnaire_totals <- left_join(questionnaire_totals,rename_with(totals,~paste0(.x,'_',day),-ID),by='ID')
+}
+stopifnot(ncol(questionnaire)==161L)
+out(questionnaire,'questionnaire_items_initial.csv')
+out(questionnaire_totals,'questionnaire_indices_all_sessions.csv')
+out(bind_rows(qa),'questionnaire_validity_audit.csv')
+all_data <- left_join(questionnaire,behavior,by='ID')
+stopifnot(nrow(all_data)==606L,ncol(all_data)==187L,!anyDuplicated(all_data$ID))
+out(all_data,'all_derived_indices.csv'); out(all_data,'positive_self_view_all_derived.csv')
+```
+
+
+## 9.7 标准化辅助结果、变量字典与来源记录
+
+```{r psv_current_audit, eval=params$run_current, message=FALSE, warning=TRUE}
+# Separate z scores: column-wise available observations, sample SD; preserve NAs.
+stats <- bind_rows(lapply(names(all_data)[-1],function(v) {
+  x<-all_data[[v]]
+  stopifnot(is.numeric(x),!any(is.infinite(x)),!any(is.nan(x)))
+  tibble(variable=v,n_valid=sum(!is.na(x)),n_missing=sum(is.na(x)),mean=mean_available(x),
+         sd=stats::sd(x,na.rm=TRUE),minimum=min(x,na.rm=TRUE),maximum=max(x,na.rm=TRUE))
+}))
+zdata <- all_data
+for (v in stats$variable) {
+  s<-stats[stats$variable==v,]
+  zdata[[v]] <- if (is.finite(s$sd) && s$sd>0) (all_data[[v]]-s$mean)/s$sd else rep(NA_real_,nrow(all_data))
+}
+out(zdata,'all_derived_indices_z.csv'); out(stats,'indicator_counts.csv')
+definition <- function(v) {
+  if (grepl('_IAT$',v)) return('Full-trial IAT D; error RT = original block mean + 600 ms; mean of two (B-A)/pooled-SD pairs.')
+  if (grepl('^SMT_rt',v)) return('Matching trials, mean RT(friend) minus mean RT(self), including retained correct and error trials.')
+  if (grepl('^SMT_d',v)) return('d-prime(self) minus d-prime(friend); shared nonmatching noise; loglinear +0.5 correction.')
+  if (grepl('^SRET_yes',v)) return('Mean of self and friend yes-response counts; not a difference or a proportion.')
+  if (grepl('^SRET_rt',v)) return('Mean of self and friend available-RT means; missing RT excluded within person; ms.')
+  if (grepl('^REC_',v)) return('Mean of self and friend recognition d-prime; shared new-word noise; familiar/old count as recognition; unclassified responses omitted.')
+  'Source d-prime: self correct/incorrect = H/M; friend correct/incorrect = CR/FA; loglinear +0.5 correction.'
+}
+bd <- tibble(variable=behavior_names,type='behavioral_index',
+  session=ifelse(grepl('IAT',behavior_names),'day2','day3'),
+  scale=ifelse(grepl('IAT',behavior_names),'IAT',ifelse(grepl('^SMT',behavior_names),'SMT2','SRET')),
+  definition=vapply(behavior_names,definition,character(1)),
+  unit=ifelse(grepl('_rt_',behavior_names),'ms',ifelse(grepl('^SRET_yes',behavior_names),'mean count','dimensionless')),
+  source=ifelse(grepl('IAT',behavior_names),'02_cleaned/IAT_cleaned.csv',ifelse(grepl('^SMT',behavior_names),'02_cleaned/SMT_2_cleaned.zip','02_cleaned/SRET_cleaned.csv')))
+out(bind_rows(bind_rows(dict),bd),'variable_dictionary.csv')
+summary <- tibble(dataset=c('606_pool','IAT','SMT2','SRET','questionnaire_initial','all_186_complete'),
+  n_subjects=c(606,602,557,483,606,sum(complete.cases(all_data))),
+  n_variables=c(0,2,8,16,160,186))
+out(summary,'dataset_counts.csv',audit)
+manifest_paths <- unique(c(list.files(clean,full.names=TRUE),pool_file,normalizePath(script)))
+manifest <- tibble(path=substring(manifest_paths,nchar(root)+2),bytes=file.info(manifest_paths)$size,md5=unname(tools::md5sum(manifest_paths)))
+out(manifest,'input_manifest.csv',audit)
+capture.output(sessionInfo(),file=file.path(audit,'R_session_info.txt'))
+```
+
+
+## 9.8 暂存核验与九文件安装
+
+```{r psv_current_install, eval=params$run_current, message=FALSE, warning=TRUE}
+# Verify staged data before installation, including exact membership from 02.
+for (f in c('positive_IAT.csv','positive_SMT.csv','positive_SRET.csv','questionnaire_items_initial.csv','all_derived_indices.csv')) {
+  x<-read_csv(file.path(stage,f),show_col_types=FALSE); check_ids(x,unique=TRUE)
+}
+stopifnot(all(stats$n_valid[match(names(iat_scores)[-1],stats$variable)]==602),
+          all(stats$n_valid[match(names(smt_scores)[-1],stats$variable)]==557))
+if (isTRUE(params$install_derived)) {
+  dest <- file.path(root,'03_derived')
+  old <- list.files(dest,full.names=TRUE,recursive=FALSE)
+  old <- old[!file.info(old)$isdir]
+  backup <- file.path(audit,paste0('backup_03_derived_',format(Sys.time(),'%Y%m%d_%H%M%S')))
+  dir.create(backup,recursive=TRUE)
+  stopifnot(all(file.copy(old,backup)),identical(unname(tools::md5sum(old)),unname(tools::md5sum(file.path(backup,basename(old))))))
+  # Stage contains diagnostics too; publish only the nine requested CSVs.
+  files<-file.path(stage,derived_output_files)
+  stopifnot(all(file.exists(files)))
+  stopifnot(all(file.copy(files,dest,overwrite=TRUE)),
+    identical(unname(tools::md5sum(files)),unname(tools::md5sum(file.path(dest,basename(files))))))
+  out(tibble(file=basename(files),md5=unname(tools::md5sum(files)),backup=backup),'installation_record.csv',audit)
+  organize_derived_outputs(root)
+  cat('Installed to',dest,'\nBackup:',backup,'\n')
+}
+print(summary)
+print(stats %>% filter(variable %in% behavior_names) %>% select(variable,n_valid,n_missing))
+cat('SRET EW missing RT:',sum(is.na(sret$rt[sret$screen_id=='EW_formal'])),'\n')
+```
+
+
+## 9.9 独立逐人重算核验
+
+```{r psv_current_validation, eval=params$run_current, message=FALSE, warning=TRUE}
+if (isTRUE(params$validate_derived)) {
+  local({
+# Independent full-subject checks using base R/data.table, not builder helpers.
+suppressPackageStartupMessages(library(data.table))
+outdir <- file.path(root,'03_derived'); clean <- file.path(root,'02_cleaned')
+audit <- file.path(root,'04_code_and_reproducibility','analysis','derived_606_audit')
+getcsv <- function(f, dir=outdir) {
+  path <- file.path(dir,f)
+  # Diagnostic/intermediate CSVs live outside the nine published files.
+  if (!file.exists(path) && identical(dir,outdir)) path <- file.path(audit,'staged_03_derived',f)
+  fread(path,na.strings=c('','NA'))
+}
+x <- getcsv('all_derived_indices.csv'); b <- getcsv('positive_self_view_indices.csv')
+pool <- fread(file.path(root,'04_code_and_reproducibility','subject _screening','retained_606_IDs.csv'))$ID
+stopifnot(nrow(x)==606L,ncol(x)==187L,ncol(b)==27L,!anyDuplicated(x$ID),setequal(x$ID,pool))
+checks <- list()
+record <- function(name,n,err=0) checks[[name]] <<- data.table(check=name,n_checked=n,max_abs_difference=err,status='PASS')
+compare <- function(a,b,name,tol=1e-10) {
+  stopifnot(length(a)==length(b),identical(is.na(a),is.na(b)),!any(is.infinite(a)))
+  err <- if(all(is.na(a))) 0 else max(abs(a-b),na.rm=TRUE)
+  if(err>tol) stop(name,': maximum error ',err)
+  record(name,length(a),err)
+}
+manifest <- fread(file.path(audit,'input_manifest.csv'))
+# Historical builder hashes describe the generation used then; source data
+# checks remain strict when only output organization code is subsequently edited.
+manifest <- manifest[!grepl('\\.R$',path)]
+actual_hash <- unname(tools::md5sum(file.path(root,manifest$path)))
+stopifnot(identical(actual_hash,manifest$md5)); record('input_files_unchanged',nrow(manifest))
+for(task in c('IAT','SMT','SRET')) {
+  t <- getcsv(paste0('positive_',task,'.csv'))
+  expected_n <- c(IAT=602,SMT=557,SRET=483)[[task]]
+  stopifnot(nrow(t)==expected_n,!anyDuplicated(t$ID),all(t$ID %in% pool))
+  for(v in setdiff(names(t),'ID')) compare(x[[v]],t[[v]][match(x$ID,t$ID)],paste0('membership_and_merge_',v))
+}
+qdict <- getcsv('variable_dictionary.csv')[type=='questionnaire_item']
+stopifnot(nrow(qdict)==160L,uniqueN(qdict$variable)==160L)
+for(day in unique(qdict$session)) {
+  q <- getcsv(paste0('questionnaires_',day,'_cleaned.csv'),clean)
+  for(v in qdict[session==day,variable]) compare(x[[v]],q[[v]][match(x$ID,q$ID)],paste0('item_exact_',v),0)
+  totals <- getcsv(paste0('questionnaire_indices_',day,'.csv'))
+  for(sc in unique(qdict[session==day,scale])) {
+    cols <- qdict[session==day & scale==sc,variable]
+    s <- rowSums(as.matrix(q[,..cols]))+ifelse(sc=='IPC',24,0)
+    compare(totals[[paste0(sc,'_al')]][match(q$ID,totals$ID)],s,paste0('scale_total_',day,'_',sc),0)
+  }
+}
+q10 <- getcsv('questionnaires_day10_cleaned.csv',clean)
+q10out <- getcsv('questionnaire_items_day10.csv')
+q10tot <- getcsv('questionnaire_indices_day10.csv')
+stopifnot(nrow(q10out)==512,ncol(q10out)==161,identical(q10out$ID,q10$ID))
+for(v in qdict$variable) compare(q10out[[v]],q10[[v]],paste0('day10_item_',v),0)
+for(sc in unique(qdict$scale)) {
+  cols <- qdict[scale==sc,variable]
+  compare(q10tot[[paste0(sc,'_al')]],rowSums(as.matrix(q10[,..cols]))+ifelse(sc=='IPC',24,0),paste0('day10_total_',sc),0)
+}
+z <- getcsv('all_derived_indices_z.csv'); stopifnot(identical(z$ID,x$ID))
+for(v in names(x)[-1]) compare(z[[v]],as.numeric(scale(x[[v]])),paste0('z_',v))
+dp <- function(h,m,f,c) {
+  qnorm((h+.5)/(h+m+1))-qnorm((f+.5)/(f+c+1))
+}
+expected <- copy(b)
+for(v in names(expected)[-1]) set(expected,j=v,value=NA_real_)
+setkey(expected,ID)
+iat <- getcsv('IAT_cleaned.csv',clean); byid <- split(iat,by='ID',keep.by=TRUE)
+for(id in names(byid)) for(dom in c('ability','moral')) {
+  sub <- byid[[id]][task_id==dom]; blocks <- split(sub,by='version')
+  adjusted <- lapply(blocks,function(g) {r<-g$rt; r[g$correct==0]<-mean(g$rt)+600; r})
+  d <- vapply(1:2,function(j) {
+    a<-adjusted[[paste0('A',j)]]; bb<-adjusted[[paste0('B',j)]]
+    ma<-mean(a); mb<-mean(bb); n<-length(a)+length(bb)
+    pooled<-sqrt((sum((a-ma)^2)+sum((bb-mb)^2)+n*((ma-mb)/2)^2)/(n-1))
+    (mb-ma)/pooled
+  },numeric(1))
+  expected[id,(paste0(dom,'_IAT')):=mean(d)]
+}
+tmp <- tempfile('smt_validate_'); dir.create(tmp)
+member <- unzip(file.path(clean,'SMT_2_cleaned.zip'),exdir=tmp)
+smt <- fread(member,na.strings=c('','NA')); byid <- split(smt,by='ID',keep.by=TRUE)
+for(id in names(byid)) for(dom in c('ability','moral')) for(val in c('positive','negative')) {
+  g<-byid[[id]][domain==dom & valence==val & identity=='match']
+  self<-g[person=='self']; friend<-g[person=='friend']
+  r<-mean(friend$rt)-mean(self$rt)
+  # Shared noise cancels, providing an independent check on duplicated-noise SDT.
+  d<-qnorm((sum(self$correct==1)+.5)/(nrow(self)+1))-qnorm((sum(friend$correct==1)+.5)/(nrow(friend)+1))
+  expected[id,(paste0('SMT_rt_',dom,'_',val)):=r]
+  expected[id,(paste0('SMT_d_',dom,'_',val)):=d]
+}
+sret <- getcsv('SRET_cleaned.csv',clean); byid <- split(sret,by='ID',keep.by=TRUE)
+for(id in names(byid)) for(dom in c('ability','morality')) for(val in c('Positive','Negative')) {
+  g<-byid[[id]][domain==dom & valence==val]; e<-g[screen_id=='EW_formal']
+  counts<-vapply(c('self','friend'),function(p) sum(e[person==p,responses]=='yes',na.rm=TRUE),numeric(1))
+  rt<-vapply(c('self','friend'),function(p) mean(e[person==p,rt],na.rm=TRUE),numeric(1))
+  expected[id,(paste0('SRET_yes_',dom,'_',val)):=mean(counts)]
+  expected[id,(paste0('SRET_rt_',dom,'_',val)):=mean(rt)]
+  rec<-g[screen_id=='RJ_formal1']; noise<-rec[identity=='new' & responses %in% c('old','familiar','new')]
+  ds<-vapply(c('self','friend'),function(p) {
+    sig<-rec[identity=='old' & person==p & responses %in% c('old','familiar','new')]
+    dp(sum(sig$responses %in% c('old','familiar')),sum(sig$responses=='new'),
+       sum(noise$responses %in% c('old','familiar')),sum(noise$responses=='new'))
+  },numeric(1))
+  expected[id,(paste0('REC_',dom,'_',val)):=mean(ds)]
+  src<-g[screen_id=='RJ_formal_2' & identity %in% c('self','friend') & correct %in% 0:1]
+  ds<-if (nrow(src)==0) NA_real_ else dp(nrow(src[identity=='self' & correct==1]),nrow(src[identity=='self' & correct==0]),
+         nrow(src[identity=='friend' & correct==0]),nrow(src[identity=='friend' & correct==1]))
+  expected[id,(paste0('SOURCE_',dom,'_',val)):=ds]
+}
+for(v in names(b)[-1]) compare(b[[v]],expected[[v]][match(b$ID,expected$ID)],paste0('independent_recalculation_',v))
+stopifnot('phase_017_subj_16' %in% getcsv('positive_SRET.csv')$ID)
+counts <- getcsv('indicator_counts.csv')
+for(v in names(x)[-1]) stopifnot(counts[variable==v,n_valid]==sum(!is.na(x[[v]])))
+qa <- fread(file.path(root,'04_code_and_reproducibility','subject _screening1','archive','audit','cleaning_606_audit','task_validity_606.csv'))
+tv <- getcsv('task_validity.csv')
+stopifnot(identical(tv$valid_IAT,qa$valid_IAT[match(tv$ID,qa$ID)]),
+          identical(tv$valid_SMT,qa$valid_SMT2[match(tv$ID,qa$ID)]),
+          identical(tv$valid_SRET,qa$valid_SRET[match(tv$ID,qa$ID)]))
+record('task_membership_matches_02_audit',606L)
+record('complete_cases_diagnostic_only',sum(complete.cases(x)))
+fwrite(rbindlist(checks),file.path(audit,'validation_results.csv'),bom=TRUE,na='')
+cat('PASS:',length(checks),'checks; all 26 indicators independently recalculated for every valid participant.\n')
+print(counts[variable %in% names(b)[-1],.(variable,n_valid,n_missing)])
+
+  })
+}
+```
+
 # Session information
 
-```{r session_info}
+```{r session_info, eval=TRUE}
 sessionInfo()
 ```
