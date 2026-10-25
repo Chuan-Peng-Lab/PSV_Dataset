@@ -2,13 +2,13 @@
 
 ## Dataset overview / 数据集概述
 
-This dataset contains item-level questionnaire data and trial-level data from three behavioral tasks collected across multiple sessions. The behavioral tasks are the Implicit Association Test (IAT), the Self-Matching Task (SMT), and the Self-Referent Encoding Task (SRET). The term **SMT** is used in the manuscript and dataset description; the archived analysis code and file prefixes use **ALT** for this task. Accordingly, `SMT_1` and `SMT_2` below are the two versions of the SMT — the geometric-shape version administered on Day 2 and the self-referential version administered on Day 3 — not a fourth task.
+This dataset contains item-level questionnaire data and trial-level data from three behavioral tasks collected across multiple sessions. The behavioral tasks are the Implicit Association Test (IAT), the Self-Matching Task (SMT, also known as self-associative learning task, shape-matching task), and the Self-Referent Encoding Task (SRET). The term **SMT** is used in the manuscript and dataset description; the archived analysis code and file prefixes use **ALT** for this task. Accordingly, `SMT_1` and `SMT_2` below are the two versions of the SMT — the geometric-shape version administered on Day 2 and the self-referential version administered on Day 3 — not a fourth task.
 
-本数据集包含多次测量中收集的问卷条目级数据和三个行为任务的试次级数据。三个行为任务为内隐联想测验（IAT）、自我匹配任务（SMT）和自我参照编码任务（SRET）。论文和数据集说明统一使用 **SMT**；历史分析代码和文件名前缀使用 **ALT** 表示该任务。因此，下面的 `SMT_1` 和 `SMT_2` 是 SMT 的两个版本——Day 2 施测的几何图形版与 Day 3 施测的自我参照版——不代表第四个任务。
+本数据集包含多次测量中收集的问卷条目级数据和三个行为任务的试次级数据。三个行为任务为内隐联想测验（IAT）、自我匹配任务（SMT，也被称为自我联结学习任务、图形匹配任务）和自我参照编码任务（SRET）。论文和数据集说明统一使用 **SMT**；历史分析代码和文件名前缀使用 **ALT** 表示该任务。因此，下面的 `SMT_1` 和 `SMT_2` 是 SMT 的两个版本——Day 2 施测的几何图形版与 Day 3 施测的自我参照版——不代表第四个任务。
 
-The dataset is organized in three data levels. The raw data cover all task attempters and questionnaire respondents (`01_raw`, 777 Day-1 screening records). The cleaned data retain 606 participants (`02_cleaned`, after removal of ineligible, duplicate, and non-retained records). The all-clean (complete) data retain 466 participants (after further removal of task-level invalid records); this 466 level is a sample-size definition and does not have a separate directory. The derived participant-level indices in `03_derived` follow the manuscript's analysis pipeline (`04_code_and_reproducibility/analysis/analysis.Rmd`) and retain 503 participants. The participant-flow diagram is reported in the manuscript (Figure A1, Appendix 3), and task-level valid sample sizes are summarized in Appendix 4 (Table A3) of the manuscript.
+The dataset is organized in three data levels. The raw data cover all task attempters and questionnaire respondents (`01_raw`, 777 Day-1 screening records). The cleaned data retain 606 participants (`02_cleaned`, after removal of ineligible, duplicate, and non-retained records). The derived participant-level indices in `03_derived` follow the manuscript's analysis pipeline (`04_code_and_reproducibility/analysis/analysis.Rmd`). The participant-flow diagram is reported in the manuscript (Figure A1, Appendix 3), and task-level valid sample sizes are summarized in Appendix 4 (Table A3) of the manuscript.
 
-本数据集分为三个数据层级。原始数据覆盖全部任务参加者与问卷作答者（`01_raw`，Day 1 筛查共 777 份记录）。清洗后数据保留 606 名参与者（`02_cleaned`，剔除不合格、重复与未保留记录后）。全清洗的完整数据保留 466 名参与者（进一步剔除任务层面无效记录后）；该 466 层级仅为样本量口径，没有独立目录。`03_derived` 的参与者层面衍生指标依据论文分析流程（`04_code_and_reproducibility/analysis/analysis.Rmd`）筛选，保留 503 名参与者。被试流程图见论文图A1（附录3），任务级有效样本量见论文附录4（表A3）。
+本数据集分为三个数据层级。原始数据覆盖全部任务参加者与问卷作答者（`01_raw`，Day 1 筛查共 777 份记录）。清洗后数据保留 606 名参与者（`02_cleaned`，剔除不合格、重复与未保留记录后）。`03_derived` 的参与者层面衍生指标依据论文分析流程（`04_code_and_reproducibility/analysis/analysis.Rmd`）。被试流程图见论文图A1（附录3），任务级有效样本量见论文附录4（表A3）。
 
 ## Session naming / 测试日命名
 
@@ -114,22 +114,19 @@ The complete mapping between the released variable names and the manuscript-faci
 
 - `01_raw`（01_raw_data）：实验平台导出的原始数据，包括行为任务试次记录和问卷导出文件（Day 1 筛查共 **777** 份记录）。
 - `02_cleaned`（02_cleaned_data）：按照论文所述规则删除无效试次和练习试次后的清洗任务数据及问卷表（保留 **606** 名参与者）。
-- 全清洗完整数据（all clean）：在清洗数据基础上进一步剔除任务层面无效记录后的完整数据口径（保留 **466** 名参与者；仅为样本量口径，无独立目录）。
 - `03_derived`（03_derived_indices）：依据论文分析流程（`analysis/analysis.Rmd`）筛选的参与者层面任务指标、问卷表、合并数据以及相关/重测结果。
 
 - `01_raw`: raw exports from the experimental platform, including trial-level behavioral records and questionnaire exports (777 Day-1 screening records).
 - `02_cleaned`: cleaned trial-level task data and cleaned questionnaire tables after removal of invalid trials and practice trials as described in the manuscript (606 participants).
-- All-clean (complete) data: after further removal of task-level invalid records (466 participants; a sample-size definition with no separate directory).
 - `03_derived`: participant-level task indices filtered by the manuscript's analysis pipeline (`analysis/analysis.Rmd`), questionnaire tables, merged datasets, and correlation/retest outputs (503 participants).
 
 ## Participant exclusion and cleaning records / 被试排除与清洗记录
 
 Two record sets under `04_code_and_reproducibility/` document how the 777 Day-1 records are reduced to the analysis sample:
 
-
 - `subject _screening/` records the standard participant- and task-level cleaning, reducing the 777 records to **606** retained participants and then to the **466** complete-and-valid set.
 
 `04_code_and_reproducibility/` 下的两套记录说明如何从 Day 1 的 777 条记录逐步缩减到分析样本：
 
-- `subject _screening/` 记录被试层面与任务层面的标准清洗，将 777 条记录缩减为 **606** 名保留参与者，再得到 **466** 名完整且合格的数据集合。
+- `subject _screening/` 记录被试层面与任务层面的标准清洗，将 777 条记录缩减为 **606** 名保留参与者。
 
