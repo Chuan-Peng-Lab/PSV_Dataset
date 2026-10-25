@@ -61,17 +61,19 @@ PSV_Dataset/
 │   ├── positive_IAT.csv
 │   ├── positive_SMT.csv
 │   ├── positive_SRET.csv
-│   ├── positive_self_view_indices.csv                     # 合并 503 名参与者（论文分析流程）的行为任务指标
+│   ├── questionnaire_indices_day1.csv
+│   ├── questionnaire_indices_day2.csv
+│   ├── questionnaire_indices_day3.csv
+│   ├── questionnaire_indices_day10.csv
+│   ├── positive_self_view_indices.csv  
+│   ├── questionnaire_indices_all_sessions.csv
+│   ├── all_derived_indices.csv
 │   └── README.md
 │
 └── 04_code_and_reproducibility/                           # 代码与可复现性
     ├── README.md                                          # 文件说明
     ├── procedure/                                         # 实验程序（day1/day2/day3/day10）
     ├── analysis/                                          # 整合文章内全部分析流程的代码
-    │   ├── analysis.Rmd                                   # 主分析文件
-    │   ├── analysis.html                                  # 由该 Rmd 生成的 HTML
-    │   └── README.md                                      # 分析代码说明
-    ├── excluded_record_paper/                             # 按论文思路的被试排除记录（777 → 503）
     └── subject _screening/                                # 标准清洗记录（777 → 606 → 466）
 ```
 
@@ -104,16 +106,16 @@ The archived filenames are preserved in `04_code_and_reproducibility/` so that t
 | `D` | IAT D-score (improved algorithm) / IAT D 分数（改进算法） |
 | `_al` (suffix) | Total score of a scale / 量表总分 |
 
-The complete mapping between the released variable names and the manuscript-facing indicator names (Tables 3 and 6 of the manuscript) is provided in `codebook_variable_mapping.csv`. Note that valence is capitalized in some released files (`Positive`/`Negative`) but lowercase in the manuscript (`positive`/`negative`).
+The complete mapping between the released variable names and the manuscript-facing indicator names is provided in `codebook_variable_mapping.csv`. Note that valence is capitalized in some released files (`Positive`/`Negative`) but lowercase in the manuscript (`positive`/`negative`).
 
-发布变量名与论文指标名（论文表3与表6）之间的完整对应关系见 `codebook_variable_mapping.csv`。注意：部分发布文件中效价标签为首字母大写（`Positive`/`Negative`），论文中为小写（`positive`/`negative`）。
+发布变量名与论文指标名之间的完整对应关系见 `codebook_variable_mapping.csv`。注意：部分发布文件中效价标签为首字母大写（`Positive`/`Negative`），论文中为小写（`positive`/`negative`）。
 
 ## Data levels / 数据层级
 
 - `01_raw`（01_raw_data）：实验平台导出的原始数据，包括行为任务试次记录和问卷导出文件（Day 1 筛查共 **777** 份记录）。
 - `02_cleaned`（02_cleaned_data）：按照论文所述规则删除无效试次和练习试次后的清洗任务数据及问卷表（保留 **606** 名参与者）。
 - 全清洗完整数据（all clean）：在清洗数据基础上进一步剔除任务层面无效记录后的完整数据口径（保留 **466** 名参与者；仅为样本量口径，无独立目录）。
-- `03_derived`（03_derived_indices）：依据论文分析流程（`analysis/analysis.Rmd`）筛选的参与者层面任务指标、问卷表、合并数据以及相关/重测结果（**503** 名参与者）。
+- `03_derived`（03_derived_indices）：依据论文分析流程（`analysis/analysis.Rmd`）筛选的参与者层面任务指标、问卷表、合并数据以及相关/重测结果。
 
 - `01_raw`: raw exports from the experimental platform, including trial-level behavioral records and questionnaire exports (777 Day-1 screening records).
 - `02_cleaned`: cleaned trial-level task data and cleaned questionnaire tables after removal of invalid trials and practice trials as described in the manuscript (606 participants).
@@ -124,11 +126,10 @@ The complete mapping between the released variable names and the manuscript-faci
 
 Two record sets under `04_code_and_reproducibility/` document how the 777 Day-1 records are reduced to the analysis sample:
 
-- `excluded_record_paper/` follows the manuscript's own analysis logic (`analysis/analysis.Rmd`) and reproduces the path to the **503**-participant final sample. Its single entry point is `exclusion_pipeline.qmd`; it writes `excluded_subjects_record.csv`, `exclusion_flow_reconciliation.csv`, and `flagged_but_retained.csv`.
-- `subject _screening/` records the standard participant- and task-level cleaning, reducing the 777 records to **606** retained participants and then to the **466** complete-and-valid set. Its tables are `excluded_subjects_171.csv`, `invalidated_task_data_140.csv`, `exclusion_ledger_three_layer.csv`, `removal_ledger_777_to_466.csv`, and `timeline_quality_screen.csv`.
+
+- `subject _screening/` records the standard participant- and task-level cleaning, reducing the 777 records to **606** retained participants and then to the **466** complete-and-valid set.
 
 `04_code_and_reproducibility/` 下的两套记录说明如何从 Day 1 的 777 条记录逐步缩减到分析样本：
 
-- `excluded_record_paper/` 按论文自身分析逻辑（`analysis/analysis.Rmd`）复现到 **503** 名最终样本的路径。唯一复现入口为 `exclusion_pipeline.qmd`；生成 `excluded_subjects_record.csv`、`exclusion_flow_reconciliation.csv` 与 `flagged_but_retained.csv`。
-- `subject _screening/` 记录被试层面与任务层面的标准清洗，将 777 条记录缩减为 **606** 名保留参与者，再得到 **466** 名完整且合格的数据集合。表格为 `excluded_subjects_171.csv`、`invalidated_task_data_140.csv`、`exclusion_ledger_three_layer.csv`、`removal_ledger_777_to_466.csv` 与 `timeline_quality_screen.csv`。
+- `subject _screening/` 记录被试层面与任务层面的标准清洗，将 777 条记录缩减为 **606** 名保留参与者，再得到 **466** 名完整且合格的数据集合。
 

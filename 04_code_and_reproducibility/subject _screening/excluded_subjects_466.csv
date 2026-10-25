@@ -1,0 +1,312 @@
+﻿ID,ParticipantID,排除原因,排除阶段,触发任务或判据,参加场次,观测值
+phase_003_subj_1,49,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=36; honeypot=0; IAT_prop=0.0139(ability,n=144); ALT1_min_acc=0.6875(diamond_match,n=48); SRET_rec=0.4562(n=160); SRET_src_lt200=0.0067(n=149); ALT2_min_cond=0.4375(ability_self_match_negative); ALT2_min_domain=0.6484(moral)"
+phase_003_subj_12,584,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=37; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8542(diamond_nonmatch,n=48); SRET_rec=0.5188(n=160); SRET_src_lt200=0.0000(n=35); ALT2_min_cond=0.5208(moral_friend_match_negative); ALT2_min_domain=0.7839(moral)"
+phase_003_subj_14,681,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=40; honeypot=0; IAT_prop=0.0069(ability,n=288); ALT1_min_acc=0.6042(trapezoid_nonmatch,n=96)"
+phase_003_subj_15,693,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7708(hexagon_nonmatch,n=48); SRET_rec=0.5312(n=160); SRET_src_lt200=0.0000(n=135); ALT2_min_cond=0.6458(ability_self_nonmatch_positive); ALT2_min_domain=0.7630(moral)"
+phase_003_subj_5,178,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=29; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.5625(pentagon_nonmatch,n=48)"
+phase_003_subj_7,251,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=30; honeypot=0
+phase_004_subj_12,455,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8750(trapezoid_match,n=48); SRET_rec=0.5188(n=160); SRET_src_lt200=0.0000(n=47); ALT2_min_cond=0.5833(ability_self_nonmatch_negative); ALT2_min_domain=0.7656(moral)"
+phase_004_subj_14,467,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=25; honeypot=0
+phase_004_subj_17,570,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(square_nonmatch,n=48); SRET_rec=0.5125(n=160); SRET_src_lt200=0.3312(n=154); ALT2_min_cond=0.5833(ability_friend_match_negative); ALT2_min_domain=0.7734(ability)"
+phase_004_subj_19,670,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=33; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8333(pentagon_nonmatch,n=48); SRET_rec=0.5000(n=160); SRET_src_lt200=0.1333(n=150); ALT2_min_cond=0.5625(moral_self_nonmatch_negative); ALT2_min_domain=0.7578(ability)"
+phase_004_subj_20,686,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_004_subj_4,225,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=24; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6667(pentagon_nonmatch,n=48); SRET_rec=0.5062(n=160); SRET_src_lt200=0.0079(n=127); ALT2_min_cond=0.4792(ability_friend_nonmatch_positive); ALT2_min_domain=0.6875(ability)"
+phase_004_subj_6,287,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7708(ellipse_nonmatch,n=48); SRET_rec=0.5000(n=160); SRET_src_lt200=0.0063(n=158); ALT2_min_cond=0.6250(ability_self_nonmatch_positive); ALT2_min_domain=0.7812(moral)"
+phase_004_subj_7,355,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8750(square_nonmatch,n=48); SRET_rec=0.5125(n=160); SRET_src_lt200=0.0000(n=54); ALT2_min_cond=0.4583(moral_friend_match_positive); ALT2_min_domain=0.7604(ability)"
+phase_004_subj_9,416,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=23; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.8333(diamond_match,n=48); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0000(n=135); ALT2_min_cond=0.4583(moral_self_nonmatch_positive); ALT2_min_domain=0.7083(moral)"
+phase_005_subj_11,503,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_005_subj_14,577,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7500(ellipse_match,n=48); SRET_rec=0.5375(n=160); SRET_src_lt200=0.0089(n=112); ALT2_min_cond=0.7500(ability_friend_match_positive); ALT2_min_domain=0.8802(ability)"
+phase_005_subj_15,636,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_005_subj_20,698,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(trapezoid_match,n=48); SRET_rec=0.5125(n=160); SRET_src_lt200=0.0000(n=58); ALT2_min_cond=0.7083(ability_self_nonmatch_negative); ALT2_min_domain=0.8776(ability)"
+phase_005_subj_6,208,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3,4","age=32; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(trapezoid_nonmatch,n=48); SRET_rec=0.5687(n=160); SRET_src_lt200=0.0000(n=27); ALT2_min_cond=0.1667(ability_self_match_negative); ALT2_min_domain=0.6615(ability)"
+phase_005_subj_8,271,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3,4","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7500(hexagon_match,n=48); SRET_rec=0.5750(n=160); SRET_src_lt200=0.0956(n=136); ALT2_min_cond=0.2083(ability_friend_match_negative); ALT2_min_domain=0.5938(ability)"
+phase_006_subj_11,358,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3","age=32; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8125(ellipse_nonmatch,n=48); SRET_rec=0.5312(n=160); SRET_src_lt200=0.3032(n=155); ALT2_min_cond=0.6458(ability_self_match_negative); ALT2_min_domain=0.8359(moral)"
+phase_006_subj_12,364,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3","age=32; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8125(trapezoid_match,n=48); SRET_rec=0.5188(n=160); SRET_src_lt200=0.4194(n=155); ALT2_min_cond=0.7083(ability_friend_match_positive); ALT2_min_domain=0.8490(moral)"
+phase_006_subj_13,422,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7708(diamond_nonmatch,n=48); SRET_rec=0.5000(n=160); SRET_src_lt200=0.0254(n=118); ALT2_min_cond=0.4792(ability_self_nonmatch_negative); ALT2_min_domain=0.7135(ability)"
+phase_006_subj_14,425,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=23; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.8542(trapezoid_match,n=48); SRET_rec=0.5125(n=160); SRET_src_lt200=0.0067(n=150); ALT2_min_cond=0.7292(moral_self_match_negative); ALT2_min_domain=0.8854(ability)"
+phase_006_subj_15,436,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(pentagon_nonmatch,n=48); SRET_rec=0.4938(n=160); SRET_src_lt200=0.1379(n=87); ALT2_min_cond=0.5625(ability_friend_match_negative); ALT2_min_domain=0.7708(ability)"
+phase_006_subj_16,440,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=25; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.8333(circle_match,n=48); SRET_rec=0.5312(n=160); SRET_src_lt200=0.0000(n=45); ALT2_min_cond=0.5625(ability_self_nonmatch_negative); ALT2_min_domain=0.7240(moral)"
+phase_006_subj_18,447,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3","age=27; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6875(pentagon_match,n=48); SRET_rec=0.5188(n=160); SRET_src_lt200=0.3737(n=99); ALT2_min_cond=0.6667(moral_friend_nonmatch_positive); ALT2_min_domain=0.7917(moral)"
+phase_006_subj_20,479,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6875(diamond_nonmatch,n=48); SRET_rec=0.5250(n=160); SRET_src_lt200=0.0172(n=116); ALT2_min_cond=0.5833(moral_friend_match_negative); ALT2_min_domain=0.7292(moral)"
+phase_006_subj_21,496,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3,4","age=25; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6667(hexagon_match,n=48); SRET_rec=0.6438(n=160); SRET_src_lt200=0.0000(n=47); ALT2_min_cond=0.4167(moral_friend_match_negative); ALT2_min_domain=0.5755(moral)"
+phase_006_subj_3,93,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=39; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.4792(pentagon_match,n=48)"
+phase_006_subj_6,274,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=26; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5833(ellipse_match,n=48)"
+phase_006_subj_9,320,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6250(trapezoid_nonmatch,n=48); SRET_rec=0.5687(n=160); SRET_src_lt200=0.0095(n=105); ALT2_min_cond=0.4583(moral_friend_nonmatch_negative); ALT2_min_domain=0.5964(moral)"
+phase_007_subj_14,456,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=31; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5000(trapezoid_match,n=48); trap1=1(ans=1)"
+phase_007_subj_15,490,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_007_subj_2,71,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_007_subj_20,639,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_007_subj_7,173,年龄不符合要求,Day1 年龄纳入标准,年龄,1,age=71; honeypot=0
+phase_007_subj_9,251,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.4792(trapezoid_match,n=48); trap1=3(ans=3)"
+phase_008_subj_3,154,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=24; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.4792(trapezoid_match,n=48); trap1=1(ans=1)"
+phase_008_subj_5,203,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=36; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8542(trapezoid_match,n=48); SRET_rec=0.5062(n=160); SRET_src_lt200=0.2597(n=77); ALT2_min_cond=0.7083(moral_friend_nonmatch_positive); ALT2_min_domain=0.8333(ability); trap2=1(我曾经去过月球。)"
+phase_008_subj_9,284,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=26; honeypot=0
+phase_009_subj_17,442,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7292(pentagon_nonmatch,n=48)"
+phase_009_subj_2,15,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7292(triangle_nonmatch,n=48); SRET_rec=0.5062(n=160); SRET_src_lt200=0.4762(n=147); ALT2_min_cond=0.6042(moral_friend_nonmatch_negative); ALT2_min_domain=0.7682(moral); trap2=1(我曾经去过月球。)"
+phase_009_subj_3,24,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=33; honeypot=0; IAT_prop=0.0000(ability,n=143); ALT1_min_acc=0.6458(hexagon_nonmatch,n=48); SRET_rec=0.5062(n=160); SRET_src_lt200=0.1126(n=151); ALT2_min_cond=0.4792(moral_friend_nonmatch_negative); ALT2_min_domain=0.6667(moral); trap2=1(我从来没有用过电脑。)"
+phase_009_subj_4,65,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7708(hexagon_nonmatch,n=48); SRET_rec=0.5312(n=160); SRET_src_lt200=0.1783(n=129); ALT2_min_cond=0.5208(ability_self_nonmatch_positive); ALT2_min_domain=0.7370(ability); trap2=1(我已经环游世界23次了。)"
+phase_010_subj_10,395,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(hexagon_match,n=48); trap1=2(ans=2); SRET_rec=0.5188(n=160); SRET_src_lt200=0.0000(n=111); ALT2_min_cond=0.6875(ability_friend_match_negative); ALT2_min_domain=0.7812(ability); trap2=1(我已经环游世界23次了。)"
+phase_010_subj_13,445,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=23; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(hexagon_match,n=48); trap1=3(ans=3); SRET_rec=0.5312(n=160); SRET_src_lt200=0.0000(n=113); ALT2_min_cond=0.4375(ability_self_match_negative); ALT2_min_domain=0.7604(ability); trap2=1(我在12岁从高中毕业。)"
+phase_010_subj_14,466,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=34; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(pentagon_nonmatch,n=48); SRET_rec=0.4813(n=160); SRET_src_lt200=0.2677(n=127); ALT2_min_cond=0.6250(ability_friend_nonmatch_positive); ALT2_min_domain=0.7344(ability); trap2=1(我今天没有填过任何问卷。)"
+phase_010_subj_15,482,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=34; honeypot=0; IAT_prop=0.0139(moral,n=144); ALT1_min_acc=0.8750(hexagon_nonmatch,n=48); trap1=3(ans=3); SRET_rec=0.5312(n=160); SRET_src_lt200=0.1259(n=135); ALT2_min_cond=0.6458(ability_friend_nonmatch_negative); ALT2_min_domain=0.7188(ability); trap2=1(我在12岁从高中毕业。)"
+phase_010_subj_17,538,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7708(trapezoid_match,n=48); trap1=1(ans=1); SRET_rec=0.6375(n=160); SRET_src_lt200=0.7692(n=104); ALT2_min_cond=0.7292(ability_friend_match_positive); ALT2_min_domain=0.8125(ability); trap2=1(我今天没有填过任何问卷。)"
+phase_010_subj_18,576,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=24; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8750(diamond_match,n=48); trap1=3(ans=3); SRET_rec=0.5125(n=160); SRET_src_lt200=0.0303(n=132); ALT2_min_cond=0.5833(moral_friend_match_negative); ALT2_min_domain=0.7422(moral); trap2=1(我今年不到3岁。)"
+phase_010_subj_23,658,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(triangle_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5312(n=160); SRET_src_lt200=0.2683(n=123); ALT2_min_cond=0.3542(ability_self_match_negative); ALT2_min_domain=0.7500(ability); trap2=1(我今年不到3岁。)"
+phase_010_subj_25,700,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=35; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(square_match,n=48); trap1=1(ans=1); SRET_rec=0.4375(n=160); SRET_src_lt200=0.2578(n=128); ALT2_min_cond=0.6042(moral_friend_match_negative); ALT2_min_domain=0.7448(moral); trap2=1(我曾经去过月球。)"
+phase_010_subj_4,178,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=36; honeypot=0
+phase_010_subj_5,215,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=26; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5833(triangle_nonmatch,n=48)"
+phase_010_subj_8,265,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=40; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.4792(diamond_nonmatch,n=48); trap1=3(ans=3)"
+phase_011_subj_11,359,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_011_subj_12,375,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=33; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6042(pentagon_nonmatch,n=48); trap1=2(ans=2)"
+phase_011_subj_14,440,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=23; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.6042(ellipse_match,n=48); trap1=1(ans=1); SRET_rec=0.6500(n=160); SRET_src_lt200=0.0000(n=96); ALT2_min_cond=0.5417(ability_self_nonmatch_negative); ALT2_min_domain=0.7109(ability); trap2=4(我今天没有填过任何问卷。)"
+phase_011_subj_15,444,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率; trap1注意核查,"1,2","age=20; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.5625(hexagon_nonmatch,n=48); trap1=3(ans=1)"
+phase_011_subj_16,446,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7292(circle_nonmatch,n=48); trap1=4(ans=4); SRET_rec=0.6750(n=160); SRET_src_lt200=0.0109(n=92); ALT2_min_cond=0.7083(moral_self_nonmatch_positive); ALT2_min_domain=0.8490(ability); trap2=6(我今天没有填过任何问卷。)"
+phase_011_subj_21,562,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_011_subj_24,651,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6042(diamond_match,n=48); trap1=1(ans=1); SRET_rec=0.8063(n=160); SRET_src_lt200=0.0000(n=67); ALT2_min_cond=0.5833(ability_friend_match_positive); ALT2_min_domain=0.7656(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_012_subj_1,49,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=25; honeypot=0
+phase_012_subj_18,551,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.5417(pentagon_nonmatch,n=48); trap1=3(ans=3)"
+phase_012_subj_19,625,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=18; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(trapezoid_match,n=48); SRET_rec=0.5375(n=160); SRET_src_lt200=0.0515(n=136); ALT2_min_cond=0.6458(moral_friend_match_positive); ALT2_min_domain=0.7474(moral)"
+phase_012_subj_9,345,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(hexagon_nonmatch,n=48); trap1=4(ans=4)"
+phase_013_subj_1,76,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8750(square_nonmatch,n=48); trap1=2(ans=2); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0000(n=79); ALT2_min_cond=0.6875(moral_self_match_negative); ALT2_min_domain=0.8542(ability); trap2=1(我今年不到3岁。)"
+phase_013_subj_12,330,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8958(trapezoid_nonmatch,n=48); SRET_rec=0.6375(n=160); SRET_src_lt200=0.5606(n=132); ALT2_min_cond=0.6042(moral_self_nonmatch_positive); ALT2_min_domain=0.7604(moral); trap2=1(我已经环游世界23次了。)"
+phase_013_subj_14,357,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=34; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8542(trapezoid_match,n=48); trap1=5(ans=5); SRET_rec=0.6000(n=160); SRET_src_lt200=0.5323(n=124); ALT2_min_cond=0.5625(moral_self_nonmatch_positive); ALT2_min_domain=0.7318(moral); trap2=1(我从来没有用过电脑。)"
+phase_013_subj_15,358,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8125(ellipse_nonmatch,n=48); trap1=2(ans=2); SRET_rec=0.5312(n=160); SRET_src_lt200=0.0000(n=149); ALT2_min_cond=0.6042(ability_self_nonmatch_positive); ALT2_min_domain=0.7812(moral); trap2=1(我曾经去过月球。)"
+phase_013_subj_16,393,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_013_subj_20,433,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=26; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(trapezoid_match,n=48); trap1=5(ans=5)"
+phase_013_subj_24,453,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=25; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5000(pentagon_match,n=48); trap1=3(ans=3)"
+phase_013_subj_3,96,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_013_subj_30,640,年龄不符合要求,Day1 年龄纳入标准,年龄,"1,2,3,4","age=60; honeypot=0; IAT_prop=0.0139(moral,n=144); ALT1_min_acc=0.6875(trapezoid_nonmatch,n=48); trap1=4(ans=4); SRET_rec=0.7438(n=160); SRET_src_lt200=0.0000(n=93); ALT2_min_cond=0.3750(moral_self_nonmatch_positive); ALT2_min_domain=0.6615(moral); trap2=1(我从来没有用过电脑。)"
+phase_014_subj_1,51,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_014_subj_14,171,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.3750(diamond_match,n=48); trap1=1(ans=1)"
+phase_014_subj_15,193,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3","age=26; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(trapezoid_nonmatch,n=48); SRET_rec=0.4938(n=160); SRET_src_lt200=0.8129(n=155); ALT2_min_cond=0.7500(moral_friend_match_negative); ALT2_min_domain=0.8854(moral); trap2=1(我今年不到3岁。)"
+phase_014_subj_19,244,第3次质量未通过,Day3 质量筛选未达标,SRET再认; ALT2正确率,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7083(hexagon_nonmatch,n=48); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0331(n=151); ALT2_min_cond=0.1458(ability_self_match_negative); ALT2_min_domain=0.6068(ability); trap2=1(我曾经去过月球。)"
+phase_014_subj_2,51,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7708(hexagon_match,n=48); trap1=1(ans=1)"
+phase_014_subj_20,254,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_014_subj_22,280,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=31; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7083(pentagon_match,n=48)"
+phase_014_subj_24,294,第3次质量未通过,Day3 质量筛选未达标,SRET再认; ALT2正确率,"1,2,3","age=30; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6875(diamond_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5375(n=160); SRET_src_lt200=0.0938(n=96); ALT2_min_cond=0.2500(ability_friend_nonmatch_negative); ALT2_min_domain=0.5521(ability); trap2=1(我今年不到3岁。)"
+phase_014_subj_25,308,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_014_subj_26,308,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_014_subj_27,328,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7292(pentagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.6312(n=160); SRET_src_lt200=0.0000(n=55); ALT2_min_cond=0.7708(ability_self_nonmatch_positive); ALT2_min_domain=0.8984(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_014_subj_28,338,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.4583(pentagon_nonmatch,n=48)"
+phase_014_subj_3,67,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_014_subj_30,362,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=27; honeypot=0
+phase_014_subj_32,373,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(square_match,n=48); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0000(n=151); ALT2_min_cond=0.8333(ability_self_match_negative); ALT2_min_domain=0.9193(ability); trap2=1(我已经环游世界23次了。)"
+phase_014_subj_34,381,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=25; honeypot=0; IAT_prop=0.0000(moral,n=143); ALT1_min_acc=0.6667(hexagon_nonmatch,n=48); SRET_rec=0.5250(n=160); SRET_src_lt200=0.0000(n=72); ALT2_min_cond=0.4167(ability_friend_match_negative); ALT2_min_domain=0.6016(ability); trap2=1(我已经环游世界23次了。)"
+phase_014_subj_35,388,年龄不符合要求,Day1 年龄纳入标准,年龄,1,age=84; honeypot=0
+phase_014_subj_38,413,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5000(diamond_match,n=48)"
+phase_014_subj_43,451,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=25; honeypot=0
+phase_014_subj_44,452,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(diamond_match,n=48); SRET_rec=0.6250(n=160); SRET_src_lt200=0.3983(n=118); ALT2_min_cond=0.8333(moral_self_match_negative); ALT2_min_domain=0.9271(moral); trap2=1(我从来没有用过电脑。)"
+phase_014_subj_46,471,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_014_subj_47,483,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6250(diamond_match,n=48); SRET_rec=0.6562(n=160); SRET_src_lt200=0.7582(n=91); ALT2_min_cond=0.6667(moral_self_match_negative); ALT2_min_domain=0.7786(moral); trap2=1(我在12岁从高中毕业。)"
+phase_014_subj_49,552,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3","age=24; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.8125(hexagon_nonmatch,n=48); SRET_rec=0.5000(n=160); SRET_src_lt200=0.3250(n=160); ALT2_min_cond=0.3750(ability_friend_match_negative); ALT2_min_domain=0.6276(ability); trap2=1(我曾经去过月球。)"
+phase_014_subj_52,621,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_014_subj_54,664,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_014_subj_56,666,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_014_subj_57,672,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_014_subj_58,678,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=24; honeypot=0
+phase_014_subj_6,129,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_014_subj_60,693,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_014_subj_7,131,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_015_subj_13,126,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5625(square_nonmatch,n=48); trap1=5(ans=5)"
+phase_015_subj_14,193,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=26; honeypot=0
+phase_015_subj_16,221,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7708(pentagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5188(n=160); SRET_src_lt200=0.0000(n=147); ALT2_min_cond=0.3542(ability_self_nonmatch_negative); ALT2_min_domain=0.6302(ability); trap2=1(我今年不到3岁。)"
+phase_015_subj_17,223,第2次质量未通过,Day2 质量筛选未达标,trap1注意核查,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6875(diamond_nonmatch,n=48); trap1=3(ans=1); SRET_rec=0.6687(n=160); SRET_src_lt200=0.0000(n=85); ALT2_min_cond=0.7083(moral_self_nonmatch_negative); ALT2_min_domain=0.8177(moral); trap2=1(我今年不到3岁。)"
+phase_015_subj_36,575,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_015_subj_37,588,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3","age=26; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7500(diamond_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5375(n=160); SRET_src_lt200=0.6645(n=152); ALT2_min_cond=0.2917(ability_friend_match_negative); ALT2_min_domain=0.6849(moral); trap2=1(我今天没有填过任何问卷。)"
+phase_015_subj_41,621,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=23; honeypot=0; IAT_prop=0.0139(ability,n=144); ALT1_min_acc=0.5833(hexagon_match,n=48); trap1=2(ans=2)"
+phase_015_subj_44,664,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_015_subj_45,672,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7708(diamond_match,n=48); trap1=1(ans=1); SRET_rec=0.6375(n=160); SRET_src_lt200=0.6562(n=128); ALT2_min_cond=0.7083(moral_self_nonmatch_negative); ALT2_min_domain=0.8099(moral); trap2=1(我今年不到3岁。)"
+phase_015_subj_46,681,第3次后失访：未参加第4次,Day3 后未参加 Day4（失访）,"","1,2,3","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6667(pentagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.6438(n=160); SRET_src_lt200=0.0000(n=107); ALT2_min_cond=0.4792(ability_friend_nonmatch_positive); ALT2_min_domain=0.6771(moral); trap2=1(我曾经去过月球。)"
+phase_015_subj_8,79,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=34; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6875(hexagon_match,n=48); trap1=1(ans=1); SRET_rec=0.5188(n=160); SRET_src_lt200=0.0000(n=157); ALT2_min_cond=0.5625(ability_friend_match_negative); ALT2_min_domain=0.7891(ability); trap2=1(我在12岁从高中毕业。)"
+phase_016_subj_1,6,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(trapezoid_match,n=48); trap1=5(ans=5); SRET_rec=0.5687(n=160); SRET_src_lt200=0.2871(n=101); ALT2_min_cond=0.6250(moral_friend_nonmatch_positive); ALT2_min_domain=0.7578(moral); trap2=7(我今天没有填过任何问卷。)"
+phase_016_subj_12,118,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_016_subj_14,122,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.2292(circle_nonmatch,n=48); trap1=1(ans=1)"
+phase_016_subj_15,128,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_016_subj_17,140,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(diamond_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.6312(n=160); SRET_src_lt200=0.3458(n=107); ALT2_min_cond=0.6875(ability_friend_match_positive); ALT2_min_domain=0.8568(ability); trap2=1(我在12岁从高中毕业。)"
+phase_016_subj_18,144,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_016_subj_19,146,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_016_subj_21,157,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_016_subj_22,157,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_016_subj_23,160,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_016_subj_25,173,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3,4","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5833(trapezoid_nonmatch,n=48); trap1=3(ans=3); SRET_rec=0.6875(n=160); SRET_src_lt200=0.0000(n=106); ALT2_min_cond=0.5833(moral_friend_nonmatch_positive); ALT2_min_domain=0.8568(moral); trap2=1(我今年不到3岁。)"
+phase_016_subj_26,182,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_016_subj_27,185,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_016_subj_28,197,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5000(hexagon_nonmatch,n=48); trap1=1(ans=1)"
+phase_016_subj_3,12,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.3542(diamond_match,n=48); trap1=1(ans=1)"
+phase_016_subj_31,238,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.7917(pentagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5500(n=160); SRET_src_lt200=0.1591(n=88); ALT2_min_cond=0.7292(moral_self_nonmatch_negative); ALT2_min_domain=0.8724(moral); trap2=7(我今天没有填过任何问卷。)"
+phase_016_subj_34,276,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5833(hexagon_nonmatch,n=48); SRET_rec=0.8438(n=160); SRET_src_lt200=0.0000(n=77); ALT2_min_cond=0.6667(moral_friend_nonmatch_negative); ALT2_min_domain=0.8385(ability); trap2=1(我曾经去过月球。)"
+phase_016_subj_37,306,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=19; honeypot=0; IAT_prop=0.0764(moral,n=144); ALT1_min_acc=0.4792(triangle_nonmatch,n=48); trap1=1(ans=1)"
+phase_016_subj_39,308,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_016_subj_4,27,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3,4","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5625(trapezoid_match,n=48); trap1=4(ans=4); SRET_rec=0.5250(n=160); SRET_src_lt200=0.0541(n=148); ALT2_min_cond=0.5833(ability_self_match_negative); ALT2_min_domain=0.8333(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_016_subj_41,336,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_016_subj_42,336,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6667(hexagon_nonmatch,n=48); trap1=3(ans=3); SRET_rec=0.5875(n=160); SRET_src_lt200=0.3095(n=126); ALT2_min_cond=0.7083(moral_friend_nonmatch_negative); ALT2_min_domain=0.8203(moral); trap2=1(我今年不到3岁。)"
+phase_016_subj_46,368,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT; trap2恶意条目,"1,2,3","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7708(trapezoid_nonmatch,n=48); trap1=3(ans=3); SRET_rec=0.7250(n=160); SRET_src_lt200=0.5957(n=94); ALT2_min_cond=0.6875(ability_self_match_negative); ALT2_min_domain=0.8229(moral); trap2=4(我今天没有填过任何问卷。)"
+phase_016_subj_47,381,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.9375(hexagon_nonmatch,n=48); trap1=2(ans=2)"
+phase_016_subj_57,447,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=35; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.8333(hexagon_match,n=48); trap1=3(ans=3)"
+phase_016_subj_58,451,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=25; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8125(diamond_match,n=48); SRET_rec=0.6125(n=160); SRET_src_lt200=0.0865(n=104); ALT2_min_cond=0.4583(ability_friend_nonmatch_positive); ALT2_min_domain=0.6771(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_016_subj_59,463,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6667(diamond_nonmatch,n=48); trap1=5(ans=5); SRET_rec=0.6937(n=160); SRET_src_lt200=0.0000(n=87); ALT2_min_cond=0.2917(ability_self_match_positive); ALT2_min_domain=0.5964(ability); trap2=1(我从来没有用过电脑。)"
+phase_016_subj_61,524,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=34; honeypot=0; IAT_prop=0.0486(ability,n=144); ALT1_min_acc=0.7292(ellipse_match,n=48); trap1=4(ans=4)"
+phase_016_subj_62,534,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT; ALT2正确率,"1,2,3","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7708(diamond_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5500(n=160); SRET_src_lt200=0.4516(n=124); ALT2_min_cond=0.3125(ability_self_nonmatch_negative); ALT2_min_domain=0.5807(ability); trap2=3(我曾经去过月球。)"
+phase_016_subj_63,547,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5625(hexagon_match,n=48); trap1=1(ans=1)"
+phase_016_subj_64,558,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_016_subj_65,563,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_016_subj_67,584,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(trapezoid_nonmatch,n=48); trap1=1(ans=1)"
+phase_016_subj_69,600,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=45; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.7708(pentagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5375(n=160); SRET_src_lt200=0.0956(n=136); ALT2_min_cond=0.4792(moral_friend_nonmatch_positive); ALT2_min_domain=0.7422(moral); trap2=1(我曾经去过月球。)"
+phase_016_subj_7,51,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_016_subj_70,603,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6875(diamond_match,n=48); trap1=2(ans=2); SRET_rec=0.7250(n=160); SRET_src_lt200=0.4043(n=94); ALT2_min_cond=0.5833(ability_self_nonmatch_positive); ALT2_min_domain=0.7344(moral); trap2=1(我从来没有用过电脑。)"
+phase_016_subj_72,639,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6667(square_match,n=48)"
+phase_016_subj_75,654,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT; trap2恶意条目,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6875(diamond_nonmatch,n=48); SRET_rec=0.5875(n=160); SRET_src_lt200=0.4231(n=130); ALT2_min_cond=0.4792(ability_friend_nonmatch_positive); ALT2_min_domain=0.6536(ability); trap2=4(我曾经去过月球。)"
+phase_016_subj_76,656,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_016_subj_77,656,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.3125(ellipse_nonmatch,n=48)"
+phase_016_subj_78,659,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.2083(hexagon_match,n=48); trap1=3(ans=3)"
+phase_016_subj_79,667,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(diamond_match,n=48); trap1=1(ans=1); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0000(n=133); ALT2_min_cond=0.2708(moral_self_nonmatch_negative); ALT2_min_domain=0.6224(moral); trap2=1(我曾经去过月球。)"
+phase_016_subj_80,669,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=30; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7292(hexagon_nonmatch,n=48); trap1=2(ans=2)"
+phase_016_subj_83,691,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=23; honeypot=0; IAT_prop=0.0000(moral,n=143); ALT1_min_acc=0.4583(diamond_match,n=48); trap1=1(ans=1)"
+phase_016_subj_9,77,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8958(hexagon_nonmatch,n=48); trap1=5(ans=5); SRET_rec=0.7312(n=160); SRET_src_lt200=0.0000(n=67); ALT2_min_cond=0.3750(ability_friend_match_negative); ALT2_min_domain=0.7604(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_017_subj_10,51,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3,4","age=18; honeypot=0; IAT_prop=0.0000(moral,n=142); ALT1_min_acc=0.5833(diamond_match,n=48); SRET_rec=0.7438(n=160); SRET_src_lt200=0.0000(n=65); ALT2_min_cond=0.6458(ability_friend_nonmatch_positive); ALT2_min_domain=0.8073(ability)"
+phase_017_subj_105,434,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7292(triangle_match,n=48)"
+phase_017_subj_107,443,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_017_subj_109,452,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_017_subj_11,57,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=38; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6458(pentagon_match,n=48)"
+phase_017_subj_110,453,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_017_subj_112,458,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.8750(triangle_match,n=48)"
+phase_017_subj_116,466,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_017_subj_118,473,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_017_subj_119,478,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=27; honeypot=0
+phase_017_subj_12,60,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_017_subj_121,483,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8750(square_nonmatch,n=48); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0000(n=147); ALT2_min_cond=0.8333(moral_self_nonmatch_negative); ALT2_min_domain=0.8984(moral)"
+phase_017_subj_126,511,第2次质量未通过,Day2 质量筛选未达标,trap1注意核查,"1,2","age=26; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7500(trapezoid_nonmatch,n=48); trap1=5(ans=1)"
+phase_017_subj_129,534,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=24; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6875(triangle_match,n=48); trap1=1(ans=1)"
+phase_017_subj_130,537,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=33; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6875(square_match,n=48); SRET_rec=0.5375(n=160); SRET_src_lt200=0.0071(n=140); ALT2_min_cond=0.4375(moral_friend_match_positive); ALT2_min_domain=0.7083(moral)"
+phase_017_subj_131,538,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6667(diamond_match,n=48)"
+phase_017_subj_136,547,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.9375(pentagon_match,n=48); trap1=1(ans=1); SRET_rec=0.5312(n=160); SRET_src_lt200=0.0000(n=147); ALT2_min_cond=0.9167(moral_self_nonmatch_positive); ALT2_min_domain=0.9714(ability)"
+phase_017_subj_137,550,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_017_subj_138,551,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=41; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8542(square_nonmatch,n=48); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0000(n=143); ALT2_min_cond=0.7917(ability_self_nonmatch_negative); ALT2_min_domain=0.8724(ability)"
+phase_017_subj_139,562,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_017_subj_140,565,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=31; honeypot=0
+phase_017_subj_143,582,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6250(diamond_match,n=48); trap1=1(ans=1)"
+phase_017_subj_146,602,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.8125(diamond_match,n=48)"
+phase_017_subj_147,609,第2次质量未通过,Day2 质量筛选未达标,IAT反应时; ALT1正确率,"1,2","age=21; honeypot=0; IAT_prop=0.3403(moral,n=144); ALT1_min_acc=0.5833(diamond_match,n=48)"
+phase_017_subj_148,616,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(square_nonmatch,n=48)"
+phase_017_subj_15,73,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3","age=43; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.6250(hexagon_match,n=48); SRET_rec=0.5500(n=160); SRET_src_lt200=0.2255(n=102); ALT2_min_cond=0.2500(moral_friend_match_negative); ALT2_min_domain=0.5156(ability)"
+phase_017_subj_150,623,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=37; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(trapezoid_nonmatch,n=48); trap1=1(ans=1)"
+phase_017_subj_151,623,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=21; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.6667(pentagon_nonmatch,n=48); trap1=1(ans=1)"
+phase_017_subj_155,656,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(pentagon_nonmatch,n=48); SRET_rec=0.5750(n=160); SRET_src_lt200=0.1250(n=56); ALT2_min_cond=0.3333(ability_self_match_negative); ALT2_min_domain=0.5078(ability)"
+phase_017_subj_162,685,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=28; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7500(trapezoid_nonmatch,n=48)"
+phase_017_subj_164,687,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=30; honeypot=0
+phase_017_subj_165,688,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_017_subj_166,688,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6667(square_nonmatch,n=48); SRET_rec=0.7125(n=160); SRET_src_lt200=0.4222(n=90); ALT2_min_cond=0.3333(moral_friend_match_negative); ALT2_min_domain=0.6901(moral)"
+phase_017_subj_167,694,第2次质量未通过,Day2 质量筛选未达标,trap1注意核查,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.9167(trapezoid_nonmatch,n=48); trap1=4(ans=1); SRET_rec=0.5500(n=160); SRET_src_lt200=0.0000(n=24); ALT2_min_cond=0.8125(ability_friend_nonmatch_positive); ALT2_min_domain=0.9245(ability)"
+phase_017_subj_17,80,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7708(hexagon_match,n=48); trap1=1(ans=1)"
+phase_017_subj_18,81,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3","age=18; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6875(trapezoid_nonmatch,n=48); SRET_rec=0.6188(n=160); SRET_src_lt200=0.0000(n=75); ALT2_min_cond=0.3958(ability_friend_nonmatch_positive); ALT2_min_domain=0.5703(moral)"
+phase_017_subj_20,85,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=24; honeypot=0; IAT_prop=0.0000(ability,n=288); ALT1_min_acc=0.8750(diamond_match,n=96)"
+phase_017_subj_25,93,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=55; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(ellipse_match,n=48)"
+phase_017_subj_26,95,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8333(trapezoid_nonmatch,n=48)"
+phase_017_subj_28,96,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8750(diamond_match,n=48)"
+phase_017_subj_29,105,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(trapezoid_match,n=48); trap1=1(ans=1); SRET_rec=0.5312(n=160); SRET_src_lt200=0.0000(n=119); ALT2_min_cond=0.6250(ability_friend_match_positive); ALT2_min_domain=0.7656(ability)"
+phase_017_subj_35,123,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(circle_nonmatch,n=48); SRET_rec=0.5125(n=160); SRET_src_lt200=0.0968(n=124); ALT2_min_cond=0.6458(moral_self_nonmatch_negative); ALT2_min_domain=0.7812(moral)"
+phase_017_subj_37,128,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=22; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.4375(diamond_match,n=48)"
+phase_017_subj_39,151,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_017_subj_42,169,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=29; honeypot=0
+phase_017_subj_44,175,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=22; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.7708(trapezoid_match,n=48)"
+phase_017_subj_45,175,第2次质量未通过,Day2 质量筛选未达标,IAT反应时,"1,2","age=23; honeypot=0; IAT_prop=0.9792(ability,n=144); ALT1_min_acc=0.8333(pentagon_nonmatch,n=48); trap1=1(ans=1)"
+phase_017_subj_48,186,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=28; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8333(ellipse_match,n=48)"
+phase_017_subj_5,32,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3,4","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5208(hexagon_match,n=48); SRET_rec=0.7000(n=160); SRET_src_lt200=0.0000(n=80); ALT2_min_cond=0.4792(moral_friend_match_positive); ALT2_min_domain=0.7318(moral)"
+phase_017_subj_50,196,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(pentagon_match,n=48)"
+phase_017_subj_52,219,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_017_subj_55,230,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=21; honeypot=0; IAT_prop=0.0278(ability,n=144); ALT1_min_acc=0.4167(diamond_match,n=48)"
+phase_017_subj_57,239,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=31; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(square_match,n=48)"
+phase_017_subj_59,252,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6042(diamond_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5312(n=160); SRET_src_lt200=0.0000(n=111); ALT2_min_cond=0.4167(ability_self_nonmatch_negative); ALT2_min_domain=0.6719(ability)"
+phase_017_subj_64,280,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(pentagon_nonmatch,n=48); SRET_rec=0.5062(n=160); SRET_src_lt200=0.0370(n=81); ALT2_min_cond=0.7708(ability_friend_match_positive); ALT2_min_domain=0.8802(moral)"
+phase_017_subj_65,296,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.2917(diamond_match,n=48)"
+phase_017_subj_66,296,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=22; honeypot=0
+phase_017_subj_68,304,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8125(diamond_match,n=48); trap1=1(ans=1); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0000(n=149); ALT2_min_cond=0.7083(moral_self_match_negative); ALT2_min_domain=0.8958(ability)"
+phase_017_subj_69,308,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3,4","age=18; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.5833(pentagon_match,n=48); SRET_rec=0.7625(n=160); SRET_src_lt200=0.0182(n=110); ALT2_min_cond=0.7708(ability_self_nonmatch_negative); ALT2_min_domain=0.8802(moral)"
+phase_017_subj_72,323,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=41; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(hexagon_match,n=48); trap1=1(ans=1)"
+phase_017_subj_73,325,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(trapezoid_nonmatch,n=48); SRET_rec=0.5125(n=160); SRET_src_lt200=0.0000(n=78); ALT2_min_cond=0.5208(ability_self_match_positive); ALT2_min_domain=0.7578(ability)"
+phase_017_subj_74,338,年龄不符合要求,Day1 年龄纳入标准,年龄,1,age=0; honeypot=0
+phase_017_subj_76,341,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=19; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.1667(square_match,n=48)"
+phase_017_subj_80,355,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=47; honeypot=0
+phase_017_subj_81,357,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7083(pentagon_nonmatch,n=48); trap1=1(ans=1)"
+phase_017_subj_83,366,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT,"1,2,3","age=21; honeypot=0; IAT_prop=0.0139(moral,n=144); ALT1_min_acc=0.8333(pentagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5250(n=160); SRET_src_lt200=0.3115(n=122); ALT2_min_cond=0.5833(ability_self_match_negative); ALT2_min_domain=0.8620(moral)"
+phase_017_subj_85,367,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7083(pentagon_match,n=48)"
+phase_017_subj_88,372,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8125(hexagon_match,n=48); trap1=1(ans=1); SRET_rec=0.5375(n=160); SRET_src_lt200=0.1250(n=144); ALT2_min_cond=0.6250(ability_self_match_negative); ALT2_min_domain=0.8464(ability)"
+phase_017_subj_9,47,年龄不符合要求,Day1 年龄纳入标准,年龄,1,age=109; honeypot=0
+phase_017_subj_92,386,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_017_subj_96,398,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=26; honeypot=0
+phase_017_subj_98,398,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=26; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.6667(pentagon_match,n=48); SRET_rec=0.5312(n=160); SRET_src_lt200=0.2245(n=147); ALT2_min_cond=0.5417(moral_self_nonmatch_negative); ALT2_min_domain=0.7969(ability)"
+phase_018_subj_1,24,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=34; honeypot=0
+phase_018_subj_10,103,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=35; honeypot=0
+phase_018_subj_100,658,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=24; honeypot=0; IAT_prop=0.0139(ability,n=144); ALT1_min_acc=0.6875(hexagon_nonmatch,n=48)"
+phase_018_subj_102,670,年龄不符合要求,Day1 年龄纳入标准,年龄,1,age=71; honeypot=0
+phase_018_subj_103,680,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6667(trapezoid_nonmatch,n=48); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0000(n=95); ALT2_min_cond=0.2500(ability_self_nonmatch_negative); ALT2_min_domain=0.6406(moral)"
+phase_018_subj_104,683,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(trapezoid_nonmatch,n=48); SRET_rec=0.5312(n=160); SRET_src_lt200=0.0615(n=65); ALT2_min_cond=0.7083(moral_friend_nonmatch_positive); ALT2_min_domain=0.8490(moral)"
+phase_018_subj_105,684,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=36; honeypot=0
+phase_018_subj_12,112,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=38; honeypot=0
+phase_018_subj_14,112,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7917(diamond_match,n=48); SRET_rec=0.5312(n=160); SRET_src_lt200=0.2157(n=153); ALT2_min_cond=0.7500(ability_self_nonmatch_positive); ALT2_min_domain=0.8906(ability)"
+phase_018_subj_18,130,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(hexagon_nonmatch,n=48)"
+phase_018_subj_19,137,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=31; honeypot=0
+phase_018_subj_2,34,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=39; honeypot=0
+phase_018_subj_20,139,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_018_subj_22,144,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_018_subj_23,155,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=27; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7917(pentagon_nonmatch,n=48); SRET_rec=0.5188(n=160); SRET_src_lt200=0.1429(n=77); ALT2_min_cond=0.7500(ability_friend_nonmatch_positive); ALT2_min_domain=0.8932(ability)"
+phase_018_subj_24,158,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_018_subj_25,160,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=25; honeypot=0
+phase_018_subj_27,184,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_018_subj_29,190,第3次质量未通过,Day3 质量筛选未达标,SRET再认; SRET来源RT; ALT2正确率,"1,2,3","age=21; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.6250(hexagon_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5250(n=160); SRET_src_lt200=0.3358(n=134); ALT2_min_cond=0.2292(ability_self_nonmatch_positive); ALT2_min_domain=0.4062(ability)"
+phase_018_subj_30,230,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=24; honeypot=0
+phase_018_subj_31,233,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0278(ability,n=144); ALT1_min_acc=0.7500(diamond_nonmatch,n=48)"
+phase_018_subj_32,240,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=32; honeypot=0
+phase_018_subj_35,248,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_018_subj_37,249,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=24; honeypot=0
+phase_018_subj_39,267,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=19; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8542(pentagon_nonmatch,n=48); SRET_rec=0.4875(n=160); SRET_src_lt200=0.1962(n=158); ALT2_min_cond=0.8125(moral_friend_nonmatch_negative); ALT2_min_domain=0.9036(moral)"
+phase_018_subj_40,271,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=37; honeypot=0
+phase_018_subj_45,308,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=24; honeypot=0; IAT_prop=0.0069(moral,n=144); ALT1_min_acc=0.5417(trapezoid_match,n=48)"
+phase_018_subj_49,323,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=39; honeypot=0
+phase_018_subj_50,332,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3,4","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8750(pentagon_nonmatch,n=48); SRET_rec=0.6250(n=160); SRET_src_lt200=0.3684(n=76); ALT2_min_cond=0.6458(moral_self_nonmatch_negative); ALT2_min_domain=0.8620(ability)"
+phase_018_subj_52,338,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_018_subj_58,385,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_018_subj_63,423,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=33; honeypot=0
+phase_018_subj_64,428,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=23; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8958(hexagon_nonmatch,n=48)"
+phase_018_subj_66,436,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_018_subj_67,442,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=34; honeypot=0
+phase_018_subj_68,447,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=33; honeypot=0
+phase_018_subj_7,90,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_018_subj_72,451,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=26; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.7500(trapezoid_match,n=48); SRET_rec=0.5437(n=160); SRET_src_lt200=0.0066(n=151); ALT2_min_cond=0.6458(ability_friend_nonmatch_positive); ALT2_min_domain=0.7839(ability)"
+phase_018_subj_80,524,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3,4","age=18; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8333(square_nonmatch,n=48); SRET_rec=0.6375(n=160); SRET_src_lt200=0.3723(n=94); ALT2_min_cond=0.5417(ability_friend_nonmatch_negative); ALT2_min_domain=0.6693(moral)"
+phase_018_subj_83,554,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=37; honeypot=0
+phase_018_subj_84,561,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=23; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.3333(hexagon_match,n=48)"
+phase_018_subj_85,567,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=20; honeypot=0
+phase_018_subj_89,584,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=23; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.8333(diamond_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5188(n=160); SRET_src_lt200=0.0000(n=147); ALT2_min_cond=0.4375(moral_self_nonmatch_negative); ALT2_min_domain=0.7344(moral)"
+phase_018_subj_90,596,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=24; honeypot=0
+phase_018_subj_91,601,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=29; honeypot=0
+phase_018_subj_92,611,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_018_subj_93,615,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=25; honeypot=0
+phase_018_subj_94,618,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=24; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6458(diamond_nonmatch,n=48)"
+phase_018_subj_95,620,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=23; honeypot=0
+phase_018_subj_96,621,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=21; honeypot=0
+phase_018_subj_99,646,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3","age=21; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5208(square_match,n=48); SRET_rec=0.6562(n=160); SRET_src_lt200=0.0494(n=81); ALT2_min_cond=0.1875(ability_self_match_negative); ALT2_min_domain=0.6562(ability)"
+phase_019_subj_1,16,第2次后失访：未参加第3次,Day2 后未参加 Day3（失访）,"","1,2","age=20; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(trapezoid_match,n=48); trap1=4(ans=4)"
+phase_019_subj_10,111,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8333(trapezoid_nonmatch,n=48); trap1=5(ans=5); SRET_rec=0.6937(n=160); SRET_src_lt200=0.0000(n=93); ALT2_min_cond=0.6042(ability_friend_nonmatch_positive); ALT2_min_domain=0.8255(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_019_subj_11,123,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=24; honeypot=0
+phase_019_subj_17,171,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=34; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.3750(diamond_match,n=48); trap1=1(ans=1)"
+phase_019_subj_20,232,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.5833(square_nonmatch,n=48); trap1=3(ans=3); SRET_rec=0.7625(n=160); SRET_src_lt200=0.0000(n=82); ALT2_min_cond=0.4167(moral_self_nonmatch_positive); ALT2_min_domain=0.7344(ability); trap2=1(我从来没有用过电脑。)"
+phase_019_subj_24,297,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2","age=19; honeypot=0; IAT_prop=0.0139(ability,n=144); ALT1_min_acc=0.4375(hexagon_match,n=48); trap1=1(ans=1)"
+phase_019_subj_27,344,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.7083(triangle_match,n=48); trap1=2(ans=2); SRET_rec=0.5750(n=160); SRET_src_lt200=0.0352(n=142); ALT2_min_cond=0.6458(moral_self_match_negative); ALT2_min_domain=0.8099(moral); trap2=7(我今天没有填过任何问卷。)"
+phase_019_subj_28,350,第2次质量未通过,Day2 质量筛选未达标,IAT反应时,"1,2","age=23; honeypot=0; IAT_prop=0.9722(ability,n=144); ALT1_min_acc=0.6042(square_match,n=48); trap1=2(ans=2)"
+phase_019_subj_29,352,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.8542(hexagon_match,n=48); SRET_rec=0.6687(n=160); SRET_src_lt200=0.8861(n=79); ALT2_min_cond=0.8125(moral_friend_nonmatch_positive); ALT2_min_domain=0.8776(moral); trap2=1(我在12岁从高中毕业。)"
+phase_019_subj_3,36,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=19; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6042(trapezoid_match,n=48); trap1=1(ans=1); SRET_rec=0.6875(n=160); SRET_src_lt200=0.5588(n=102); ALT2_min_cond=0.7292(moral_self_match_negative); ALT2_min_domain=0.8672(ability); trap2=1(我已经环游世界23次了。)"
+phase_019_subj_32,412,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_019_subj_36,443,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=23; honeypot=0; IAT_prop=0.0000(ability,n=142); ALT1_min_acc=0.6458(ellipse_match,n=48); SRET_rec=0.6500(n=160); SRET_src_lt200=0.7647(n=102); ALT2_min_cond=0.4792(ability_self_match_negative); ALT2_min_domain=0.7552(ability); trap2=1(我从来没有用过电脑。)"
+phase_019_subj_37,456,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=23; honeypot=0; IAT_prop=0.0278(ability,n=144); ALT1_min_acc=0.7500(diamond_match,n=48); trap1=5(ans=5); SRET_rec=0.6312(n=160); SRET_src_lt200=0.6813(n=91); ALT2_min_cond=0.5417(ability_self_nonmatch_positive); ALT2_min_domain=0.7656(ability); trap2=1(我已经环游世界23次了。)"
+phase_019_subj_38,487,第2次质量未通过,Day2 质量筛选未达标,IAT反应时; ALT1正确率,"1,2","age=20; honeypot=0; IAT_prop=0.9931(ability,n=144); ALT1_min_acc=0.3750(hexagon_match,n=48); trap1=3(ans=3)"
+phase_019_subj_40,524,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3,4","age=19; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7292(diamond_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5375(n=160); SRET_src_lt200=0.0000(n=94); ALT2_min_cond=0.6667(ability_self_nonmatch_positive); ALT2_min_domain=0.8307(ability); trap2=1(我在12岁从高中毕业。)"
+phase_019_subj_41,531,第3次质量未通过,Day3 质量筛选未达标,trap2恶意条目,"1,2,3,4","age=46; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.8542(trapezoid_match,n=48); trap1=2(ans=2); SRET_rec=0.7063(n=160); SRET_src_lt200=0.0000(n=103); ALT2_min_cond=0.6667(ability_friend_nonmatch_negative); ALT2_min_domain=0.8255(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_019_subj_43,598,第2次质量未通过,Day2 质量筛选未达标,ALT1正确率,"1,2,3,4","age=20; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.5625(hexagon_match,n=48); trap1=3(ans=3); SRET_rec=0.7500(n=160); SRET_src_lt200=0.0000(n=108); ALT2_min_cond=0.3958(moral_self_match_negative); ALT2_min_domain=0.7578(moral); trap2=1(我在12岁从高中毕业。)"
+phase_019_subj_44,617,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3","age=22; honeypot=0; IAT_prop=0.0069(ability,n=144); ALT1_min_acc=0.7500(square_match,n=48); trap1=5(ans=5); SRET_rec=0.6813(n=160); SRET_src_lt200=0.5913(n=115); ALT2_min_cond=0.7500(ability_friend_match_negative); ALT2_min_domain=0.8464(ability); trap2=1(我从来没有用过电脑。)"
+phase_019_subj_5,63,第3次质量未通过,Day3 质量筛选未达标,SRET再认,"1,2,3","age=18; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.6250(diamond_match,n=48); trap1=1(ans=1); SRET_rec=0.5000(n=160); SRET_src_lt200=0.0125(n=80); ALT2_min_cond=0.5208(moral_self_match_negative); ALT2_min_domain=0.7214(moral); trap2=1(我在12岁从高中毕业。)"
+phase_019_subj_50,646,第3次质量未通过,Day3 质量筛选未达标,ALT2正确率,"1,2,3","age=51; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7500(diamond_match,n=48); trap1=1(ans=1); SRET_rec=0.5625(n=160); SRET_src_lt200=0.1917(n=120); ALT2_min_cond=0.1875(moral_friend_match_negative); ALT2_min_domain=0.7083(moral); trap2=1(我在12岁从高中毕业。)"
+phase_019_subj_51,654,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=18; honeypot=0
+phase_019_subj_52,667,第3次质量未通过,Day3 质量筛选未达标,SRET再认; trap2恶意条目,"1,2,3","age=21; honeypot=0; IAT_prop=0.0000(moral,n=144); ALT1_min_acc=0.6458(diamond_match,n=48); SRET_rec=0.5062(n=160); SRET_src_lt200=0.0345(n=145); ALT2_min_cond=0.2083(moral_self_match_negative); ALT2_min_domain=0.6771(ability); trap2=7(我今天没有填过任何问卷。)"
+phase_019_subj_7,73,第1次后失访：未参加第2次,Day1 后未参加 Day2（失访）,"",1,age=19; honeypot=0
+phase_020_subj_2,294,第3次质量未通过,Day3 质量筛选未达标,SRET来源RT,"1,2,3,4","age=22; honeypot=0; IAT_prop=0.0000(ability,n=144); ALT1_min_acc=0.7500(square_nonmatch,n=48); trap1=1(ans=1); SRET_rec=0.5875(n=160); SRET_src_lt200=0.3413(n=126); ALT2_min_cond=0.5208(ability_self_match_negative); ALT2_min_domain=0.6979(ability)"

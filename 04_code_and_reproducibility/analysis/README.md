@@ -1,13 +1,16 @@
-# analysis: Analysis Code / 分析代码
+# Analysis
 
-This directory contains the integrated analysis pipeline that produces all results reported in the manuscript *"An integrated dataset of self-report and behavioral measures of positive self-view"*.
+当前派生指标实现统一位于analysis.Rmd第9节：新02数据、606池、160个问卷条目和26个行为指标、九个CSV正式输出及独立核验。第1—8节历史代码保留，默认不执行。
 
-本目录包含整合文章内全部分析流程的代码。
+直接Knit默认生成04本目录下derived_606_audit的暂存结果并核验现有03。设置install_derived=true才备份并安装正式结果。
 
-## Files / 文件
+项目根目录命令：
+- Rscript 04_code_and_reproducibility/analysis/run_analysis_current.R --install
+- Rscript 04_code_and_reproducibility/analysis/run_analysis_current.R --mode=validate
 
-| File / 文件 | Description / 说明 |
-|---|---|
-| `analysis.Rmd` | Main analysis file integrating, in manuscript order, all analysis code for the manuscript / 主分析文件，整合文章内全部分析流程的代码 |
-| `analysis.html` | HTML report generated from `analysis.Rmd` / 由该 Rmd 生成的 HTML |
+rebuild_derived_new_clean.R、organize_derived_outputs.R、validate_derived_new_clean.R只保留兼容入口，算法在Rmd中维护。derived_606_audit保存派生审计、暂存表和历史备份；archive保存目录整理时移动的辅助材料及说明文件备份。
+
+analysis.html是既有历史报告，本轮未重新渲染，不作为当前606池计算结果的证明。当前结果和核验记录以03的九个CSV及derived_606_audit为准。
+
+两版被试排除名单和合并筛查脚本位于同级subject _screening1；历史明细与任务可用ID名单已归入其中的archive。原subject _screening保持不变。
 
