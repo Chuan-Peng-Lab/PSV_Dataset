@@ -1,13 +1,12 @@
 # 03_derived：02清洗数据的派生指标
 
-
 ## CSV内容
 
 | 文件 | 内容 |
 |---|---|
 | positive_IAT.csv | 602人，2指标 |
 | positive_SMT.csv | 557人，8指标，来自SMT2而非SMT1 |
-| positive_SRET.csv | 483人，16指标 |
+| positive_SRET.csv | 482人，16指标 |
 | questionnaire_indices_day1.csv | 606人，Day1量表总分及既有分类，含ID共6列 |
 | questionnaire_indices_day2.csv | 606人，Day2量表总分，含ID共6列 |
 | questionnaire_indices_day3.csv | 571人，Day3量表总分，含ID共8列 |
@@ -37,6 +36,3 @@
 - SOURCE：self正确/错误为H/M，friend正确/错误为CR/FA，计算来源d′。
 
 d′采用Rmd的loglinear校正：qnorm((H+0.5)/(H+M+1)) − qnorm((FA+0.5)/(FA+CR+1))。条件组存在但某一类计数为0时，仍按Rmd进行0.5校正；完全没有可计分试次的条件不伪造数据，指标留NA。
-
-SRET的负性道德来源指标SOURCE_morality_Negative有6人没有可计分来源试次，因此该指标实际477人有效，其他15项SRET指标各483人有效。另5人在该条件仅有一类试次，依Rmd公式得到平滑校正值。11个具体ID、计数及处理见04审计目录SRET_SOURCE_sparse_conditions.csv；没有因此排除任何人的其他指标。
-

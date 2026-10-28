@@ -23,6 +23,59 @@ output_dir <- dirname(script)
 legacy_dir <- file.path(root, "04_code_and_reproducibility", "subject _screening")
 read_csv <- function(path) fread(path, encoding="UTF-8", na.strings=c("", "NA"), showProgress=FALSE)
 
+# Targeted task-level amendment, independent of unavailable historical inputs.
+# Run from the project: Rscript "04_code_and_reproducibility/subject _screening/subject_screening.R" --exclude-sret-incomplete
+# This is a confirmed individual decision, not a new blanket missing-response rule.
+if ("--exclude-sret-incomplete" %in% commandArgs(TRUE)) {
+  target <- "phase_017_subj_16"
+  clean_file <- file.path(root, "02_cleaned", "SRET_cleaned.csv")
+  log_file <- file.path(output_dir, "excluded_task_data.csv")
+  backup_dir <- file.path(output_dir, "archive", "sret_exclusion_20261028")
+  backup_file <- file.path(backup_dir, "SRET_cleaned.csv")
+  x <- read_csv(clean_file)
+  if (!target %in% x$ID) {
+    stopifnot(uniqueN(x$ID) == 482L, file.exists(log_file), file.exists(backup_file))
+    log <- read_csv(log_file)
+    stopifnot(nrow(log[ID == target & task == "SRET"]) == 1L)
+    cat("Already applied: SRET 482 participants; exclusion record exists.\n")
+    quit(save="no", status=0)
+  }
+  z <- x[ID == target]
+  rec <- z[screen_id == "RJ_formal1"]
+  stopifnot(uniqueN(x$ID) == 483L, nrow(z) == 355L,
+            identical(unique(z$ParticipantID), 74L), nrow(rec) == 160L,
+            sum(rec$recognition_scoring_correct) == 109L,
+            sum(rec$recognition_response_missing) == 1L)
+  protected <- c(list.files(file.path(root,"02_cleaned"), pattern="[.](csv|zip)$",full.names=TRUE),
+                 list.files(file.path(root,"03_derived"), pattern="[.]csv$",full.names=TRUE),
+                 file.path(output_dir,c("excluded_subjects_606.csv","excluded_subjects_466.csv","valid_data.csv")))
+  protected <- setdiff(protected, clean_file)
+  hashes <- tools::md5sum(protected)
+  dir.create(backup_dir, recursive=TRUE, showWarnings=FALSE)
+  if (!file.exists(backup_file)) stopifnot(file.copy(clean_file, backup_file))
+  stopifnot(identical(unname(tools::md5sum(clean_file)), unname(tools::md5sum(backup_file))))
+  y <- x[ID != target]
+  stopifnot(nrow(y) == 160720L, uniqueN(y$ID) == 482L)
+  entry <- data.table(ID=target, ParticipantID=74L, task="SRET", exclusion_level="任务级",
+    exclusion_reason="再认作答不完整；正确率达标，按用户确认仅剔除该人的SRET数据",
+    recognition_trials=160L, recognition_correct=109L, recognition_missing=1L,
+    recognition_accuracy=109/160, removed_rows=nrow(z),
+    scope="全部SRET阶段；其他任务、问卷及606/466被试级名单不变",
+    decision_date="2026-10-28", source_file="02_cleaned/SRET_cleaned.csv",
+    backup_file="archive/sret_exclusion_20261028/SRET_cleaned.csv")
+  log <- if (file.exists(log_file)) read_csv(log_file) else entry[0]
+  log <- rbindlist(list(log[!(ID == target & task == "SRET")],entry),use.names=TRUE,fill=TRUE)
+  staged <- tempfile("sret-",tmpdir=backup_dir,fileext=".csv")
+  fwrite(y, staged, bom=TRUE, na="")
+  check <- read_csv(staged)
+  stopifnot(isTRUE(all.equal(as.data.frame(check),as.data.frame(y),tolerance=1e-14)),
+            !target %in% check$ID, uniqueN(check$ID)==482L)
+  fwrite(log, log_file, bom=TRUE, na="")
+  stopifnot(file.rename(staged,clean_file),identical(tools::md5sum(protected),hashes))
+  cat("PASS: removed 355 SRET rows; 482 participants / 160720 rows remain. Other data and cohort lists unchanged.\n")
+  quit(save="no",status=0)
+}
+
 # The 777-person source table contains the established screening variables and order.
 screen <- read_csv(file.path(legacy_dir, "recomputed_screening_all_777.csv"))
 ledger <- read_csv(file.path(legacy_dir, "exclusion_ledger_three_layer.csv"))
