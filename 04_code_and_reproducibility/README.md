@@ -11,7 +11,6 @@ This directory contains the experimental programs and the analysis code that sup
 ├── README.md                                          # 文件说明
 ├── procedure/                                         # 实验程序
 ├── analysis/                                          # 整合文章内全部分析流程的代码
-├── excluded_record_paper/                             # 按论文思路的被试排除记录（777 → 503）
 └── subject _screening/                                # 标准清洗记录（777 → 606 ，777 → 466）
 ```
 
@@ -27,10 +26,6 @@ Contains the jsPsych experimental programs for the four data-collection sessions
 | `day2/` | Day 2: questionnaires (RSES, CSES, NPI-16, HNS, SGPS) + IAT + geometric-shape SMT / Day 2：问卷 + IAT + SMT 几何图形版 |
 | `day3/` | Day 3: questionnaires (SWLS, IPC-I, LOT-R, MIS, MSIS, SDE, IM) + SRET + self-referential SMT / Day 3：问卷 + SRET + SMT 自我参照版 |
 | `day10/` | Day 10 retest: full questionnaire set, no behavioral tasks / Day 10 重测：问卷全量重测，无行为任务 |
-
-Steps for running the programs locally are described in the README of this subdirectory.
-
-本地运行各程序需注意的事项见该子目录下的说明文件。
 
 ## analysis/ — Analysis Code / 分析代码
 

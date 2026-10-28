@@ -2566,7 +2566,7 @@ message("Finished. Outputs written to ", OUTPUT_DIR)
 
 本节是当前版本的唯一计算实现（2026-10-22）。将此前新增的派生计算、输出整理和独立核验代码完整内嵌于此，不依赖外部R脚本提供计分函数。第1—8节保留为历史参考，默认不执行。
 
-输入为当前02_cleaned和04中的retained_606_IDs.csv。保留全部160个首次测量问卷条目及26个行为指标，按真实ID合并，不因某个任务失败删除其他有效数据。IAT 602人、SMT2 557人、SRET 483人；SOURCE_morality_Negative因6人缺少可计分试次而477人有值。问卷有效性及条目数继承02，不再次反向计分。
+输入为当前02_cleaned和04中的retained_606_IDs.csv。保留全部160个首次测量问卷条目及26个行为指标，按真实ID合并，不因某个任务失败删除其他有效数据。IAT 602人、SMT2 557人、SRET 482人；其中 `phase_017_subj_16` 因SRET作答不完整而按任务级规则剔除，其他任务和问卷保留。SOURCE_morality_Negative因6人缺少可计分试次而477人有值。问卷有效性及条目数继承02，不再次反向计分。
 
 **运行方式**
 
@@ -2600,7 +2600,7 @@ message("Finished. Outputs written to ", OUTPUT_DIR)
 
 IAT按区块原平均RT+600ms惩罚错误试次。SMT RT为friend−self，d′为self−friend并共享不匹配噪声。SRET yes、RT和REC为两个人物指标的等权平均，SOURCE按self为信号、friend为噪声计算d′。这些方向以Rmd实际运算为准，不套用旧字典中冲突的差值描述。
 
-SRET编码RT采用正文的可用试次均值，不填补226条缺失RT。对仅一类SDT试次的条件沿用0.5校正；完全无可计分试次的条件留NA。phase_017_subj_16保留，缺失再认反应不虚构分类。所有特殊条件及有效试次数有独立审计记录。
+SRET编码RT采用正文的可用试次均值，不填补226条缺失RT。对仅一类SDT试次的条件沿用0.5校正；完全无可计分试次的条件留NA。`phase_017_subj_16` 的SRET作答不完整，按任务级排除处理；其问卷、IAT和SMT指标保留。所有特殊条件及有效试次数有独立审计记录。
 
 
 ## 9.1 路径、参数与通用函数
@@ -2761,7 +2761,8 @@ out(sr,'SMT_RT_components.csv',audit); out(sc,'SMT_SDT_components.csv',audit)
 ```{r psv_current_sret, eval=params$run_current, message=FALSE, warning=TRUE}
 # SRET: equal-person means of EW endorsement counts, EW mean RT and
 # recognition d-prime; source sensitivity uses self as signal, friend as noise.
-sret <- read('SRET_cleaned.csv') %>% norm(); check_ids(sret,483)
+sret <- read('SRET_cleaned.csv') %>% norm(); check_ids(sret,482)
+stopifnot(!'phase_017_subj_16' %in% sret$ID)
 ew <- sret %>% filter(screen_id=='EW_formal',person %in% c('self','friend')) %>%
   group_by(ID,domain,valence,person) %>% summarise(
     yes=sum(responses=='yes',na.rm=TRUE), rt=mean_available(rt), n=n(),
@@ -2800,7 +2801,7 @@ out(sret %>% filter((screen_id=='EW_formal' & (is.na(rt)|is.na(responses))) |
                     (screen_id=='RJ_formal1' & !responses %in% c('old','familiar','new')) |
                     (screen_id=='RJ_formal_2' & identity %in% c('self','friend') & !correct %in% 0:1)) %>%
       select(ID,screen_id,domain,valence,person,identity,word,rt,responses,correct), 'SRET_missing_trials.csv',audit)
-check_ids(iat_scores,602,TRUE); check_ids(smt_scores,557,TRUE); check_ids(sret_scores,483,TRUE)
+check_ids(iat_scores,602,TRUE); check_ids(smt_scores,557,TRUE); check_ids(sret_scores,482,TRUE)
 behavior <- pool %>% left_join(iat_scores,by='ID') %>% left_join(smt_scores,by='ID') %>% left_join(sret_scores,by='ID')
 mapping <- read_csv(file.path(root,'codebook_variable_mapping.csv'),show_col_types=FALSE)
 behavior_names <- mapping$released_variable[1:26]
@@ -2910,7 +2911,7 @@ bd <- tibble(variable=behavior_names,type='behavioral_index',
   source=ifelse(grepl('IAT',behavior_names),'02_cleaned/IAT_cleaned.csv',ifelse(grepl('^SMT',behavior_names),'02_cleaned/SMT_2_cleaned.zip','02_cleaned/SRET_cleaned.csv')))
 out(bind_rows(bind_rows(dict),bd),'variable_dictionary.csv')
 summary <- tibble(dataset=c('606_pool','IAT','SMT2','SRET','questionnaire_initial','all_186_complete'),
-  n_subjects=c(606,602,557,483,606,sum(complete.cases(all_data))),
+  n_subjects=c(606,602,557,482,606,sum(complete.cases(all_data))),
   n_variables=c(0,2,8,16,160,186))
 out(summary,'dataset_counts.csv',audit)
 manifest_paths <- unique(c(list.files(clean,full.names=TRUE),pool_file,normalizePath(script)))
@@ -2985,7 +2986,7 @@ actual_hash <- unname(tools::md5sum(file.path(root,manifest$path)))
 stopifnot(identical(actual_hash,manifest$md5)); record('input_files_unchanged',nrow(manifest))
 for(task in c('IAT','SMT','SRET')) {
   t <- getcsv(paste0('positive_',task,'.csv'))
-  expected_n <- c(IAT=602,SMT=557,SRET=483)[[task]]
+  expected_n <- c(IAT=602,SMT=557,SRET=482)[[task]]
   stopifnot(nrow(t)==expected_n,!anyDuplicated(t$ID),all(t$ID %in% pool))
   for(v in setdiff(names(t),'ID')) compare(x[[v]],t[[v]][match(x$ID,t$ID)],paste0('membership_and_merge_',v))
 }
@@ -3062,7 +3063,7 @@ for(id in names(byid)) for(dom in c('ability','morality')) for(val in c('Positiv
   expected[id,(paste0('SOURCE_',dom,'_',val)):=ds]
 }
 for(v in names(b)[-1]) compare(b[[v]],expected[[v]][match(b$ID,expected$ID)],paste0('independent_recalculation_',v))
-stopifnot('phase_017_subj_16' %in% getcsv('positive_SRET.csv')$ID)
+stopifnot(!'phase_017_subj_16' %in% getcsv('positive_SRET.csv')$ID)
 counts <- getcsv('indicator_counts.csv')
 for(v in names(x)[-1]) stopifnot(counts[variable==v,n_valid]==sum(!is.na(x[[v]])))
 qa <- fread(file.path(root,'04_code_and_reproducibility','subject _screening1','archive','audit','cleaning_606_audit','task_validity_606.csv'))
