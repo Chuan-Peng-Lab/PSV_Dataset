@@ -1,35 +1,32 @@
-﻿类别,名称,场次,条目数,有数据N(∩606),有效N,无效/缺失N,判据/备注
-问卷,SCC 自我概念清晰度 (selfclarity),Day1(基线),12,606,606,0,条目完整（12 项全非缺失）
-问卷,PHQ-9 抑郁 (phq),Day1(基线),9,606,606,0,条目完整（9 项全非缺失）
-问卷,GAD-7 焦虑 (gad),Day1(基线),7,606,606,0,条目完整（7 项全非缺失）
-问卷,RSES 自尊 (ses),Day2,10,606,606,0,条目完整（10 项全非缺失）
-问卷,CSES 核心自我评价 (coreself),Day2,10,606,606,0,条目完整（10 项全非缺失）
-问卷,NPI-16 自恋 (NPI),Day2,15,606,606,0,条目完整（15 项全非缺失）
-问卷,HNS (hsns),Day2,10,606,581,25,条目完整（10 项全非缺失）
-问卷,SGPS (SGPS),Day2,9,606,606,0,条目完整（9 项全非缺失）
-问卷,SWLS 生活满意度 (swb),Day3,5,571,571,0,条目完整（5 项全非缺失）
-问卷,LOT-R 乐观 (LOT),Day3,6,571,571,0,条目完整（6 项全非缺失）
-问卷,IPC-I 控制源 (IPC),Day3,8,571,571,0,条目完整（8 项全非缺失）
-问卷,MIS 道德认同 (MorIden),Day3,10,571,571,0,条目完整（10 项全非缺失）
-问卷,MSIS 道德自我意象 (moralSeImag),Day3,9,571,571,0,条目完整（9 项全非缺失）
-问卷,SDE 社会赞许 (sde),Day3,20,571,571,0,条目完整（20 项全非缺失）
-问卷,IM 印象管理 (IM),Day3,20,571,571,0,条目完整（20 项全非缺失）
-问卷,SCC 自我概念清晰度 (selfclarity),Day10(重测),12,512,512,0,条目完整（12 项全非缺失）
-问卷,PHQ-9 抑郁 (phq),Day10(重测),9,512,512,0,条目完整（9 项全非缺失）
-问卷,GAD-7 焦虑 (gad),Day10(重测),7,512,512,0,条目完整（7 项全非缺失）
-问卷,RSES 自尊 (ses),Day10(重测),10,512,512,0,条目完整（10 项全非缺失）
-问卷,CSES 核心自我评价 (coreself),Day10(重测),10,512,512,0,条目完整（10 项全非缺失）
-问卷,NPI-16 自恋 (NPI),Day10(重测),15,512,512,0,条目完整（15 项全非缺失）
-问卷,HNS (hsns),Day10(重测),10,512,512,0,条目完整（10 项全非缺失）
-问卷,SGPS (SGPS),Day10(重测),9,512,512,0,条目完整（9 项全非缺失）
-问卷,SWLS 生活满意度 (swb),Day10(重测),5,512,512,0,条目完整（5 项全非缺失）
-问卷,LOT-R 乐观 (LOT),Day10(重测),6,512,512,0,条目完整（6 项全非缺失）
-问卷,IPC-I 控制源 (IPC),Day10(重测),8,512,512,0,条目完整（8 项全非缺失）
-问卷,MIS 道德认同 (MorIden),Day10(重测),10,512,512,0,条目完整（10 项全非缺失）
-问卷,MSIS 道德自我意象 (moralSeImag),Day10(重测),9,512,512,0,条目完整（9 项全非缺失）
-问卷,SDE 社会赞许 (sde),Day10(重测),20,512,512,0,条目完整（20 项全非缺失）
-问卷,IM 印象管理 (IM),Day10(重测),20,512,512,0,条目完整（20 项全非缺失）
-问卷,domain_rating 领域评分,Day10(重测),5,512,512,0,条目完整（5 项全非缺失）
-行为任务,IAT,Day2,,606,602,4,RT<=300ms 占比>0.10 判无效
-行为任务,SMT_2,Day3,,571,561,10,任一条件<0.20 或领域<0.60 判无效
-行为任务,SRET ,Day3,,570,483,87,再认<0.55 或 来源RT<200>0.30 判无效
+﻿文件夹,数据文件,ZIP内成员,数据行数,被试人数_权威ID去重,随机公开ID去重数,权威ID缺失行数
+01_raw,IAT_raw.csv,,258620,668,668,0
+01_raw,SMT_1_raw.csv,,592896,668,668,0
+01_raw,SMT_2_raw.csv,,524016,589,589,0
+01_raw,SRET_raw.csv,,263485,589,589,0
+01_raw,questionnaires_day10_raw.csv,,14696,527,527,0
+01_raw,questionnaires_day1_raw.csv,,6626,777,777,0
+01_raw,questionnaires_day2_raw.csv,,1692418,645,645,0
+01_raw,questionnaires_day3_raw.csv,,1445644,589,589,0
+01_raw,SMT_2_raw.zip,SMT_2_raw.csv,524016,589,589,0
+01_raw,questionnaires_day2_raw.zip,questionnaires_day2_raw.csv,1692418,645,645,0
+01_raw,questionnaires_day3_raw.zip,questionnaires_day3_raw.csv,1445644,589,589,0
+02_cleaned,IAT_cleaned.csv,,173343,602,602,0
+02_cleaned,SMT_1_cleaned.csv,,431382,565,565,0
+02_cleaned,SMT_2_cleaned.csv,,421695,557,557,0
+02_cleaned,SRET_cleaned.csv,,160720,482,482,0
+02_cleaned,questionnaires_day10_cleaned.csv,,512,512,512,0
+02_cleaned,questionnaires_day1_cleaned.csv,,606,606,606,0
+02_cleaned,questionnaires_day2_cleaned.csv,,606,606,606,0
+02_cleaned,questionnaires_day3_cleaned.csv,,571,571,571,0
+02_cleaned,SMT_1_cleaned.zip,SMT_1_cleaned.csv,431382,565,565,0
+02_cleaned,SMT_2_cleaned.zip,SMT_2_cleaned.csv,421695,557,557,0
+03_derived,all_derived_indices.csv,,606,606,606,0
+03_derived,positive_IAT.csv,,602,602,602,0
+03_derived,positive_SMT.csv,,557,557,557,0
+03_derived,positive_SRET.csv,,482,482,482,0
+03_derived,questionnaire_indices_all_sessions.csv,,606,606,606,0
+03_derived,questionnaire_indices_day1.csv,,606,606,606,0
+03_derived,questionnaire_indices_day10.csv,,512,512,512,0
+03_derived,questionnaire_indices_day2.csv,,606,606,606,0
+03_derived,questionnaire_indices_day3.csv,,571,571,571,0
+跨文件汇总,全部数据均完整的被试人数,,,448,448,0

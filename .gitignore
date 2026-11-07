@@ -10,3 +10,6 @@
 # 大数据文件
 2_Data
 05_Reports/
+
+# Internal identity reconciliation; never publish.
+.internal_privacy/

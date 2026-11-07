@@ -1,6 +1,6 @@
 # 01_raw: Raw Data / 原始数据
 
-This directory contains data exported from the experimental platform before trial-level cleaning. It includes three behavioral tasks and questionnaire exports from four collection days.
+This directory contains data exported from the experimental platform before trial-level cleaning. It includes three behavioral tasks and questionnaire exports from four collection days. Direct identifiers, platform identifiers, and participant-entered friend names have been removed or replaced with `[FRIEND_NAME]`. `public_id` is the only subject key retained.
 
 本目录包含实验平台导出的、尚未进行试次级清洗的数据，包括三个行为任务和四个测试日（Day 1、Day 2、Day 3、Day 10）的问卷数据。
 
