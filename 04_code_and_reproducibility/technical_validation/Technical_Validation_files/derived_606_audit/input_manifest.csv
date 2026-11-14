@@ -1,0 +1,12 @@
+﻿"path","bytes","md5"
+"02_cleaned/IAT_cleaned.csv",24360446,"e44450cd1abfbd245368360dcf3eeaef"
+"02_cleaned/questionnaires_day1_cleaned.csv",82150,"d7a3f95fc7434ba389323faf88ecafa2"
+"02_cleaned/questionnaires_day10_cleaned.csv",247064,"6c1b1088142ae7ddf9df17b369c3fb65"
+"02_cleaned/questionnaires_day2_cleaned.csv",121938,"e72bfc56d4e5b40457e15eec5c26d84d"
+"02_cleaned/questionnaires_day3_cleaned.csv",151051,"74b7e728d53d180ee40ec0f7cb096982"
+"02_cleaned/README.md",2348,"990ae43c58aebb8b143b66f01b26c654"
+"02_cleaned/SMT_1_cleaned.zip",2510259,"e5e6c9367a44b071d2e096463df2f937"
+"02_cleaned/SMT_2_cleaned.zip",3685451,"e11e51a6032a95f80a1b4cba983bbc97"
+"02_cleaned/SRET_cleaned.csv",21587266,"4365dfdee6315b517f8b056f1b86eb5c"
+"04_code_and_reproducibility/subject _screening/retained_606_IDs.csv",,
+"04_code_and_reproducibility/analysis/analysis.Rmd",172136,"2248a9d2429d00fe0140e5420f85eecd"

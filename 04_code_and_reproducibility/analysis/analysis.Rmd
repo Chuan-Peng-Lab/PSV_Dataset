@@ -2636,7 +2636,11 @@ audit <- file.path(root, '04_code_and_reproducibility', 'analysis', 'derived_606
 stage <- file.path(audit, 'staged_03_derived')
 dir.create(stage, recursive=TRUE, showWarnings=FALSE)
 out <- function(x, name, where=stage) write_excel_csv(x, file.path(where, name), na='')
-read <- function(name) read_csv(file.path(clean, name), show_col_types=FALSE, progress=FALSE)
+read <- function(name) {
+  x <- read_csv(file.path(clean, name), show_col_types=FALSE, progress=FALSE)
+  if ('public_id' %in% names(x)) x <- rename(x, ID=public_id)
+  x
+}
 pool_file <- file.path(root, '04_code_and_reproducibility', 'subject _screening', 'retained_606_IDs.csv')
 pool <- read_csv(pool_file, show_col_types=FALSE) %>% select(ID) %>% arrange(ID)
 stopifnot(nrow(pool)==606L, !anyNA(pool$ID), !anyDuplicated(pool$ID))
@@ -2735,7 +2739,8 @@ out(ib,'IAT_block_components.csv',audit)
 z <- file.path(clean,'SMT_2_cleaned.zip')
 member <- unzip(z,list=TRUE)$Name
 stopifnot(length(member)==1)
-smt <- read_csv(unz(z,member),show_col_types=FALSE,progress=FALSE) %>% norm()
+smt <- read_csv(unz(z,member),show_col_types=FALSE,progress=FALSE) %>%
+  rename(ID=public_id) %>% norm()
 check_ids(smt,557)
 stopifnot(all(smt$rt>=200 & smt$rt<=1200),all(smt$correct %in% 0:1))
 sr <- smt %>% filter(identity=='match',person %in% c('self','friend')) %>%
@@ -2962,9 +2967,10 @@ suppressPackageStartupMessages(library(data.table))
 outdir <- file.path(root,'03_derived'); clean <- file.path(root,'02_cleaned')
 audit <- file.path(root,'04_code_and_reproducibility','analysis','derived_606_audit')
 getcsv <- function(f, dir=outdir) {
-  path <- file.path(dir,f)
-  # Diagnostic/intermediate CSVs live outside the nine published files.
-  if (!file.exists(path) && identical(dir,outdir)) path <- file.path(audit,'staged_03_derived',f)
+  # Validate the freshly generated stage first; published files use public_id,
+  # whereas the current internal checks use ID.
+  path <- file.path(audit,'staged_03_derived',f)
+  if (!file.exists(path)) path <- file.path(dir,f)
   fread(path,na.strings=c('','NA'))
 }
 x <- getcsv('all_derived_indices.csv'); b <- getcsv('positive_self_view_indices.csv')
@@ -3074,6 +3080,9 @@ stopifnot(identical(tv$valid_IAT,qa$valid_IAT[match(tv$ID,qa$ID)]),
 record('task_membership_matches_02_audit',606L)
 record('complete_cases_diagnostic_only',sum(complete.cases(x)))
 fwrite(rbindlist(checks),file.path(audit,'validation_results.csv'),bom=TRUE,na='')
+tv <- file.path(root,'04_code_and_reproducibility','analysis','technical_validation_data')
+dir.create(tv,recursive=TRUE,showWarnings=FALSE)
+file.copy(file.path(audit,'validation_results.csv'),file.path(tv,'validation_results.csv'),overwrite=TRUE)
 cat('PASS:',length(checks),'checks; all 26 indicators independently recalculated for every valid participant.\n')
 print(counts[variable %in% names(b)[-1],.(variable,n_valid,n_missing)])
 
@@ -3081,7 +3090,481 @@ print(counts[variable %in% names(b)[-1],.(variable,n_valid,n_missing)])
 }
 ```
 
+# 10. 公开ID版本：按文稿及确认口径重算行为指标（2026-11-12）
+
+本节是当前公开数据的重算入口；前文基于原始ID的计算为历史记录，不应覆盖本节结果。
+使用 Python 3、pandas、numpy，从项目根目录执行本代码块；默认不随 knit 自动执行。
+只更新三份行为CSV和总合并CSV，保留9份CSV结构、行列顺序、随机ID和全部160个问卷条目。
+IAT分母为对应两个区块原始RT合并的样本SD，错误RT以该区块正确试次均值+600ms替换后计算分子。
+SMT匹配RT、SRET编码RT、再认d′均使用self−friend。SRET认可使用有效yes/no作答中的比例差，未作答不计入分母。
+来源d′是self作为信号、friend作为噪声的单一来源辨别敏感性，不是自我优势差值。d′使用0.5校正。
+未修改02清洗、样本筛选或问卷反向计分；135项清单、Z标准化及文稿统计表需另行确认。
+
+```{python public_id_article_recalculation, eval=FALSE}
+from pathlib import Path
+from statistics import NormalDist
+from datetime import datetime
+import csv, hashlib, json, shutil
+import numpy as np
+import pandas as pd
+
+root = Path.cwd()
+assert (root / '02_cleaned').is_dir(), 'Run from the PSV_Dataset root'
+out = root / '03_derived'
+key = 'public_id'
+z = NormalDist().inv_cdf
+
+def dprime(h, m, fa, cr):
+    return z((h + .5)/(h + m + 1)) - z((fa + .5)/(fa + cr + 1))
+
+def load(name):
+    frame = pd.read_csv(root/'02_cleaned'/name, low_memory=False)
+    assert frame[key].notna().all()
+    return frame
+
+def pivot(records):
+    return pd.DataFrame(records, columns=[key, 'variable', 'value']).pivot(
+        index=key, columns='variable', values='value')
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+inputs = [p for folder in ['01_raw', '02_cleaned'] for p in (root/folder).iterdir() if p.is_file()]
+input_hashes = {str(p.relative_to(root)): digest(p) for p in inputs}
+original = {p.name: pd.read_csv(p, dtype=str, keep_default_na=False) for p in out.glob('*.csv')}
+assert len(original) == 9
+for frame in original.values():
+    assert frame[key].is_unique and frame[key].str.len().gt(0).all()
+
+# IAT: retain cleaned trials, correct-block-mean +600 penalty, original inclusive SD.
+x = load('IAT_cleaned.csv')
+records = []
+for (pid, task), group in x.groupby([key, 'task_id']):
+    ds = []
+    for pair in [1, 2]:
+        blocks = [group[group.version == f'{v}{pair}'] for v in ['A', 'B']]
+        assert all(len(b) and b.correct.eq(1).any() and b.rt.notna().all() for b in blocks)
+        means = [b.rt.mask(b.correct.eq(0), b.loc[b.correct.eq(1), 'rt'].mean()+600).mean() for b in blocks]
+        sd = pd.concat([b.rt for b in blocks]).std(ddof=1)
+        assert sd > 0
+        ds.append((means[1]-means[0])/sd)
+    records.append((pid, task+'_IAT', np.mean(ds)))
+calculated = {'positive_IAT.csv': pivot(records)}
+
+# SMT2: RT self minus friend; original shared nonmatch noise for d-prime.
+x = load('SMT_2_cleaned.zip')
+x['domain'] = x.domain.str.lower().replace({'morality': 'moral'})
+x['valence'] = x.valence.str.lower()
+records = []
+for (pid, domain, valence), g in x.groupby([key, 'domain', 'valence']):
+    fa = ((g.identity == 'nonmatch') & (g.correct == 0)).sum()
+    cr = ((g.identity == 'nonmatch') & (g.correct == 1)).sum()
+    means, ds = {}, {}
+    for person in ['self', 'friend']:
+        q = g[(g.person == person) & (g.identity == 'match')]
+        means[person] = q.rt.mean()
+        ds[person] = dprime(q.correct.eq(1).sum(), q.correct.eq(0).sum(), fa, cr)
+    for prefix, values in [('SMT_rt', means), ('SMT_d', ds)]:
+        records.append((pid, f'{prefix}_{domain}_{valence}', values['self']-values['friend']))
+calculated['positive_SMT.csv'] = pivot(records)
+
+# SRET: valid-response proportions, RT differences, recognition differences, source discrimination.
+x = load('SRET_cleaned.csv')
+x['domain'] = x.domain.str.lower().replace({'moral': 'morality'})
+x['valence'] = x.valence.str.lower()
+records = []
+for (pid, domain, valence), g in x.groupby([key, 'domain', 'valence']):
+    ew = g[g.screen_id == 'EW_formal']
+    rec = g[(g.screen_id == 'RJ_formal1') & g.responses.isin(['old', 'familiar', 'new'])]
+    source = g[(g.screen_id == 'RJ_formal_2') & g.identity.isin(['self', 'friend']) & g.correct.isin([0, 1])]
+    fa = ((rec.identity == 'new') & rec.responses.isin(['old', 'familiar'])).sum()
+    cr = ((rec.identity == 'new') & rec.responses.eq('new')).sum()
+    endorsement, rt, ds = {}, {}, {}
+    for person in ['self', 'friend']:
+        e = ew[ew.person == person]
+        valid = e.responses.isin(['yes', 'no'])
+        endorsement[person] = e.responses.eq('yes').sum()/valid.sum() if valid.any() else np.nan
+        rt[person] = e.rt.mean()
+        q = rec[(rec.identity == 'old') & (rec.person == person)]
+        ds[person] = dprime(q.responses.isin(['old', 'familiar']).sum(), q.responses.eq('new').sum(), fa, cr)
+    for prefix, values in [('SRET_yes', endorsement), ('SRET_rt', rt), ('REC', ds)]:
+        records.append((pid, f'{prefix}_{domain}_{valence.title()}', values['self']-values['friend']))
+    h = ((source.identity == 'self') & source.correct.eq(1)).sum()
+    m = ((source.identity == 'self') & source.correct.eq(0)).sum()
+    fa = ((source.identity == 'friend') & source.correct.eq(0)).sum()
+    cr = ((source.identity == 'friend') & source.correct.eq(1)).sum()
+    records.append((pid, f'SOURCE_{domain}_{valence.title()}', dprime(h, m, fa, cr) if len(source) else np.nan))
+calculated['positive_SRET.csv'] = pivot(records)
+
+# Preserve unchanged cells as text (no questionnaire rounding or recoding).
+pending, differences = {}, []
+for name, computed in calculated.items():
+    old = original[name].set_index(key)
+    assert set(old.index) == set(computed.index) and set(old.columns) == set(computed.columns)
+    new = old.copy()
+    for col in old:
+        before = pd.to_numeric(old[col], errors='coerce')
+        after = computed[col].reindex(old.index)
+        assert np.array_equal(before.isna(), after.isna()), f'Unexpected missingness: {col}'
+        equal = np.isclose(before, after, rtol=1e-10, atol=1e-10, equal_nan=True)
+        differences.append({'indicator': col, 'changed_subjects': int((~equal).sum()), 'n_valid': int(after.notna().sum())})
+        if col.startswith(('SOURCE_', 'SMT_d_')):
+            assert equal.all(), f'Unchanged definition disagrees: {col}'
+        else:
+            new[col] = [format(v, '.17g') if pd.notna(v) else '' for v in after]
+    pending[name] = new.reset_index()[original[name].columns]
+merged = original['all_derived_indices.csv'].set_index(key).copy()
+for name, frame in pending.items():
+    indexed = frame.set_index(key)
+    assert set(indexed.index).issubset(merged.index)
+    for col in indexed:
+        merged.loc[indexed.index, col] = indexed[col]
+pending['all_derived_indices.csv'] = merged.reset_index()[original['all_derived_indices.csv'].columns]
+assert len(merged) == len(original['all_derived_indices.csv'])
+behavior = [c for frame in calculated.values() for c in frame.columns]
+items = [c for c in merged if c not in behavior]
+assert len(items) == 160 and len(behavior) == 26
+assert merged[items].equals(original['all_derived_indices.csv'].set_index(key)[items])
+backup = root/'.internal_privacy'/('derived_recalculation_'+datetime.now().strftime('%Y%m%d_%H%M%S_%f'))
+backup.mkdir(parents=True)
+for name in pending:
+    shutil.copy2(out/name, backup/name)
+for name, frame in pending.items():
+    staged = backup/('new_'+name)
+    frame.to_csv(staged, index=False, encoding='utf-8-sig', quoting=csv.QUOTE_MINIMAL)
+    check = pd.read_csv(staged, dtype=str, keep_default_na=False)
+    assert check.equals(frame)
+    assert check[key].equals(original[name][key])
+assert input_hashes == {str(p.relative_to(root)): digest(p) for p in inputs}
+for name in pending:
+    shutil.copy2(backup/('new_'+name), out/name)
+report = {'source_sha256': input_hashes, 'differences': differences,
+          'rows': {name: len(frame) for name, frame in original.items()},
+          'questionnaire_items_unchanged': len(items), 'raw_clean_unchanged': True}
+(backup/'audit.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+print(json.dumps({'backup': str(backup), 'rows': report['rows'], 'differences': differences}, ensure_ascii=False, indent=2))
+```
+
+# 11. 当前公开数据的文稿统计重算（2026-11-12）
+
+样本口径：用户确认各指标使用全部有效被试，不使用旧503人或统一449人完整案例。
+本节仅读取02/03，结果写入内部审计目录；不修改派生指标。描述统计使用原始单位。
+问卷使用完整条目计算原始协方差alpha；omega使用单因子minres模型且不自动反向计分。
+重测按文稿使用Spearman（历史代码Pearson另存供核对）。效应量为单样本d，定义为指标均值除以样本标准差（d = M/SD）；95% CI通过对标准化均值的非中心t分布反演计算。来源d′表示来源辨别，不解释为自我优势。
+奇偶折半沿用第8节条件分组：IAT按区块；SMT按领域×效价；SRET编码另按人物，再认/来源按领域×效价，来源先保留可计分试次。每半重新按第10节公式计算，保留负信度，不截断为零。
+以下两个代码块从项目根目录独立执行；默认不随knit运行。文稿表格更新不包括已删除人口学变量的重新统计，亦不改变筛选规则。
+
+```{r manuscript_statistics_current, eval=params$run_current}
+# Current manuscript statistics. Run from the PSV_Dataset root.
+suppressPackageStartupMessages({library(dplyr);library(tidyr);library(jsonlite)})
+out <- file.path('.internal_privacy','manuscript_statistics_20261112')
+dir.create(out,recursive=TRUE,showWarnings=FALSE)
+read03 <- function(n) read.csv(file.path('03_derived',n),check.names=FALSE,fileEncoding='UTF-8-BOM')
+read02 <- function(n) read.csv(file.path('02_cleaned',n),check.names=FALSE,fileEncoding='UTF-8-BOM')
+stopifnot(requireNamespace('psych',quietly=TRUE))
+describe_one <- function(x) {
+  x<-x[is.finite(x)];c(N=length(x),M=mean(x),SD=sd(x),Median=median(x),Min=min(x),Max=max(x))
+}
+behavior<-lapply(c('IAT','SMT','SRET'),function(task) read03(paste0('positive_',task,'.csv')))
+names(behavior)<-c('IAT','SMT','SRET')
+desc<-bind_rows(lapply(behavior,function(tab)bind_rows(lapply(setdiff(names(tab),'public_id'),function(v){
+  data.frame(variable=v,t(describe_one(tab[[v]])),check.names=FALSE)
+}))))
+totals<-lapply(c('day1','day2','day3','day10'),function(d)read03(paste0('questionnaire_indices_',d,'.csv')))
+names(totals)<-c('day1','day2','day3','day10')
+scales<-list(day1=c('selfclarity','phq','gad'),day2=c('ses','coreself','SGPS','NPI','hsns'),day3=c('swb','LOT','IPC','MorIden','moralSeImag','sde','IM'),day10='domain')
+qstats<-list();warnings_record<-character()
+for(day in names(scales)){
+  items<-read02(paste0('questionnaires_',day,'_cleaned.csv'))
+  for(s in scales[[day]]){
+    cs<-grep(if(s=='NPI') '^NPI[0-9]+$' else if(s=='domain') '^domain_rating_[0-9]+$' else paste0('^',s,'_[0-9]+$'),names(items),value=TRUE)
+    stopifnot(length(cs)>1)
+    x<-items[complete.cases(items[,cs]),c('public_id',cs)]
+    scores<-totals[[day]][,c('public_id',paste0(s,'_al'))];v<-scores[[2]]
+    stopifnot(setequal(x$public_id,scores$public_id[is.finite(v)]))
+    expected<-rowSums(x[,cs]) + ifelse(s=='IPC',24,0)
+    stopifnot(isTRUE(all.equal(expected,scores[[2]][match(x$public_id,scores$public_id)],check.attributes=FALSE)))
+    m<-as.matrix(x[,cs]);k<-ncol(m)
+    alpha<-k/(k-1)*(1-sum(apply(m,2,var))/var(rowSums(m)))
+    # Explicit unidimensional congeneric omega of the unit-weighted raw sum;
+    # no automatic item reversing or extra rescoring of cleaned items.
+    fit<-withCallingHandlers(psych::fa(cov(m),nfactors=1,n.obs=nrow(m),covar=TRUE,fm='minres',rotate='none'),warning=function(w){warnings_record<<-c(warnings_record,paste(s,conditionMessage(w)));invokeRestart('muffleWarning')})
+    loading<-as.numeric(fit$loadings[,1]);omega<-sum(loading)^2/(sum(loading)^2+sum(fit$uniquenesses))
+    rtN<-NA_integer_;rho<-pearson<-NA_real_
+    if(day!='day10'){
+      paired<-merge(scores,totals$day10[,c('public_id',paste0(s,'_al'))],by='public_id')
+      paired<-paired[complete.cases(paired),];rtN<-nrow(paired)
+      rho<-cor(paired[[2]],paired[[3]],method='spearman');pearson<-cor(paired[[2]],paired[[3]],method='pearson')
+    }
+    qstats[[s]]<-data.frame(scale=s,day=day,items=k,t(describe_one(v)),alpha=alpha,omega=omega,retest_N=rtN,rho=rho,pearson_audit=pearson)
+  }
+}
+qstats<-bind_rows(qstats)
+qd<-bind_rows(lapply(names(totals),function(day)bind_rows(lapply(names(totals[[day]])[vapply(totals[[day]],is.numeric,logical(1))],function(v){data.frame(day=day,variable=v,t(describe_one(totals[[day]][[v]])))}))))
+# Cohen's d = mean / sample SD, using all available valid observations per indicator.
+# The confidence interval is obtained by inversion of the noncentral t distribution.
+effects<-bind_rows(lapply(behavior,function(tab)bind_rows(lapply(setdiff(names(tab),'public_id'),function(v){
+ x<-tab[[v]];x<-x[is.finite(x)];n<-length(x);t0<-mean(x)/sd(x)*sqrt(n)
+ ci<-vapply(c(.975,.025),function(p)uniroot(function(ncp)suppressWarnings(pt(t0,n-1,ncp=ncp))-p,c(t0-100,t0+100),tol=1e-10)$root,numeric(1))/sqrt(n)
+ data.frame(variable=v,N=n,d=mean(x)/sd(x),low=ci[1],high=ci[2])
+}))))
+report<-list(descriptive_behavior=desc,descriptive_questionnaires=qd,questionnaire_reliability=qstats,effects=effects,
+methodology=list(sample='All available valid observations per indicator; complete item rows per scale; pairwise complete retest',retest='Spearman, with Pearson retained for audit of historical Rmd',alpha='Raw covariance alpha, no automatic rekeying',omega='One-factor minres congeneric omega from raw covariance; exploratory model assumption',effect='Cohen d = mean / sample SD; 95% CI by noncentral-t inversion for the standardized mean',source='Source d-prime represents source discrimination, not a self-friend contrast'),warnings=warnings_record)
+write_json(report,file.path(out,'statistics.json'),auto_unbox=TRUE,pretty=TRUE,digits=16,na='null')
+tv <- file.path(root,'04_code_and_reproducibility','analysis','technical_validation_data')
+dir.create(tv,recursive=TRUE,showWarnings=FALSE)
+write.csv(desc,file.path(tv,'behavior_descriptive.csv'),row.names=FALSE,fileEncoding='UTF-8')
+write.csv(qd,file.path(tv,'questionnaire_descriptive.csv'),row.names=FALSE,fileEncoding='UTF-8')
+write.csv(qstats,file.path(tv,'questionnaire_reliability.csv'),row.names=FALSE,fileEncoding='UTF-8')
+write.csv(effects[,c('variable','N','d','low','high')],file.path(tv,'behavior_effects.csv'),row.names=FALSE,fileEncoding='UTF-8')
+merged_tv <- read03('all_derived_indices.csv')
+write.csv(data.frame(metric=c('base_pool','complete_case','IAT','SMT2','SRET','questionnaire_day1','questionnaire_day2','questionnaire_day3','questionnaire_day10'),
+                     n=c(nrow(merged_tv),sum(complete.cases(merged_tv[,setdiff(names(merged_tv),'public_id')])),
+                         vapply(behavior,nrow,integer(1)),vapply(totals,nrow,integer(1)))),
+          file.path(tv,'sample_sizes.csv'),row.names=FALSE,fileEncoding='UTF-8')
+cat('Computed',nrow(desc),'behavior descriptions,',nrow(qstats),'scale reliabilities,',nrow(effects),'effect sizes\n')
+print(qstats[,c('scale','N','alpha','omega','retest_N','rho')])
+writeLines(capture.output(sessionInfo()),file.path(out,'R_sessionInfo.txt'))
+
+```
+
+```{python manuscript_splithalf_current, eval=params$run_current}
+from pathlib import Path
+import pandas as pd,numpy as np,json
+root=Path.cwd()
+if not (root/'02_cleaned').is_dir(): root=root.parent.parent
+out=root/'.internal_privacy/manuscript_statistics_20261112';out.mkdir(parents=True,exist_ok=True)
+rmd=(root/'04_code_and_reproducibility/analysis/analysis.Rmd').read_text()
+block=rmd.split('```{python public_id_article_recalculation, eval=FALSE}')[1].split('```')[0]
+definitions=block.split('inputs = ')[0]
+compute=block.split('# IAT:')[1].split('# Preserve unchanged')[0]
+compute='# IAT:'+compute
+loaded={name:pd.read_csv(root/'02_cleaned'/name,low_memory=False) for name in ['IAT_cleaned.csv','SMT_2_cleaned.zip','SRET_cleaned.csv']}
+def load_half(name,half):
+    x=loaded[name].copy()
+    if half is None:return x
+    if name.startswith('IAT'): keys=['public_id','task_id','version'];x['_half']=x.groupby(keys,dropna=False).cumcount()%2
+    elif name.startswith('SMT'):x['_half']=x.groupby(['public_id','domain','valence'],dropna=False).cumcount()%2
+    else:
+        x['_half']=-1
+        for screen in ['EW_formal','RJ_formal1','RJ_formal_2']:
+            sel=x.screen_id.eq(screen)
+            if screen=='RJ_formal_2':sel &= x.identity.isin(['self','friend']) & x.correct.isin([0,1])
+            keys=['public_id','domain','valence']+(['person'] if screen=='EW_formal' else [])
+            x.loc[sel,'_half']=x.loc[sel].groupby(keys,dropna=False).cumcount()%2
+    return x[x._half.eq(half)].drop(columns='_half')
+results={}
+for half in [None,0,1]:
+    env={};exec(definitions,env);env['load']=lambda name:load_half(name,half)
+    exec(compute,env);results[half]=env['calculated']
+    if half is None:
+        for name,tab in results[half].items():
+            saved=pd.read_csv(root/'03_derived'/name).set_index('public_id')
+            assert set(tab.index)==set(saved.index)
+            assert np.allclose(tab.reindex(index=saved.index,columns=saved.columns),saved,equal_nan=True)
+report=[];half_scores=[]
+for name in results[0]:
+    a,b=results[0][name],results[1][name]
+    for col in a:
+        pairs=pd.concat([a[col],b[col]],axis=1,keys=['A','B']).dropna()
+        half_scores.extend({'variable':col,'public_id':pid,'A':row.A,'B':row.B} for pid,row in pairs.iterrows())
+        r=pairs.A.rank().corr(pairs.B.rank())
+        report.append({'variable':col,'N':len(pairs),'r_half':r,'SB':2*r/(1+r)})
+(out/'split_half.json').write_text(json.dumps(report,indent=2,allow_nan=False))
+(out/'half_scores_audit.json').write_text(json.dumps(half_scores,allow_nan=False))
+public_out=root/'04_code_and_reproducibility'/'analysis'/'technical_validation_data'
+public_out.mkdir(parents=True,exist_ok=True)
+pd.DataFrame(report).to_csv(public_out/'behavior_split_half.csv',index=False)
+print(json.dumps(report,indent=2))
+
+```
+
+# 12. 贝叶斯因子独立复核与文稿逐项核对
+
+独立实现JZS积分，不调用BayesFactor求值；同时用log(g)与逆g两种积分变量核查数值稳定性。保留严格相对误差阈值检查和文稿显示精度检查，二者不得混为一谈。文稿核查区分表格数值一致与全文通过；历史图、人口学和筛选流程未通过，不得宣称全面验证。
+
+```{r independent_jzs_validation, eval=FALSE}
+library(jsonlite)
+p<-'.internal_privacy/manuscript_statistics_20261112'
+s<-fromJSON(file.path(p,'statistics.json'))$effects
+# Independent numerical integration of the JZS g-mixture; no BayesFactor calls.
+# delta | g ~ N(0,g), g ~ InvGamma(1/2,r^2/2), r=sqrt(2)/2.
+r<-sqrt(2)/2
+out<-lapply(seq_len(nrow(s)),function(i){
+ a<-s[i,];n<-a$N;nu<-n-1;t<-a$t
+ logf<-function(u){g<-exp(u);-.5*log1p(n*g)-(nu+1)/2*log1p(t*t/(nu*(1+n*g)))+(nu+1)/2*log1p(t*t/nu)+.5*log(r*r/2)-lgamma(.5)-.5*u-r*r/(2*g)}
+ peak<-optimize(logf,c(-30,30),maximum=TRUE)$objective
+ v<-integrate(function(u)exp(logf(u)-peak),-40,100,rel.tol=1e-11,subdivisions=2000)
+ lb<-log(v$value)+peak
+ # Second change of variable: x=r^2/(2g), x ~ Gamma(1/2,1).
+ h<-function(x){g<-r*r/(2*x); exp(-.5*log1p(n*g)-(nu+1)/2*log1p(t*t/(nu*(1+n*g)))+(nu+1)/2*log1p(t*t/nu)+dgamma(x,.5,log=TRUE)-peak)}
+ v2<-integrate(h,0,Inf,rel.tol=1e-10,subdivisions=2000)
+ lb2<-log(v2$value)+peak
+ fmt<-function(x)if(x>=1e4||x<.01)sprintf('%.2e',x) else sprintf('%.2f',x)
+ data.frame(variable=a$variable,N=n,t=t,logBF10_package=a$logBF10,logBF10_independent=lb,relative_difference=expm1(lb-a$logBF10),independent_integrals_difference=expm1(lb2-lb),integration_relative_error=v$abs.error/v$value,manuscript_precision_agrees=fmt(exp(lb))==fmt(a$BF10))
+})
+out<-do.call(rbind,out)
+write_json(list(method='Independent quadrature in log g and inverse g for two-sided JZS t test',r=r,results=out,max_relative_difference=max(abs(out$relative_difference)),strict_relative_1e6_pass=all(abs(out$relative_difference)<1e-6),manuscript_precision_pass=all(out$manuscript_precision_agrees)),file.path(p,'bayesfactor_independent_validation.json'),pretty=TRUE,auto_unbox=TRUE,digits=16)
+print(out[,c('variable','relative_difference','independent_integrals_difference')]);stopifnot(all(out$manuscript_precision_agrees),all(abs(out$independent_integrals_difference)<1e-7))
+
+```
+
+```{python final_manuscript_numeric_audit, eval=FALSE}
+from pathlib import Path
+from zipfile import ZipFile
+from lxml import etree as E
+import json,re,hashlib
+import pandas as pd,numpy as np
+root=Path('/Users/sunxinru/Desktop/PSV_Dataset');a=root/'.internal_privacy/manuscript_statistics_20261112'
+doc=root/'04_code_and_reproducibility/analysis/Manuscript_statistics_terminology_updated_highlighted.docx'
+d=json.loads((a/'statistics.json').read_text());sp={v['variable']:v for v in json.loads((a/'split_half.json').read_text())};qs={v['scale']:v for v in d['questionnaire_reliability']};bd={v['variable']:v for v in d['descriptive_behavior']};qd={(v['day'],v['variable']):v for v in d['descriptive_questionnaires']};ef={v['variable']:v for v in d['effects']}
+ns={'w':'http://schemas.openxmlformats.org/wordprocessingml/2006/main'};q=lambda s:'{'+ns['w']+'}'+s
+txt=lambda p:''.join(p.xpath('.//w:t/text()',namespaces=ns))
+with ZipFile(doc) as z:t=E.fromstring(z.read('word/document.xml'))
+tables=t.xpath('./w:body/w:tbl',namespaces=ns);checks=[]
+def check(where,actual,expected):checks.append(dict(location=where,actual=str(actual),expected=str(expected),pass_=str(actual)==str(expected)))
+def mp(s):
+ s=s.strip()
+ if s.startswith('IAT_'):return ('ability' if 'competence' in s else 'moral')+'_IAT'
+ s=s.replace('competence','ability')
+ if s.startswith('SMT_'):return s.replace('SMT_RT','SMT_rt').replace('morality','moral')
+ for old,new in [('SRET_encoding_endorsement','SRET_yes'),('SRET_encoding_RT','SRET_rt'),('SRET_RJ1','REC'),('SRET_RJ2','SOURCE')]:s=s.replace(old,new)
+ return s.replace('_positive','_Positive').replace('_negative','_Negative')
+for k in [5,6,7]:
+ for row in tables[k].findall(q('tr'))[1:]:
+  c=row.findall(q('tc'));name=txt(c[0]).strip();st=bd[mp(name)] if k==5 else qd['day10',name] if name in ['Ability','Attraction','Wealth','Social','Moral'] else qs[name[:-3]]
+  for cell,key in zip(c[1:],['N','M','SD','Median','Min','Max']):check(f'Table {k+1} {name} {key}',txt(cell),str(st[key]) if key=='N' else f'{st[key]:.2f}')
+for k,scales in {1:['ses','domain','coreself','MorIden','moralSeImag','selfclarity','LOT','IPC','sde','IM','NPI','hsns'],3:['phq','gad','swb','SGPS']}.items():
+ for row,s in zip(tables[k].findall(q('tr'))[1:],scales):
+  c=row.findall(q('tc'));st=qs[s];check(f'Table {k+1} {s} alpha omega',txt(c[4]),f"{st['alpha']:.3f} / {st['omega']:.3f}");check(f'Table {k+1} {s} N',txt(c[5]),st['N'])
+for row in tables[8].findall(q('tr'))[2:]:
+ c=row.findall(q('tc'));base=txt(c[2]).strip()
+ for val,col in [('positive',3),('negative',5)]:
+  if base.startswith('IAT_') and val=='negative':continue
+  s=ef[mp(base if base.startswith('IAT_') else base+'_'+val)]
+  check(f'Table 9 {base} {val} d CI',txt(c[col]),f"{s['d']:.2f} [{s['low']:.2f}, {s['high']:.2f}]")
+  bf=s['BF10'];check(f'Table 9 {base} {val} BF',txt(c[col+1]),f'{bf:.2e}' if bf>=1e4 or bf<.01 else f'{bf:.2f}')
+for row,s in zip(tables[9].findall(q('tr'))[1:],['IPC','LOT','NPI','hsns','coreself','ses','selfclarity','MorIden','moralSeImag','sde','IM','domain']):
+ c=row.findall(q('tc'));st=qs[s]
+ for i,expected in [(1,f"{st['M']:.2f} ({st['N']})"),(2,f"{st['alpha']:.3f}"),(3,f"{st['rho']:.3f} ({st['retest_N']})" if st['rho'] is not None else '—')]:check(f'Table 10 {s} col{i}',txt(c[i]),expected)
+for row in tables[10].findall(q('tr'))[1:]:
+ c=row.findall(q('tc'));v=mp(txt(c[0]));st=sp[v]
+ for i,expected in [(1,'Competence' if 'ability' in v else 'Morality'),(2,f"{st['r_half']:.3f} ({st['N']})"),(3,f"{st['SB']:.3f}")]:check(f'Table 11 {v} col{i}',txt(c[i]),expected)
+# Recompute descriptive summaries directly from current CSV, not the saved output.
+data_checks=[]
+for task in ['IAT','SMT','SRET']:
+ df=pd.read_csv(root/'03_derived'/f'positive_{task}.csv')
+ for col in df.columns.drop('public_id'):
+  x=df[col].dropna();calc=dict(N=len(x),M=x.mean(),SD=x.std(),Median=x.median(),Min=x.min(),Max=x.max())
+  data_checks.append({'variable':col,'pass':all(np.isclose(calc[k],bd[col][k],rtol=1e-10,atol=1e-10) for k in calc)})
+merged=pd.read_csv(root/'03_derived/all_derived_indices.csv')
+qchecks=[]
+for day in ['day1','day2','day3','day10']:
+ df=pd.read_csv(root/'03_derived'/f'questionnaire_indices_{day}.csv')
+ for st in d['descriptive_questionnaires']:
+  if st['day']!=day:continue
+  x=df[st['variable']].dropna();calc=dict(N=len(x),M=x.mean(),SD=x.std(),Median=x.median(),Min=x.min(),Max=x.max())
+  qchecks.append({'day':day,'variable':st['variable'],'pass':all(np.isclose(calc[k],st[k],rtol=1e-10,atol=1e-10) for k in calc)})
+paragraphs=[{'index':i,'text':txt(p)} for i,p in enumerate(t.xpath('./w:body/w:p',namespaces=ns)) if txt(p)]
+flagged=[p for p in paragraphs if any(k in p['text'] for k in ['503','Z-score','standardized variables','28)','244','371–465','527','not replace','135'])]
+result={'document':str(doc),'document_sha256':hashlib.sha256(doc.read_bytes()).hexdigest(),'table_checks':checks,'table_checks_count':len(checks),'table_checks_pass':all(c['pass_'] for c in checks),'direct_03_descriptions':data_checks,'merged_rows':len(merged),'complete_all_columns':int(merged.notna().all(axis=1).sum()),'narrative_pending':flagged,'figure_status':{'Figures 1–3':'Procedure illustrations, not numerical validation plots','Figure 4':'Locate and inspect before certifying','Figures 5–7':'Historical embedded images: not concordant with new statistical tables; must regenerate','Figure A1':'Old 503-person flow; not current per-indicator analysis'},'scope':'Tables 2,4,6–11 numerically checked; other tables require historical/procedural source verification. Not a claim that whole manuscript passes.'}
+(a/'final_consistency_audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+result['direct_questionnaire_descriptions']=qchecks
+result['figure_status']['Figure 4']='No Figure 4 caption found in document text: figure numbering requires correction or explanation'
+result['source_hashes']={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (root/'03_derived').glob('*.csv')}
+(a/'final_consistency_audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+print(json.dumps({k:result[k] for k in ['table_checks_count','table_checks_pass','merged_rows','complete_all_columns']},ensure_ascii=False))
+print('Mismatches:',[c for c in checks if not c['pass_']]);print('Direct descriptions:',all(c['pass'] for c in data_checks))
+print('Questionnaire columns verified:',len(qchecks),all(c['pass'] for c in qchecks))
+for p in flagged:print('P',p['index'],p['text'])
+
+```
+
 # Session information
+
+## Current manuscript Figures 5–7
+
+The plotted values are participant-level derived indicators in their original units.
+Each interval is a two-sided 95% t confidence interval for the mean, using the
+available finite observations for that indicator (not a common complete-case sample).
+These are pointwise intervals, without a multiple-comparison adjustment.
+Run this block or `Rscript 04_code_and_reproducibility/analysis/render_current_figures.R`.
+
+```{r manuscript_figures_current, eval=params$run_current, message=FALSE, warning=FALSE}
+library(ggplot2)
+if (!exists('root')) {
+  root <- getwd()
+  if (!dir.exists(file.path(root,'03_derived'))) root <- normalizePath(file.path(root,'../..'))
+}
+figure_dir <- file.path(root,'04_code_and_reproducibility','technical_validation','figures')
+dir.create(figure_dir,recursive=TRUE,showWarnings=FALSE)
+summary_rows <- list()
+for (task in c('IAT','SMT','SRET')) {
+  tab <- read.csv(file.path(root,'03_derived',paste0('positive_',task,'.csv')),check.names=FALSE)
+  stopifnot(!anyDuplicated(tab$public_id),!anyNA(tab$public_id))
+  for (v in setdiff(names(tab),'public_id')) {
+    x <- tab[[v]]; x <- x[is.finite(x)]
+    n <- length(x); stopifnot(n>1)
+    se <- sd(x)/sqrt(n); margin <- qt(.975,n-1)*se
+    panel <- if(task=='IAT') 'IAT D-score' else if(grepl('^SMT_rt',v)) 'B  Reaction-time difference (ms)' else if(grepl('^SMT_d',v)) 'A  Sensitivity difference (d′)' else if(grepl('^SRET_yes',v)) 'A  Endorsement proportion difference' else if(grepl('^SRET_rt',v)) 'B  Encoding RT difference (ms)' else if(grepl('^REC_',v)) 'C  Recognition sensitivity difference (d′)' else 'D  Source discrimination (d′)'
+    summary_rows[[length(summary_rows)+1]] <- data.frame(task=task,variable=v,N=n,M=mean(x),SD=sd(x),SE=se,CI_low=mean(x)-margin,CI_high=mean(x)+margin,
+      domain=if(grepl('ability',v)) 'Competence' else 'Morality',
+      valence=if(task=='IAT') 'Overall' else if(grepl('positive',v,ignore.case=TRUE)) 'Positive' else 'Negative',panel=panel)
+  }
+}
+figure_stats <- do.call(rbind,summary_rows)
+stopifnot(nrow(figure_stats)==26L,all(figure_stats$CI_low<=figure_stats$M),all(figure_stats$CI_high>=figure_stats$M))
+write.csv(figure_stats,file.path(figure_dir,'figure_statistics_95CI.csv'),row.names=FALSE)
+base_theme <- theme_classic(base_size=12) + theme(
+  plot.title=element_text(size=14,hjust=0),
+  legend.position='right',legend.key.size=grid::unit(.45,'cm'),
+  axis.title.x=element_blank(),axis.text=element_text(colour='black'),
+  axis.ticks.x=element_blank(),plot.margin=margin(16,10,10,14))
+save_figure <- function(p,name,width,height) {
+  ggsave(file.path(figure_dir,paste0(name,'.png')),p,width=width,height=height,dpi=400,bg='white')
+  pdf_device <- if (Sys.info()[['sysname']]=='Darwin') {
+    function(filename,width,height,...) grDevices::quartz(file=filename,type='pdf',width=width,height=height,...)
+  } else grDevices::cairo_pdf
+  ggsave(file.path(figure_dir,paste0(name,'.pdf')),p,width=width,height=height,device=pdf_device,bg='white')
+}
+figure_stats$domain <- factor(tolower(figure_stats$domain),levels=c('competence','morality'))
+figure_stats$valence <- factor(figure_stats$valence,levels=c('Negative','Positive','Overall'))
+a <- subset(figure_stats,task=='IAT')
+p5 <- ggplot(a,aes(domain,M)) + geom_col(width=.35,fill='#B3B3B3') +
+  geom_errorbar(aes(ymin=CI_low,ymax=CI_high),width=.12,linewidth=.5,colour='black') +
+  scale_y_continuous(breaks=seq(0,.6,.2),limits=c(0,.63),expand=expansion(mult=0)) +
+  labs(y='D Score') + base_theme
+save_figure(p5,'Figure_5_IAT',7,4.5)
+bar_panel <- function(task_name,pattern,ylabel,breaks,limits,title=NULL) {
+  a <- subset(figure_stats,task==task_name & grepl(pattern,variable))
+  stopifnot(nrow(a)==4L,all(a$CI_low>=limits[1]),all(a$CI_high<=limits[2]))
+  dodge <- position_dodge(width=.6)
+  ggplot(a,aes(domain,M,fill=valence,group=valence)) +
+    geom_col(position=dodge,width=.5) +
+    geom_hline(yintercept=0,colour='grey40',linetype='dashed',linewidth=.4) +
+    geom_errorbar(aes(ymin=CI_low,ymax=CI_high),position=dodge,width=.12,linewidth=.45,colour='black') +
+    scale_fill_manual(values=c(Negative='#B3B3B3',Positive='#333333'),
+      breaks=c('Negative','Positive'),
+      labels=if(task_name=='SMT') c('negative','positive') else c('Negative','Positive'),
+      name=if(task_name=='SMT') 'Valence' else 'valence') +
+    scale_y_continuous(breaks=breaks,limits=limits,expand=expansion(mult=0)) +
+    labs(y=ylabel,title=title) + base_theme
+}
+p6 <- patchwork::wrap_plots(
+  bar_panel('SMT','^SMT_d','d′',seq(-.8,.8,.4),c(-.85,.85)),
+  bar_panel('SMT','^SMT_rt','RT (ms)',seq(-50,50,25),c(-55,55)),
+  ncol=2,guides='collect') + patchwork::plot_annotation(tag_levels='A')
+save_figure(p6,'Figure_6_SMT',11,4.5)
+p7 <- patchwork::wrap_plots(
+  bar_panel('SRET','^SRET_yes','yes self - yes friend',seq(-1,1,.5),c(-1.1,1.1),'Encoding phase'),
+  bar_panel('SRET','^SRET_rt','RT (ms)',seq(-50,50,25),c(-55,55),'Encoding phase'),
+  bar_panel('SRET','^REC_','d′(Recognition)',seq(-.1,.1,.1),c(-.16,.20),'Recognition phase'),
+  bar_panel('SRET','^SOURCE_','d′(Source memory)',seq(-1,1,.5),c(-1.1,1.1),'Source memory phase'),
+  ncol=2,guides='collect') + patchwork::plot_annotation(tag_levels='A')
+save_figure(p7,'Figure_7_SRET',11,8)
+writeLines(capture.output(sessionInfo()),file.path(figure_dir,'R_sessionInfo.txt'))
+cat('Generated Figures 5–7 and 26 indicator summaries in',figure_dir,'\n')
+```
 
 ```{r session_info, eval=TRUE}
 sessionInfo()

@@ -1,0 +1,265 @@
+---
+title: "Technical Validation"
+subtitle: "Integrated dataset of self-report and behavioral measures of positive self-view"
+author: "Xinru Sun, Yi Ding, Shuting Sun, Hu Chuan-Peng"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: false
+  warning: false
+  message: false
+  freeze: false
+---
+
+```{r setup}
+library(knitr)
+library(dplyr)
+
+input_path <- knitr::current_input(dir = TRUE)
+data_candidates <- c(
+  file.path(getwd(), "technical_validation_data"),
+  file.path(getwd(), "04_code_and_reproducibility", "analysis", "technical_validation_data"),
+  file.path(input_path, "technical_validation_data"),
+  file.path(dirname(input_path), "technical_validation_data")
+)
+data_dir <- data_candidates[dir.exists(data_candidates)][1]
+if (is.na(data_dir)) {
+  stop("technical_validation_data is missing. Run the current statistics block in analysis.Rmd first.")
+}
+read_tv <- function(file) {
+  path <- file.path(data_dir, file)
+  if (!file.exists(path)) stop("Missing generated table: ", path)
+  read.csv(path, check.names = FALSE, fileEncoding = "UTF-8-BOM")
+}
+fmt <- function(x, digits = 2) {
+  ifelse(is.na(x), "NA", formatC(x, format = "f", digits = digits))
+}
+behavior_descriptive <- read_tv("behavior_descriptive.csv")
+questionnaire_descriptive <- read_tv("questionnaire_descriptive.csv")
+questionnaire_reliability <- read_tv("questionnaire_reliability.csv")
+behavior_effects <- read_tv("behavior_effects.csv")
+behavior_split_half <- read_tv("behavior_split_half.csv")
+sample_sizes <- read_tv("sample_sizes.csv")
+n_for <- function(metric) {
+  value <- sample_sizes$n[match(metric, sample_sizes$metric)]
+  if (length(value) != 1L || is.na(value)) stop("Missing sample size for: ", metric)
+  value
+}
+lookup <- function(data, variable, day = NULL) {
+  keep <- data$variable == variable
+  if (!is.null(day)) keep <- keep & data$day == day
+  row <- data[keep, , drop = FALSE]
+  if (nrow(row) != 1L) stop("Expected exactly one generated row for ", variable)
+  row
+}
+make_descriptive_table <- function(spec, data, with_day = FALSE) {
+  do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
+    variable <- spec[i, 1]
+    row <- if (with_day) lookup(data, variable, spec[i, 2]) else lookup(data, variable)
+    data.frame(Variable = spec[i, if (with_day) 3 else 2], N = row$N,
+      M = fmt(row$M), SD = fmt(row$SD), Median = fmt(row$Median),
+      Min = fmt(row$Min), Max = fmt(row$Max), check.names = FALSE)
+  }))
+}
+fmt_effect <- function(variable) {
+  row <- behavior_effects[behavior_effects$variable == variable, , drop = FALSE]
+  if (nrow(row) != 1L) stop("Expected exactly one effect-size row for ", variable)
+  paste0(fmt(row$d), " [", fmt(row$low), ", ", fmt(row$high), "]")
+}
+```
+
+## Descriptive statistics
+
+The current merged data file contains `r n_for("base_pool")` participants, 160 initial-session questionnaire items, and 26 behavioral indicators. Of these participants, `r n_for("complete_case")` have nonmissing values for all 160 initial-assessment questionnaire items and all 26 behavioral indicators. This complete-case count is provided for transparency; the reported analyses use the valid sample for each measure rather than imposing a common complete-case sample.
+
+### Table 6
+
+**Descriptive Statistics of Behavioral Indicators (26 indicators)**
+
+```{r table-6}
+table6_spec <- data.frame(
+  source = c("moral_IAT", "ability_IAT",
+    "SMT_d_ability_negative", "SMT_d_ability_positive", "SMT_d_moral_negative", "SMT_d_moral_positive",
+    "SMT_rt_ability_negative", "SMT_rt_ability_positive", "SMT_rt_moral_negative", "SMT_rt_moral_positive",
+    "SRET_yes_ability_Negative", "SRET_yes_ability_Positive", "SRET_yes_morality_Negative", "SRET_yes_morality_Positive",
+    "SRET_rt_ability_Negative", "SRET_rt_ability_Positive", "SRET_rt_morality_Negative", "SRET_rt_morality_Positive",
+    "REC_ability_Negative", "REC_ability_Positive", "REC_morality_Negative", "REC_morality_Positive",
+    "SOURCE_ability_Negative", "SOURCE_ability_Positive", "SOURCE_morality_Negative", "SOURCE_morality_Positive"),
+  label = c("IAT_morality", "IAT_competence",
+    "SMT_d_competence_negative", "SMT_d_competence_positive", "SMT_d_morality_negative", "SMT_d_morality_positive",
+    "SMT_RT_competence_negative", "SMT_RT_competence_positive", "SMT_RT_morality_negative", "SMT_RT_morality_positive",
+    "SRET_encoding_endorsement_competence_negative", "SRET_encoding_endorsement_competence_positive", "SRET_encoding_endorsement_morality_negative", "SRET_encoding_endorsement_morality_positive",
+    "SRET_encoding_RT_competence_negative", "SRET_encoding_RT_competence_positive", "SRET_encoding_RT_morality_negative", "SRET_encoding_RT_morality_positive",
+    "SRET_RJ1_competence_negative", "SRET_RJ1_competence_positive", "SRET_RJ1_morality_negative", "SRET_RJ1_morality_positive",
+    "SRET_RJ2_competence_negative", "SRET_RJ2_competence_positive", "SRET_RJ2_morality_negative", "SRET_RJ2_morality_positive"))
+table6 <- make_descriptive_table(cbind(table6_spec$source, table6_spec$label), behavior_descriptive)
+kable(table6)
+```
+
+**Note.** Manuscript labels map to CSV names as follows: IAT_morality/IAT_competence = moral_IAT/ability_IAT; SMT_RT = SMT_rt; SRET_encoding_endorsement = SRET_yes; SRET_encoding_RT = SRET_rt; SRET_RJ1 = REC; SRET_RJ2 = SOURCE. Domains map to moral/ability for SMT and morality/ability for SRET. Valence is lowercase in SMT CSV names and capitalized as Positive/Negative in SRET CSV names. SMT/SRET/IAT are the three behavioral paradigms; competence/morality are the two domains; D = D score; RT = response time; RJ1 = recognition phase; RJ2 = source-memory phase; negative/positive = valence. Statistics use all available valid observations for each variable, in original units. N is the number of participants contributing to that row; no common complete-case sample is imposed.
+
+### Table 7
+
+**Descriptive Statistics of Questionnaire Indicators (16 indicators)**
+
+```{r table-7}
+table7_spec <- rbind(
+  c("selfclarity_al", "day1", "selfclarity_al"), c("ses_al", "day2", "ses_al"),
+  c("coreself_al", "day2", "coreself_al"), c("hsns_al", "day2", "hsns_al"),
+  c("NPI_al", "day2", "NPI_al"), c("LOT_al", "day3", "LOT_al"),
+  c("sde_al", "day3", "sde_al"), c("IM_al", "day3", "IM_al"),
+  c("MorIden_al", "day3", "MorIden_al"), c("moralSeImag_al", "day3", "moralSeImag_al"),
+  c("IPC_al", "day3", "IPC_al"), c("Ability", "day10", "Ability"),
+  c("Attraction", "day10", "Attraction"), c("Wealth", "day10", "Wealth"),
+  c("Social", "day10", "Social"), c("Moral", "day10", "Moral"))
+table7 <- make_descriptive_table(table7_spec, questionnaire_descriptive, with_day = TRUE)
+kable(table7)
+```
+
+**Note.** selfclarity_al = Self-Concept Clarity (SCC); ses_al = Self-Esteem (RSES); coreself_al = Core Self-Evaluations (CSES); hsns_al = Hypersensitive Narcissism (HNS); NPI_al = Narcissistic Personality Inventory (NPI); LOT_al = Life Orientation Test–Revised (LOT-R); sde_al / IM_al = two subscales of the Balanced Inventory of Desirable Responding (BIDR); MorIden_al = Moral Identity (MI); moralSeImag_al = Moral Self-Image (MSI); IPC_al = Internality (IPC-I); Ability/Attraction/Wealth/Social/Moral = the five domain scores of the Domain-Specific Self-Esteem scale (DSSE). Statistics use all available valid observations for each variable, in original units. N is the number of participants contributing to that row; no common complete-case sample is imposed.
+
+### Table 8
+
+**Descriptive Statistics of Mental Health Indicators (4 indicators)**
+
+```{r table-8}
+table8_spec <- rbind(c("phq_al", "day1", "phq_al"), c("gad_al", "day1", "gad_al"),
+                     c("swb_al", "day3", "swb_al"), c("SGPS_al", "day2", "SGPS_al"))
+table8 <- make_descriptive_table(table8_spec, questionnaire_descriptive, with_day = TRUE)
+kable(table8)
+```
+
+**Note.** phq_al = Patient Health Questionnaire-9 (PHQ-9, depression); gad_al = Generalized Anxiety Disorder-7 (GAD-7); swb_al = Satisfaction With Life Scale (SWLS); SGPS_al = Short General Procrastination Scale (SGPS). Statistics use all available valid observations for each variable, in original units. N is the number of participants contributing to that row; no common complete-case sample is imposed.
+
+## Behavioral Contrasts and Source Discrimination
+
+To verify the validity of the behavioral indicators in this dataset, we examined whether each cognitive task produced the expected self vs other differences reflecting self-bias. More specifically, we focused on whether self-versus-other differences were non-zero in positive conditions across both competence and morality domains, yielding a total of 13 indices (Table 9). For the self vs other differences in negative conditions, we also reported the statistics, which may reflect self-bias in general20 instead of positive self-view. Figures 5–7 are retained as visual summaries of the behavioral measures obtained from the IAT, SMT, and SRET. They are intended to help users inspect the distributions and relative patterns of the released indicators across domains and valence conditions. The figures should therefore be interpreted as descriptive representations of the dataset rather than as independent hypothesis tests.
+
+The inferential analyses previously used to evaluate self-versus-other differences are not treated as primary validation results in the present data descriptor. Researchers interested in testing theoretical predictions may use the released participant-level data and analysis code to conduct hypothesis-driven analyses under alternative statistical models and exclusion criteria.
+
+### Implicit Association Test (IAT)
+
+For the IAT, Figure 5 presents the distributions of the D-scores in the competence and morality domains. The corresponding descriptive statistics are reported in Table 6, allowing users to evaluate the central tendency and variability of implicit self-association scores.
+
+### Self-Matching Task (SMT)
+
+For the SMT, Figure 6 presents the condition-specific patterns of the RT and d′ difference scores. The RT indices represent the difference between responses to self-related and friend-related stimuli, whereas the d′ indices represent the corresponding difference in sensitivity. The figure provides a visual overview of how these indicators vary across the competence and morality domains and across positive- and negative-valence conditions. Full descriptive statistics for these indicators are provided in Table 6.
+
+### Self-Referent Encoding Task (SRET)
+
+For the SRET, Figure 7 summarizes the behavioral indicators obtained during the encoding, recognition, and source-memory phases. The encoding indicators include endorsement and reaction-time differences, whereas the recognition indicators are d′ differences and the source-memory indicators measure source discrimination d′. The figure illustrates the heterogeneity of the behavioral measures across processing phases, domains, and valence conditions. Full descriptive statistics for these indicators are provided in Table 6.
+
+### Table 9
+
+**Standardized Effects and Source Discrimination Across Behavioral Tasks**
+
+```{r table-9}
+effect_spec <- data.frame(
+  task = c("IAT", "IAT", "SMT", "SMT", "SMT", "SMT", rep("SRET", 8)),
+  domain = c("Morality", "Competence", "Morality", "Competence", "Morality", "Competence",
+             "Morality", "Competence", "Morality", "Competence", "Morality", "Competence", "Morality", "Competence"),
+  indicator = c("IAT_morality", "IAT_competence", "SMT_RT_morality", "SMT_RT_competence",
+    "SMT_d_morality", "SMT_d_competence", "SRET_encoding_endorsement_morality", "SRET_encoding_endorsement_competence",
+    "SRET_encoding_RT_morality", "SRET_encoding_RT_competence", "SRET_RJ1_morality", "SRET_RJ1_competence",
+    "SRET_RJ2_morality", "SRET_RJ2_competence"),
+  positive_source = c("moral_IAT", "ability_IAT", "SMT_rt_moral_positive", "SMT_rt_ability_positive",
+    "SMT_d_moral_positive", "SMT_d_ability_positive", "SRET_yes_morality_Positive", "SRET_yes_ability_Positive",
+    "SRET_rt_morality_Positive", "SRET_rt_ability_Positive", "REC_morality_Positive", "REC_ability_Positive",
+    "SOURCE_morality_Positive", "SOURCE_ability_Positive"),
+  negative_source = c(NA, NA, "SMT_rt_moral_negative", "SMT_rt_ability_negative",
+    "SMT_d_moral_negative", "SMT_d_ability_negative", "SRET_yes_morality_Negative", "SRET_yes_ability_Negative",
+    "SRET_rt_morality_Negative", "SRET_rt_ability_Negative", "REC_morality_Negative", "REC_ability_Negative",
+    "SOURCE_morality_Negative", "SOURCE_ability_Negative"))
+table9 <- data.frame(Task = effect_spec$task, Domain = effect_spec$domain,
+  Indicator = effect_spec$indicator,
+  `Positive Cohen's d [95% CI]` = vapply(effect_spec$positive_source, fmt_effect, character(1)),
+  `Negative Cohen's d [95% CI]` = vapply(effect_spec$negative_source,
+    function(v) if (is.na(v)) "-" else fmt_effect(v), character(1)),
+  check.names = FALSE)
+rownames(table9) <- NULL
+kable(table9)
+```
+
+**Note.** Cohen's d was calculated as the mean of each behavioral indicator divided by its sample standard deviation (d = M/SD), using all available valid participants for that indicator. The 95% CI was obtained by inversion of the noncentral t distribution for the standardized mean. N: IAT = `r n_for("IAT")`; SMT = `r n_for("SMT2")`; SRET = `r n_for("SRET")`, except negative-morality source d′ (N = `r lookup(behavior_descriptive, "SOURCE_morality_Negative")$N`). Source d′ measures source discrimination rather than a self-versus-friend advantage.
+
+## Reliability of Self-report Scales and Behavioral Tasks
+
+The stability of the released measures was evaluated using two complementary approaches: test–retest reliability for questionnaire measures and split-half reliability for behavioral indicators. These analyses were intended to characterize the reproducibility of the measures.
+
+### Questionnaire Test–Retest Reliability
+
+Questionnaire test–retest reliability was evaluated using data from the initial assessment and the Day 10 retest session, which were separated by approximately 7–9 days. For each questionnaire measure administered at both time points, total scores were calculated according to the scoring procedures described in the questionnaire documentation. Test–retest reliability was then estimated using Spearman’s rank-order correlation coefficient between the initial and retest scores, using participants with valid scores at both assessments.
+
+Spearman test–retest correlations across the 15 repeated questionnaire scales ranged from 0.741 to 0.918. Paired sample sizes were 493 for HNS and 512 for the other repeated scales. Cronbach alpha across the 16 scale scores, including Day 10 DSSE, ranged from 0.706 to 0.942. Internal consistency is not evidence of temporal stability. DSSE was measured only on Day 10 and therefore has no retest estimate. Table 10 reports the positive-self-view scales; the additional mental-health scales were included in the same recalculation.
+
+### Split-Half Reliability of Behavioral Indicators
+
+Because the behavioral tasks were administered only once and were not repeated during the Day 10 session, test-retest reliability could not be estimated for the behavioral indicators. We therefore assessed their within-session reliability using an indicator-specific split-half procedure.
+
+Trials were assigned to odd/even halves within the conditions defined in analysis.Rmd. Each half was scored independently using the current indicator formulas. Half-score associations were estimated using Spearman correlations, with Spearman–Brown correction. Across 26 indicators, corrected coefficients ranged from -0.082 to 0.826. The ranges were 0.243–0.316 for IAT, 0.658–0.826 for SMT, and -0.082–0.488 for SRET. Negative and near-zero estimates were retained and indicate that several difference scores have poor within-session reliability. Table 11 gives coefficients and paired-half sample sizes.
+
+### Table 10
+
+**Internal Consistency and Test–Retest Reliability of Positive Self-View Scales**
+
+```{r table-10}
+table10_spec <- data.frame(
+  label = c("Internal Locus of Control", "Optimism", "Explicit Narcissism", "Hypersensitive Narcissism",
+    "Core Self-Evaluations", "Rosenberg Self-Esteem", "Self-Concept Clarity", "Moral Identity",
+    "Moral Self-Image", "Self-Deceptive Enhancement", "Impression Management", "Domain-Specific Self-Esteem"),
+  scale = c("IPC", "LOT", "NPI", "hsns", "coreself", "ses", "selfclarity", "MorIden",
+    "moralSeImag", "sde", "IM", "domain"),
+  day = c("day3", "day3", "day2", "day2", "day2", "day2", "day1", "day3", "day3", "day3", "day3", "day10"))
+table10 <- do.call(rbind, lapply(seq_len(nrow(table10_spec)), function(i) {
+  row <- questionnaire_reliability[questionnaire_reliability$scale == table10_spec$scale[i] &
+                                     questionnaire_reliability$day == table10_spec$day[i], , drop = FALSE]
+  if (nrow(row) != 1L) stop("Missing reliability row for ", table10_spec$scale[i])
+  retest <- if (is.na(row$rho)) "—" else paste0(fmt(row$rho, 3), " (", row$retest_N, ")")
+  data.frame(Variable = table10_spec$label[i],
+    `Mean Total Score (N)` = paste0(fmt(row$M), " (", row$N, ")"),
+    `Internal Consistency (α)` = fmt(row$alpha, 3),
+    `Retest ρ (paired N)` = retest, check.names = FALSE)
+}))
+kable(table10)
+```
+
+**Note.** Internal consistency uses complete item responses at the initial session (DSSE: Day 10 only). Retest ρ is the Spearman correlation between valid paired initial and Day 10 scale scores, matched by public_id. DSSE has no retest estimate. N and paired N may differ.
+
+### Table 11
+
+**Split-Half Reliability of the 26 Behavioral Task Indicators**
+
+```{r table-11}
+table11_map <- data.frame(
+  source = c("moral_IAT", "ability_IAT",
+    "SMT_d_ability_negative", "SMT_d_ability_positive", "SMT_d_moral_negative", "SMT_d_moral_positive",
+    "SMT_rt_ability_negative", "SMT_rt_ability_positive", "SMT_rt_moral_negative", "SMT_rt_moral_positive",
+    "SRET_yes_ability_Negative", "SRET_yes_ability_Positive", "SRET_yes_morality_Negative", "SRET_yes_morality_Positive",
+    "SRET_rt_ability_Negative", "SRET_rt_ability_Positive", "SRET_rt_morality_Negative", "SRET_rt_morality_Positive",
+    "REC_ability_Negative", "REC_ability_Positive", "REC_morality_Negative", "REC_morality_Positive",
+    "SOURCE_ability_Negative", "SOURCE_ability_Positive", "SOURCE_morality_Negative", "SOURCE_morality_Positive"),
+  label = c("IAT_morality", "IAT_competence",
+    "SMT_d_competence_negative", "SMT_d_competence_positive", "SMT_d_morality_negative", "SMT_d_morality_positive",
+    "SMT_RT_competence_negative", "SMT_RT_competence_positive", "SMT_RT_morality_negative", "SMT_RT_morality_positive",
+    "SRET_encoding_endorsement_competence_negative", "SRET_encoding_endorsement_competence_positive", "SRET_encoding_endorsement_morality_negative", "SRET_encoding_endorsement_morality_positive",
+    "SRET_encoding_RT_competence_negative", "SRET_encoding_RT_competence_positive", "SRET_encoding_RT_morality_negative", "SRET_encoding_RT_morality_positive",
+    "SRET_RJ1_competence_negative", "SRET_RJ1_competence_positive", "SRET_RJ1_morality_negative", "SRET_RJ1_morality_positive",
+    "SRET_RJ2_competence_negative", "SRET_RJ2_competence_positive", "SRET_RJ2_morality_negative", "SRET_RJ2_morality_positive"))
+table11 <- do.call(rbind, lapply(seq_len(nrow(table11_map)), function(i) {
+  row <- behavior_split_half[behavior_split_half$variable == table11_map$source[i], , drop = FALSE]
+  if (nrow(row) != 1L) stop("Missing split-half result for ", table11_map$source[i])
+  domain <- if (grepl("competence", table11_map$label[i]) || table11_map$label[i] == "IAT_competence") "Competence" else "Morality"
+  data.frame(Indicator = table11_map$label[i], Domain = domain,
+    `Split-half ρ (N)` = paste0(fmt(row$r_half, 3), " (", row$N, ")"),
+    `Spearman-Brown r` = fmt(row$SB, 3), check.names = FALSE)
+}))
+kable(table11)
+```
+
+**Note.** Odd/even within-condition halves were scored independently using the revised indicator definitions. N counts participants with both half scores. Spearman–Brown r = 2ρ/(1 + ρ). Negative estimates are retained and indicate poor reliability; they are not truncated to zero.
+
