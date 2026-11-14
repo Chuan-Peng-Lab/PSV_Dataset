@@ -11,6 +11,8 @@ This directory contains the experimental programs and the analysis code that sup
 ├── README.md                                          # 文件说明
 ├── procedure/                                         # 实验程序
 ├── analysis/                                          # 整合文章内全部分析流程的代码
+│   ├── Technical_Validation.qmd                       # 可复现的技术核验报告
+│   └── render_technical_validation.command            # macOS 一键渲染入口
 └── subject _screening/                                # 标准清洗记录（777 → 606 ，777 → 466）
 ```
 
