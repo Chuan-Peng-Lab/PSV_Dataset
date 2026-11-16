@@ -23,7 +23,6 @@ library(dplyr)
 input_path <- knitr::current_input(dir = TRUE)
 data_candidates <- c(
   file.path(getwd(), "technical_validation_data"),
-  file.path(getwd(), "04_code_and_reproducibility", "analysis", "technical_validation_data"),
   file.path(input_path, "technical_validation_data"),
   file.path(dirname(input_path), "technical_validation_data")
 )
@@ -219,16 +218,16 @@ table10 <- do.call(rbind, lapply(seq_len(nrow(table10_spec)), function(i) {
   row <- questionnaire_reliability[questionnaire_reliability$scale == table10_spec$scale[i] &
                                      questionnaire_reliability$day == table10_spec$day[i], , drop = FALSE]
   if (nrow(row) != 1L) stop("Missing reliability row for ", table10_spec$scale[i])
-  retest <- if (is.na(row$rho)) "—" else paste0(fmt(row$rho, 3), " (", row$retest_N, ")")
+  retest <- if (is.na(row$rho)) "—" else fmt(row$rho, 3)
   data.frame(Variable = table10_spec$label[i],
-    `Mean Total Score (N)` = paste0(fmt(row$M), " (", row$N, ")"),
+    `Mean Total Score` = fmt(row$M),
     `Internal Consistency (α)` = fmt(row$alpha, 3),
-    `Retest ρ (paired N)` = retest, check.names = FALSE)
+    `Retest ρ` = retest, check.names = FALSE)
 }))
 kable(table10)
 ```
 
-**Note.** Internal consistency uses complete item responses at the initial session (DSSE: Day 10 only). Retest ρ is the Spearman correlation between valid paired initial and Day 10 scale scores, matched by public_id. DSSE has no retest estimate. N and paired N may differ.
+**Note.** Internal consistency uses complete item responses at the initial session (DSSE: Day 10 only). Retest ρ is the Spearman correlation between valid paired initial and Day 10 scale scores, matched by public_id. DSSE has no retest estimate.
 
 ### Table 11
 
@@ -255,11 +254,11 @@ table11 <- do.call(rbind, lapply(seq_len(nrow(table11_map)), function(i) {
   if (nrow(row) != 1L) stop("Missing split-half result for ", table11_map$source[i])
   domain <- if (grepl("competence", table11_map$label[i]) || table11_map$label[i] == "IAT_competence") "Competence" else "Morality"
   data.frame(Indicator = table11_map$label[i], Domain = domain,
-    `Split-half ρ (N)` = paste0(fmt(row$r_half, 3), " (", row$N, ")"),
+    `Split-half ρ` = fmt(row$r_half, 3),
     `Spearman-Brown r` = fmt(row$SB, 3), check.names = FALSE)
 }))
 kable(table11)
 ```
 
-**Note.** Odd/even within-condition halves were scored independently using the revised indicator definitions. N counts participants with both half scores. Spearman–Brown r = 2ρ/(1 + ρ). Negative estimates are retained and indicate poor reliability; they are not truncated to zero.
+**Note.** Odd/even within-condition halves were scored independently using the revised indicator definitions. Spearman–Brown r = 2ρ/(1 + ρ). Negative estimates are retained and indicate poor reliability; they are not truncated to zero.
 
