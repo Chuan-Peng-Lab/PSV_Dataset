@@ -1,16 +1,18 @@
 # 01_raw: Raw Data / 原始数据
 
-This directory contains data exported from the experimental platform before trial-level cleaning. It includes three behavioral tasks and questionnaire exports from four collection days. Direct identifiers, platform identifiers, and participant-entered friend names have been removed or replaced with `[FRIEND_NAME]`. `public_id` is the only subject key retained.
+This directory contains data exported from the experimental platform before trial-level cleaning. It includes three behavioral tasks and questionnaire exports from four collection days. 
+To protect the participants' privacy, personal information such as ID, gender, education level, parents' occupation, and parents' income has been removed from the original data. The ID is a randomly generated public ID.
 
 本目录包含实验平台导出的、尚未进行试次级清洗的数据，包括三个行为任务和四个测试日（Day 1、Day 2、Day 3、Day 10）的问卷数据。
+为保证被试的个人隐私，原始数据已经将ID、性别、教育水平、父母职业、父母收入等个人信息隐去，ID为随机生成的public ID。
 
 ## Files / 文件
 
 | File / 文件 | Description / 说明 |
 |---|---|
-| `IAT_raw.csv` | Trial-level data for the Implicit Association Test (IAT), merged across all collection waves/ IAT 试次级数据，全部批次合并（681 名被试） |
+| `IAT_raw.csv` | Trial-level data for the Implicit Association Test (IAT), merged across all collection waves/ IAT 试次级数据，全部批次合并|
 | `SMT_1_raw.csv` | Trial-level data for the geometric-shape version of the SMT (Day 2 session; historical label ALT1), all waves / SMT 几何图形版（Day 2；历史标签 ALT1）试次级数据，全部批次|
-| `SMT_2_raw.csv` | Trial-level data for the self-referential version of the SMT (Day 3 session; historical label ALT2), all waves / SMT 自我参照版（Day 3；历史标签 ALT2）试次级数据，全部批次 |
+| `SMT_2_raw.csv` | Trial-level data for the self-referential version of the SMT (Day 3 session; historical label ALT2), all waves / SMT 自我参照版（Day 3；历史标签 ALT2）试次级数据，全部批次|
 | `SRET_raw.csv` | Trial-level data for the Self-Referent Encoding Task (SRET), all waves  / SRET 试次级数据，全部批次 |
 | `questionnaires_day1_raw.csv` | Day 1 questionnaire export (platform label `day0`): consent, demographics, SCC, PHQ-9, GAD-7; 777 participants / Day 1（平台标签 `day0`）：知情同意、人口学、SCC、PHQ-9、GAD-7；共 777 名被试 |
 | `questionnaires_day2_raw.zip` | Compressed Day 2 export (platform label `day1`): questionnaires (RSES, CSES, NPI-16, HNS, SGPS) + IAT + SMT geometric version (ALT1) / Day 2（平台标签 `day1`）：问卷 + IAT + SMT 几何版（ALT1） |

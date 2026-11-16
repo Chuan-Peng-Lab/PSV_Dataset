@@ -1,8 +1,8 @@
 # 04_code_and_reproducibility: Code and Reproducibility / 代码与可复现性
 
-This directory contains the experimental programs and the analysis code that support the dataset and the manuscript results; only materials directly related to this dataset are retained.
+This directory contains the experimental programs and the analysis code that support the dataset and the manuscript results.
 
-本目录包含本数据库及论文结果所对应的实验程序与分析代码，仅保留与本数据库直接相关的内容。
+本目录包含本数据库及论文结果所对应的实验程序与分析代码。
 
 ## Structure / 目录结构
 
@@ -11,9 +11,8 @@ This directory contains the experimental programs and the analysis code that sup
 ├── README.md                                          # 文件说明
 ├── procedure/                                         # 实验程序
 ├── analysis/                                          # 整合文章内全部分析流程的代码
-│   ├── Technical_Validation.qmd                       # 可复现的技术核验报告
-│   └── render_technical_validation.command            # macOS 一键渲染入口
-└── subject _screening/                                # 标准清洗记录（777 → 606 ，777 → 466）
+├── technical_validation/                              # 可复现的技术核验报告         
+└── subject _screening/                                # 标准清洗记录
 ```
 
 ## procedure/ — Experimental Programs / 实验程序
@@ -42,9 +41,9 @@ Contains the integrated analysis pipeline in manuscript order, together with the
 
 ## subject _screening/ — Standard Cleaning / 标准清洗
 
-Contains the standard participant- and task-level cleaning records, reducing the 777 Day-1 records to **606** retained participants and then to the **466** complete-and-valid set. 
+Contains the standard participant- and task-level cleaning records, reducing the 777 Day-1 records to **606** retained participants and then to the **449** complete-and-valid set. 
 
-包含被试层面与任务层面的标准清洗记录，将 Day 1 的 777 条记录缩减为 **606** 名保留参与者，再得到 **466** 名完整且合格的数据集合。
+包含被试层面与任务层面的标准清洗记录，将 Day 1 的 777 条记录缩减为 **606** 名保留参与者，再得到 **449** 名完整且合格的数据集合。
 
 ## Notes / 说明
 

@@ -18,10 +18,10 @@ The questionnaire files are labeled Day 1, Day 2, Day 3, and Day 10, correspondi
 
 | File label / 文件标签 | Manuscript session / 论文测试日 | Core content / 核心内容 |
 |---|---|---|
-| `day1` | Day 1 | Informed consent, demographics, Self-Concept Clarity Scale (SCC), PHQ-9, GAD-7 / 知情同意、人口学问卷、自我概念清晰度量表（SCC）、PHQ-9、GAD-7 |
-| `day2` | Day 2 | Questionnaires (RSES, CSES, NPI-16, HNS, SGPS) + IAT + geometric-shape version of the SMT (SMT_1) / 问卷（RSES、CSES、NPI-16、HNS、SGPS）+ IAT + SMT 几何图形版（SMT_1） |
-| `day3` | Day 3 | Questionnaires (SWLS, IPC-I, LOT-R, MIS, MSIS, SDE, IM) + SRET + self-referential version of the SMT with moral/competence labels (SMT_2) / 问卷（SWLS、IPC-I、LOT-R、MIS、MSIS、SDE、IM）+ SRET + SMT 自我参照版（道德/能力标签，SMT_2） |
-| `day10` | Day 10 | Full questionnaire retest (all scales; no behavioral tasks) / 问卷全量重测（全部量表，无行为任务） |
+| `day1` | Day 1 | Informed consent, demographics, Self-Concept Clarity Scale (SCC), PHQ-9, GAD-7 / 知情同意、人口学问卷、自我概念清晰度量表（SCC）、PHQ-9、GAD-7 | 共28题｜
+| `day2` | Day 2 | Questionnaires (RSES, CSES, NPI-16, HNS, SGPS) + IAT + geometric-shape version of the SMT (SMT_1) / 问卷（RSES、CSES、NPI-16、HNS、SGPS）+ IAT + SMT 几何图形版（SMT_1） |共54题｜
+| `day3` | Day 3 | Questionnaires (SWLS, IPC-I, LOT-R, MIS, MSIS, SDE, IM) + SRET + self-referential version of the SMT with moral/competence labels (SMT_2) / 问卷（SWLS、IPC-I、LOT-R、MIS、MSIS、SDE、IM）+ SRET + SMT 自我参照版（道德/能力标签，SMT_2） |共78题｜
+| `day10` | Day 10 | Full questionnaire retest (all scales; no behavioral tasks) / 问卷全量重测（全部量表，无行为任务） | 160题重测＋domain rating 5题｜
 
 Day 10 was the retest session, scheduled 7–9 days after the baseline sessions, and involved questionnaire retesting only. The eight SMT indices released in this dataset were derived from the self-referential version administered on Day 3 (SMT_2).
 
@@ -74,7 +74,8 @@ PSV_Dataset/
     ├── README.md                                          # 文件说明
     ├── procedure/                                         # 实验程序（day1/day2/day3/day10）
     ├── analysis/                                          # 整合文章内全部分析流程的代码
-    └── subject _screening/                                # 标准清洗记录（777 → 606 → 466）
+    ├── technical_validation/                              # 可复现的技术核验报告 
+    └── subject _screening/                                # 标准清洗记录
 ```
 
 ## File naming and task terminology / 文件命名与任务术语
@@ -124,7 +125,7 @@ The complete mapping between the released variable names and the manuscript-faci
 
 Two record sets under `04_code_and_reproducibility/` document how the 777 Day-1 records are reduced to the analysis sample:
 
-- `subject _screening/` records the standard participant- and task-level cleaning, reducing the 777 records to **606** retained participants and then to the **466** complete-and-valid set.
+- `subject _screening/` records the standard participant- and task-level cleaning, reducing the 777 records to **606** retained participants and then to the **449** complete-and-valid set.
 
 `04_code_and_reproducibility/` 下的两套记录说明如何从 Day 1 的 777 条记录逐步缩减到分析样本：
 
