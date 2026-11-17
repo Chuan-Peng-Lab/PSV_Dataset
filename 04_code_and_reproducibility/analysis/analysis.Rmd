@@ -3320,13 +3320,46 @@ for(day in names(scales)){
 }
 qstats<-bind_rows(qstats)
 qd<-bind_rows(lapply(names(totals),function(day)bind_rows(lapply(names(totals[[day]])[vapply(totals[[day]],is.numeric,logical(1))],function(v){data.frame(day=day,variable=v,t(describe_one(totals[[day]][[v]])))}))))
-# Cohen's d = mean / sample SD, using all available valid observations per indicator.
+# Cohen's d_z = mean / SD of each participant-level indicator (standardized mean against zero)， using all available valid observations per indicator.
 # The confidence interval is obtained by inversion of the noncentral t distribution.
-effects<-bind_rows(lapply(behavior,function(tab)bind_rows(lapply(setdiff(names(tab),'public_id'),function(v){
- x<-tab[[v]];x<-x[is.finite(x)];n<-length(x);t0<-mean(x)/sd(x)*sqrt(n)
- ci<-vapply(c(.975,.025),function(p)uniroot(function(ncp)suppressWarnings(pt(t0,n-1,ncp=ncp))-p,c(t0-100,t0+100),tol=1e-10)$root,numeric(1))/sqrt(n)
- data.frame(variable=v,N=n,d=mean(x)/sd(x),low=ci[1],high=ci[2])
-}))))
+# 读入三个任务的数据文件
+# behavior <- lapply(c('IAT','SMT','SRET'), function(task)
+#   read03(paste0('positive_', task, '.csv')))
+# names(behavior) <- c('IAT', 'SMT', 'SRET')
+# 计算 d_z 及其 95% CI 
+dz_one_indicator <- function(x, variable_name = "") {
+  # 剔除 NA / NaN / Inf
+  x <- x[is.finite(x)]
+  n <- length(x)
+  # 样本均值 M 和样本标准差 SD (R 的 sd() 默认分母为 n-1)
+  M  <- mean(x)
+  SD <- sd(x)
+  # 标准化均值: d_z = M / SD (Cohen, 1988)
+  dz <- M / SD
+  # 对应的单样本 t 统计量: t = d_z * sqrt(n)
+  t_stat <- dz * sqrt(n)
+  # 用非中心 t 分布反演求 95% CI:
+  #     下限: 满足 P(T <= t_stat | ncp) = .975 的非中心参数
+  #     上限: 满足 P(T <= t_stat | ncp) = .025 的非中心参数
+  ncp_lower <- uniroot(function(ncp)
+    suppressWarnings(pt(t_stat, df = n - 1, ncp = ncp)) - 0.975,
+    interval = c(t_stat - 100, t_stat + 100), tol = 1e-10)$root
+  ncp_upper <- uniroot(function(ncp)
+    suppressWarnings(pt(t_stat, df = n - 1, ncp = ncp)) - 0.025,
+    interval = c(t_stat - 100, t_stat + 100), tol = 1e-10)$root
+  ci_low  <- ncp_lower / sqrt(n)
+  ci_high <- ncp_upper / sqrt(n)
+  data.frame(variable = variable_name, N = n, M = M, SD = SD,
+             d = dz, low = ci_low, high = ci_high)
+}
+# 逐个计算 
+effects<- data.frame()
+for (task in names(behavior)) {                 # IAT, SMT, SRET
+  tab <- behavior[[task]]
+  for (v in setdiff(names(tab), 'public_id')) { 
+    effects <- rbind(effects,dz_one_indicator(tab[[v]], v))
+  }
+}
 report<-list(descriptive_behavior=desc,descriptive_questionnaires=qd,questionnaire_reliability=qstats,effects=effects,
 methodology=list(sample='All available valid observations per indicator; complete item rows per scale; pairwise complete retest',retest='Spearman, with Pearson retained for audit of historical Rmd',alpha='Raw covariance alpha, no automatic rekeying',omega='One-factor minres congeneric omega from raw covariance; exploratory model assumption',effect='Cohen d = mean / sample SD; 95% CI by noncentral-t inversion for the standardized mean',source='Source d-prime represents source discrimination, not a self-friend contrast'),warnings=warnings_record)
 write_json(report,file.path(out,'statistics.json'),auto_unbox=TRUE,pretty=TRUE,digits=16,na='null')
